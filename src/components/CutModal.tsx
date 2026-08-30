@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '../../shared/types';
 import { PlayingCard } from './PlayingCard';
-import { Scissors, Shuffle, CheckCircle, Hand } from 'lucide-react';
+import { Scissors, Shuffle, CheckCircle, Hand, Layers, RefreshCw } from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface CutModalProps {
@@ -11,9 +11,11 @@ interface CutModalProps {
   cutOfferPlayerId: string | null;
   myPlayerId: string;
   isCutPhase: boolean;
+  cutDone: boolean;
   onShuffle: () => void;
   onOfferCut: () => void;
   onPerformCut: (cardIndex: number) => void;
+  onDistribute5Cards: () => void;
   statusMessage: string;
 }
 
@@ -23,9 +25,11 @@ export const CutModal: React.FC<CutModalProps> = ({
   cutOfferPlayerId,
   myPlayerId,
   isCutPhase,
+  cutDone,
   onShuffle,
   onOfferCut,
   onPerformCut,
+  onDistribute5Cards,
   statusMessage,
 }) => {
   const [selectedCutIndex, setSelectedCutIndex] = useState<number | null>(null);
@@ -67,13 +71,17 @@ export const CutModal: React.FC<CutModalProps> = ({
         </div>
 
         <h3 className="text-xl sm:text-2xl font-cinzel font-black gold-gradient-text mb-1">
-          {isCutPhase ? 'CUT THE DECK' : 'DEALER PRE-DEAL'}
+          {isCutPhase
+            ? 'CUT THE DECK'
+            : cutDone
+            ? 'DECK CUT COMPLETE'
+            : 'DEALER PRE-DEAL'}
         </h3>
         <p className="text-xs sm:text-sm text-slate-300 mb-4">
           {statusMessage}
         </p>
 
-        {/* Dealer Pre-Deal Controls */}
+        {/* Dealer Pre-Deal & Post-Cut Controls */}
         {!isCutPhase && (
           <div className="flex flex-col items-center gap-3 py-3">
             <div className="flex -space-x-3 justify-center mb-1">
@@ -82,43 +90,80 @@ export const CutModal: React.FC<CutModalProps> = ({
               ))}
             </div>
 
-            {isDealer ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className="text-[11px] text-slate-400">
-                  {hasShuffled ? (
-                    <span className="text-emerald-400 font-bold">✓ Deck has been shuffled by you</span>
-                  ) : (
-                    <span>Deck is in natural order. You may shuffle or offer cut directly.</span>
-                  )}
-                </div>
+            {/* Post-Cut State: Shuffle Disabled, Distribute 5 Cards Active */}
+            {cutDone ? (
+              isDealer ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="text-[11px] text-emerald-400 font-bold">
+                    ✓ Deck has been cut and locked. Shuffling is now disabled.
+                  </div>
 
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <button
-                    onClick={() => {
-                      sound.playShuffle();
-                      setHasShuffled(true);
-                      onShuffle();
-                    }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
-                  >
-                    <Shuffle className="w-4 h-4" /> {hasShuffled ? 'Shuffle Again' : 'Shuffle Deck'}
-                  </button>
+                  <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                    <button
+                      disabled
+                      className="px-4 py-2 bg-slate-900 text-slate-600 font-semibold rounded-xl text-xs sm:text-sm border border-slate-800 flex items-center justify-center gap-2 cursor-not-allowed opacity-50"
+                      title="Deck is cut and locked. Cannot shuffle."
+                    >
+                      <Shuffle className="w-4 h-4" /> Shuffle Disabled
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      sound.playCardSlide();
-                      onOfferCut();
-                    }}
-                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-glow-gold flex items-center justify-center gap-2 transition cursor-pointer"
-                  >
-                    <Hand className="w-4 h-4" /> Offer Cut to {players[(dealerPlayerIndex + 1) % 4]?.name}
-                  </button>
+                    <button
+                      onClick={() => {
+                        sound.playCardSlide();
+                        onDistribute5Cards();
+                      }}
+                      className="px-6 py-2.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 text-slate-950 font-cinzel font-black rounded-xl text-xs sm:text-sm shadow-glow-gold flex items-center justify-center gap-2 transition cursor-pointer animate-pulse"
+                    >
+                      <Layers className="w-4 h-4" /> Distribute 5 Cards
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-xs text-amber-300/90 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-2">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                  <span>Waiting for Dealer (<strong>{dealer?.name}</strong>) to distribute 5 cards...</span>
+                </div>
+              )
             ) : (
-              <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700">
-                Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle / offer cut...
-              </div>
+              /* Pre-Cut State: Dealer can Shuffle or Offer Cut */
+              isDealer ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="text-[11px] text-slate-400">
+                    {hasShuffled ? (
+                      <span className="text-emerald-400 font-bold">✓ Deck has been shuffled by you</span>
+                    ) : (
+                      <span>Deck is in natural order. You may shuffle or offer cut directly.</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <button
+                      onClick={() => {
+                        sound.playShuffle();
+                        setHasShuffled(true);
+                        onShuffle();
+                      }}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                      <Shuffle className="w-4 h-4" /> {hasShuffled ? 'Shuffle Again' : 'Shuffle Deck'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        sound.playCardSlide();
+                        onOfferCut();
+                      }}
+                      className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-glow-gold flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                      <Hand className="w-4 h-4" /> Offer Cut to {players[(dealerPlayerIndex + 1) % 4]?.name}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700">
+                  Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle / offer cut...
+                </div>
+              )
             )}
           </div>
         )}

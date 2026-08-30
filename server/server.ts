@@ -574,6 +574,20 @@ io.on('connection', (socket: Socket) => {
       try {
         room.engine.dealerDistributeNextGame(playerId);
         broadcastRoomState(room);
+        checkAndRunBotTurns(room);
+      } catch (err: any) {
+        socket.emit('notification', { message: err.message, type: 'error' });
+      }
+    }
+  });
+
+  socket.on('dealerDistribute5Cards', () => {
+    const playerId = room.socketMap[socket.id];
+    if (playerId) {
+      try {
+        room.engine.dealerDistribute5Cards(playerId);
+        broadcastRoomState(room);
+        checkAndRunBotTurns(room);
       } catch (err: any) {
         socket.emit('notification', { message: err.message, type: 'error' });
       }

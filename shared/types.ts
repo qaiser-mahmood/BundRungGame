@@ -215,6 +215,7 @@ export interface ClientToServerEvents {
   startMatchToss: () => void;
   dealerDistributeCards: () => void;
   dealerDistributeNextGame: () => void;
+  dealerDistribute5Cards: () => void;
   addBot: (data: { name?: string; seat?: SeatPosition }) => void;
   drawTossCard: (data: { cardIndex: number }) => void;
   dealerShuffle: () => void;

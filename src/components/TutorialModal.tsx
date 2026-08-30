@@ -104,8 +104,8 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose })
           text: 'If players tie on the lowest card, only the tied players redraw until a unique dealer is decided.',
         },
         {
-          title: 'Deck Cut',
-          text: 'The Dealer shuffles and offers the deck to the opponent on their right, who slides to cut the cards.',
+          title: 'Deck Cut & Distribution',
+          text: 'The Dealer may shuffle and offers the deck to the opponent on their right. Once the opponent cuts the deck, shuffling is locked and the Dealer clicks "Distribute 5 Cards" to begin the bidding.',
         },
       ],
       interactiveType: 'TOSS_CUT',

@@ -394,6 +394,9 @@ export class BundRungEngine {
     if (this.phase !== 'PRE_DEAL_SHUFFLE') {
       throw new Error('Not in shuffle phase');
     }
+    if (this.cutDone) {
+      throw new Error('Deck has already been cut and cannot be reshuffled');
+    }
     this.deck.reset();
     this.deck.shuffle();
     this.statusMessage = `${dealer.name} shuffled the deck. Dealer must click "Offer Cut".`;
@@ -419,9 +422,21 @@ export class BundRungEngine {
     }
     this.deck.cut(cardIndex);
     this.cutDone = true;
-    this.statusMessage = `${this.players.find((p) => p.id === playerId)?.name} cut the deck. Dealing 5 cards each...`;
-    
-    // Automatically proceed to First Pass Dealing
+    this.phase = 'PRE_DEAL_SHUFFLE'; // Return control to Dealer
+    const dealer = this.players[this.dealerIndex];
+    const cutPlayer = this.players.find((p) => p.id === playerId);
+    this.statusMessage = `${cutPlayer?.name || 'Opponent'} cut the deck. ${dealer.name} must now distribute 5 cards.`;
+  }
+
+  public dealerDistribute5Cards(playerId: string): void {
+    const dealer = this.players[this.dealerIndex];
+    if (!dealer || dealer.id !== playerId) {
+      throw new Error('Only the designated dealer can distribute cards');
+    }
+    if (this.phase !== 'PRE_DEAL_SHUFFLE' || !this.cutDone) {
+      throw new Error('Deck must be cut before distributing cards');
+    }
+    this.statusMessage = `${dealer.name} distributed 5 cards each.`;
     this.dealFirstPass();
   }
 

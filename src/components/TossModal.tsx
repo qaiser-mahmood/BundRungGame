@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Player } from '../../shared/types';
 import { PlayingCard } from './PlayingCard';
-import { Crown, Sparkles, RefreshCw, Layers } from 'lucide-react';
+import { Crown, Sparkles, RefreshCw, Layers, Scissors } from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface TossModalProps {
@@ -212,12 +212,12 @@ export const TossModal: React.FC<TossModalProps> = ({
               }}
               className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-cinzel font-black text-sm sm:text-base rounded-xl transition shadow-glow-gold flex items-center justify-center gap-2 mx-auto cursor-pointer"
             >
-              <Layers className="w-5 h-5" /> Distribute 5 Cards
+              <Scissors className="w-5 h-5" /> Proceed to Shuffle & Cut
             </motion.button>
           ) : (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-950/60 border border-slate-700 rounded-xl text-xs text-amber-300/90 font-semibold animate-pulse">
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
-              Waiting for {dealer?.name} to distribute cards...
+              Waiting for {dealer?.name} to proceed to shuffle & cut...
             </div>
           )}
         </motion.div>

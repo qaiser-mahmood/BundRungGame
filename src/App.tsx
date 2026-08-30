@@ -107,6 +107,10 @@ export const App: React.FC = () => {
     socket.emit('performCut', { cardIndex });
   };
 
+  const handleDealerDistribute5Cards = () => {
+    socket.emit('dealerDistribute5Cards');
+  };
+
   const handleSubmitBid = (
     action: 'SELECT_CARD_TRUMP' | 'BWINJI' | 'PASS',
     cardIdOrSuit?: string,
@@ -127,14 +131,14 @@ export const App: React.FC = () => {
   const activeDealer = publicState.players[publicState.dealerPlayerIndex];
 
   return (
-    <div className="h-full w-full relative bg-slate-950 overflow-hidden font-['Outfit',sans-serif]">
-      {/* Toast Notification */}
+    <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans select-none">
+      {/* Toast Notification Popup */}
       {notification && (
         <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-xs font-bold shadow-2xl transition-all border ${
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-sm font-semibold shadow-2xl backdrop-blur-md border animate-bounce ${
             notification.type === 'error'
-              ? 'bg-red-950/90 text-red-200 border-red-500'
-              : 'bg-amber-950/90 text-amber-200 border-amber-500'
+              ? 'bg-rose-950/90 text-rose-200 border-rose-500/50 shadow-rose-900/50'
+              : 'bg-amber-950/90 text-amber-200 border-amber-500/50 shadow-amber-900/50'
           }`}
         >
           {notification.message}
@@ -218,9 +222,11 @@ export const App: React.FC = () => {
           cutOfferPlayerId={publicState.cutOfferPlayerId}
           myPlayerId={myPlayerId}
           isCutPhase={phase === 'PRE_DEAL_CUT'}
+          cutDone={publicState.cutDone}
           onShuffle={handleDealerShuffle}
           onOfferCut={handleDealerOfferCut}
           onPerformCut={handlePerformCut}
+          onDistribute5Cards={handleDealerDistribute5Cards}
           statusMessage={publicState.statusMessage}
         />
       )}

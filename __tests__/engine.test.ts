@@ -61,6 +61,15 @@ describe('Deck & Cut Mechanics (Sections 2.3 & 4.2)', () => {
 
     // 3. P2 cuts at index 0 (card 'H_2' becomes bottom card, 'H_3' becomes top card)
     engine.performCut('p2', 0);
+    // Control returns to Dealer in PRE_DEAL_SHUFFLE with cutDone = true
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    expect(engine.getPublicState().cutDone).toBe(true);
+
+    // 4. Shuffling is now locked and throws if attempted
+    expect(() => engine.dealerShuffle('p1')).toThrow();
+
+    // 5. Dealer distributes 5 cards
+    engine.dealerDistribute5Cards('p1');
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
 
     // P2's 5 cards contain the first 5 cards from the cut deck (H_3 through H_7)
@@ -295,6 +304,8 @@ describe('Bund Rung Engine Full State Flow', () => {
     engine.dealerOfferCut('p1');
     expect(engine.getPublicState().phase).toBe('PRE_DEAL_CUT');
     engine.performCut('p2', 20);
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerDistribute5Cards('p1');
 
     const state = engine.getPublicState();
     expect(state.gameIndex).toBe(2);
@@ -345,6 +356,8 @@ describe('Bund Rung Engine Full State Flow', () => {
     engine.dealerDistributeCards('p1');
     engine.dealerOfferCut('p1');
     engine.performCut('p2', 20);
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerDistribute5Cards('p1');
 
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
     expect(engine.getPublicState().biddingTurnPlayerId).toBe('p2');
@@ -385,6 +398,8 @@ describe('Bund Rung Engine Full State Flow', () => {
     engine.dealerDistributeCards('p1');
     engine.dealerOfferCut('p1');
     engine.performCut('p2', 20);
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerDistribute5Cards('p1');
 
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
     expect(engine.getPublicState().biddingTurnPlayerId).toBe('p2');
@@ -445,6 +460,8 @@ describe('Bund Rung Engine Full State Flow', () => {
     expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
     engine.dealerOfferCut('p3');
     engine.performCut('p4', 20);
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerDistribute5Cards('p3');
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
 
     // Test Case B: Dealer Charlie (Team 1, idx 2) opponent team (Team 2) becomes KHOTI

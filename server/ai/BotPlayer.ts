@@ -22,10 +22,17 @@ export class BotPlayer {
       return;
     }
 
-    // 2. Pre-deal shuffle / offer cut (if dealer is bot)
+    // 2. Pre-deal shuffle / offer cut / distribute 5 cards (if dealer is bot)
     if (phase === 'PRE_DEAL_SHUFFLE' && player.isDealer) {
-      engine.dealerShuffle(botPlayerId);
-      engine.dealerOfferCut(botPlayerId);
+      if (publicState.cutDone) {
+        engine.dealerDistribute5Cards(botPlayerId);
+      } else {
+        const willShuffle = Math.random() < 0.5;
+        if (willShuffle) {
+          engine.dealerShuffle(botPlayerId);
+        }
+        engine.dealerOfferCut(botPlayerId);
+      }
       return;
     }
 
