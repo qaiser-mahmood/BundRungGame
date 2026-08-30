@@ -1,0 +1,160 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Player } from '../../shared/types';
+import { PlayingCard } from './PlayingCard';
+import { Scissors, Shuffle, CheckCircle, Hand } from 'lucide-react';
+import { sound } from '../utils/sound';
+
+interface CutModalProps {
+  players: Player[];
+  dealerPlayerIndex: number;
+  cutOfferPlayerId: string | null;
+  myPlayerId: string;
+  isCutPhase: boolean;
+  onShuffle: () => void;
+  onOfferCut: () => void;
+  onPerformCut: (cardIndex: number) => void;
+  statusMessage: string;
+}
+
+export const CutModal: React.FC<CutModalProps> = ({
+  players,
+  dealerPlayerIndex,
+  cutOfferPlayerId,
+  myPlayerId,
+  isCutPhase,
+  onShuffle,
+  onOfferCut,
+  onPerformCut,
+  statusMessage,
+}) => {
+  const [selectedCutIndex, setSelectedCutIndex] = useState<number | null>(null);
+  const [isSwapping, setIsSwapping] = useState(false);
+
+  const dealer = players[dealerPlayerIndex];
+  const isDealer = dealer && dealer.id === myPlayerId;
+  const isCutPlayer = cutOfferPlayerId === myPlayerId;
+  const cutPlayer = players.find((p) => p.id === cutOfferPlayerId);
+
+  const handleCardClick = (idx: number) => {
+    if (!isCutPlayer || isSwapping) return;
+    setSelectedCutIndex(idx);
+    setIsSwapping(true);
+    sound.playCardSlide();
+
+    // Trigger animated cut and lock
+    setTimeout(() => {
+      onPerformCut(idx);
+      setIsSwapping(false);
+      setSelectedCutIndex(null);
+    }, 600);
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-xl bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-2xl text-center relative overflow-hidden"
+      >
+        {/* Header */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full mb-3">
+          <Scissors className="w-3.5 h-3.5 text-amber-400" />
+          <span className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
+            Section 4: Pre-Deal Deck Cut & Shuffle
+          </span>
+        </div>
+
+        <h3 className="text-2xl font-cinzel font-bold gold-gradient-text mb-2">
+          {isCutPhase ? 'INTERACTIVE DECK CUT' : 'DEALER PRE-DEAL SHUFFLE'}
+        </h3>
+        <p className="text-xs sm:text-sm text-slate-300 mb-6">
+          {statusMessage}
+        </p>
+
+        {/* Dealer Pre-Deal Controls (Section 4.1) */}
+        {!isCutPhase && (
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="flex -space-x-3 justify-center mb-2">
+              {[0, 1, 2, 3].map((i) => (
+                <PlayingCard key={i} faceDown size="sm" />
+              ))}
+            </div>
+
+            {isDealer ? (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => {
+                    sound.playShuffle();
+                    onShuffle();
+                  }}
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition"
+                >
+                  <Shuffle className="w-4 h-4" /> Reshuffle Deck
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playCardSlide();
+                    onOfferCut();
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-sm shadow-glow-gold flex items-center justify-center gap-2 transition"
+                >
+                  <Hand className="w-4 h-4" /> Offer Cut to {players[(dealerPlayerIndex + 1) % 4]?.name}
+                </button>
+              </div>
+            ) : (
+              <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700">
+                Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle and offer cut...
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Interactive Deck Cut Pile (Section 4.2) */}
+        {isCutPhase && (
+          <div className="py-2">
+            <div className="text-xs font-semibold text-amber-300 mb-3">
+              {isCutPlayer ? (
+                <span className="text-amber-400 animate-pulse">
+                  👉 Click any card in the deck pile below to cut & swap:
+                </span>
+              ) : (
+                `Waiting for ${cutPlayer?.name} to cut the deck...`
+              )}
+            </div>
+
+            <div className="relative h-28 flex items-center justify-center my-4">
+              <div className="flex -space-x-8 sm:-space-x-10 justify-center">
+                {Array.from({ length: 18 }).map((_, idx) => {
+                  const cardActualIndex = Math.floor((idx / 18) * 52);
+                  const isCutPoint = selectedCutIndex === cardActualIndex;
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      whileHover={isCutPlayer && !isSwapping ? { y: -16, scale: 1.15 } : {}}
+                      onClick={() => handleCardClick(cardActualIndex)}
+                      className={`relative ${isCutPlayer ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    >
+                      <PlayingCard
+                        faceDown
+                        size="md"
+                        className={isCutPoint ? 'ring-4 ring-emerald-400 -translate-y-4' : ''}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {isSwapping && (
+              <div className="text-xs font-bold text-emerald-400 animate-pulse flex items-center justify-center gap-1.5 mt-2">
+                <CheckCircle className="w-4 h-4" /> Splitting and swapping Top & Bottom piles...
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};

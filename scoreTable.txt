@@ -1,0 +1,29 @@
+game type, rung called, who won, dealer scorecard
+close rung, dealer team, dealer team, -13
+close rung, dealer team, opponent team, 26
+close rung, opponent team, opponent team, 13
+close rung, opponent team, dealer team, -26
+open rung face up, dealer team, dealer team, -26
+open rung face up, dealer team, opponent team, 52
+open rung face up, opponent team, opponent team, 26
+open rung face up, opponent team, dealer team, -52
+open rung face down surrender, dealer team, dealer team, -26
+open rung face down surrender, opponent team, opponent team, 26
+open rung face down, dealer team, dealer team, -52
+open rung face down, dealer team, opponent team, 104
+open rung face down, opponent team, opponent team, 52
+open rung face down, opponent team, dealer team, -104
+bwinji face up, dealer team, dealer team, -52
+bwinji face up, dealer team, opponent team, 104
+bwinji face up, opponent team, opponent team, 52
+bwinji face up, opponent team, dealer team, -104
+bwinji face down surrender, dealer team, dealer team, -52
+bwinji face down surrender, opponent team, opponent team, 52
+bwinji face down, dealer team, dealer team, -104
+bwinji face down, dealer team, opponent team, 208
+bwinji face down, opponent team, opponent team, 104
+bwinji face down, opponent team, dealer team, -208
+			
+if score reaches above 100, the dealer team is khoti and dealership transfers to second player of the dealer team starting with 0 score			
+if score reaches below -100, the opponent team is khoti and dealership transfers to the player right of the dealer starting with 0 score			
+if score reaches below 0 but above -100 only dealership transfers to the player right of the dealer starting with absolute value of score. No khoti is declared			
