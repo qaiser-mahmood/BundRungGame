@@ -366,7 +366,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
             >
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
               <span>
-                Waiting for <strong className="text-amber-300 font-extrabold">{players.find((p) => p.id === currentTurnPlayerId)?.name || 'Player'}</strong> ({players.find((p) => p.id === currentTurnPlayerId)?.team === myPlayer.team ? 'Teammate' : 'Opponent'}) to play a card...
+                Waiting for <strong className="text-amber-300 font-extrabold">{players.find((p) => p.id === currentTurnPlayerId)?.name || 'Player'}</strong> to play a card...
               </span>
             </motion.div>
           )}
@@ -1517,17 +1517,10 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
 
   return (
     <div className="relative flex flex-col items-center">
-      {/* Top Active Turn Bouncing Badge */}
+      {/* Top Active Turn Bouncing Badge (for Partner) */}
       {isCurrentTurn && position === 'top' && (
         <div className="absolute -bottom-5 sm:-bottom-6 z-30 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(245,158,11,0.9)] animate-bounce flex items-center gap-1 whitespace-nowrap">
           <span>👇 ACTIVE TURN</span>
-        </div>
-      )}
-
-      {/* Bottom Active Turn Bouncing Badge */}
-      {isCurrentTurn && position === 'bottom' && (
-        <div className="absolute -top-5 sm:-top-6 z-30 px-2 py-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(52,211,153,0.9)] animate-bounce flex items-center gap-1 whitespace-nowrap">
-          <span>👆 YOUR TURN</span>
         </div>
       )}
 
