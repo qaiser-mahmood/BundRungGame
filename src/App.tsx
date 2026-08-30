@@ -131,7 +131,7 @@ export const App: React.FC = () => {
   const activeDealer = publicState.players[publicState.dealerPlayerIndex];
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans select-none">
+    <div className="relative h-[100dvh] w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans select-none">
       {/* Main Table Layout (Always in background / active during play) */}
       <TableLayout
         publicState={publicState}

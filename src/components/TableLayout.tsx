@@ -265,11 +265,11 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   const myTeamSurrenderCount = (surrenderVotes[myPlayer?.team || 'TEAM_1'] || []).length;
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between p-1 sm:p-3 overflow-hidden select-none table-felt">
+    <div className="relative w-full h-full min-h-[100dvh] flex flex-col justify-between pt-[max(env(safe-area-inset-top),0.75rem)] pb-[max(env(safe-area-inset-bottom),0.5rem)] px-1.5 sm:px-3 overflow-hidden select-none table-felt">
       {/* --- Top Bar: Show Cards, Surrender & Score --- */}
-      <header className="flex items-center justify-between z-20 px-2 py-1 bg-slate-950/80 backdrop-blur-md rounded-xl border border-amber-500/30 gap-1 sm:gap-2">
+      <header className="flex items-center justify-between z-30 px-2 sm:px-3 py-1.5 bg-slate-950/90 backdrop-blur-md rounded-xl border border-amber-500/40 gap-1.5 sm:gap-2 shadow-lg flex-shrink-0">
         {/* Left: Show Cards & Team Surrender */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           {/* Show Cards Toggle Button */}
           {onToggleShowHand && (
             <button
@@ -277,7 +277,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 sound.playCardSlide();
                 onToggleShowHand();
               }}
-              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer shadow-sm ${isMyHandRevealed
+              className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 border transition-all cursor-pointer shadow-sm flex-shrink-0 ${isMyHandRevealed
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 border-emerald-400 text-white shadow-glow-gold'
                   : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
                 }`}
@@ -295,7 +295,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 sound.playCardSlide();
                 onVoteSurrender();
               }}
-              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer shadow-sm ${hasVotedSurrender
+              className={`px-2 sm:px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 border transition-all cursor-pointer shadow-sm flex-shrink-0 ${hasVotedSurrender
                   ? 'bg-gradient-to-r from-red-800 to-rose-900 border-red-400 text-red-100 shadow-glow-gold'
                   : 'bg-slate-900/90 hover:bg-red-950/70 text-slate-300 border-slate-700 hover:text-red-200'
                 }`}
@@ -310,20 +310,20 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
         {/* Center: Streak Indicator (if active) */}
         {consecutiveTricksCount > 1 && (
-          <div className="px-2 py-0.5 bg-orange-950/80 border border-orange-500/60 rounded-full flex items-center gap-1 text-[10px] sm:text-xs font-bold text-orange-300 animate-pulse">
+          <div className="px-2 py-0.5 bg-orange-950/80 border border-orange-500/60 rounded-full flex items-center gap-1 text-[10px] sm:text-xs font-bold text-orange-300 animate-pulse flex-shrink-0">
             <Flame className="w-3 h-3 text-orange-400" /> Streak: {consecutiveTricksCount}
           </div>
         )}
 
         {/* Right: Tutorial & Scorecard Trigger */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           {onOpenTutorial && (
             <button
               onClick={() => {
                 sound.playCardSlide();
                 onOpenTutorial();
               }}
-              className="flex items-center gap-1 px-2.5 py-1 bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 rounded-lg text-[10px] sm:text-xs transition font-semibold cursor-pointer shadow-sm"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 rounded-lg text-[10px] sm:text-xs transition font-semibold cursor-pointer shadow-sm flex-shrink-0"
               title="Open Interactive Game & UI Tutorial"
             >
               <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
@@ -336,9 +336,9 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               sound.playCardSlide();
               onOpenScorecard();
             }}
-            className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold rounded-lg text-[10px] sm:text-xs transition shadow-glow-gold cursor-pointer"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold rounded-lg text-[10px] sm:text-xs transition shadow-glow-gold cursor-pointer flex-shrink-0"
           >
-            <Award className="w-3.5 h-3.5" /> Score ({scorecard.dealerScore} pts)
+            <Award className="w-3.5 h-3.5" /> <span>Score: {scorecard.dealerScore} pts</span>
           </button>
         </div>
       </header>
