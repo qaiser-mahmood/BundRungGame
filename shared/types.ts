@@ -119,9 +119,10 @@ export interface PublicGameState {
   tossRound: number;
   tiedPlayerIds: string[];
 
-  // Cut
+  // Cut & Controlled Shuffle
   cutOfferPlayerId: string | null;
   cutDone: boolean;
+  shuffleCount: number;
 
   // Deal & Rung
   trumpMode: TrumpMode | null;

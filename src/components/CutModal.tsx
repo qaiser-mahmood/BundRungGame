@@ -12,6 +12,7 @@ interface CutModalProps {
   myPlayerId: string;
   isCutPhase: boolean;
   cutDone: boolean;
+  shuffleCount?: number;
   onShuffle: () => void;
   onOfferCut: () => void;
   onPerformCut: (cardIndex: number) => void;
@@ -26,6 +27,7 @@ export const CutModal: React.FC<CutModalProps> = ({
   myPlayerId,
   isCutPhase,
   cutDone,
+  shuffleCount = 0,
   onShuffle,
   onOfferCut,
   onPerformCut,
@@ -34,12 +36,13 @@ export const CutModal: React.FC<CutModalProps> = ({
 }) => {
   const [selectedCutIndex, setSelectedCutIndex] = useState<number | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
-  const [hasShuffled, setHasShuffled] = useState(false);
 
   const dealer = players[dealerPlayerIndex];
   const isDealer = dealer && dealer.id === myPlayerId;
   const isCutPlayer = cutOfferPlayerId === myPlayerId;
   const cutPlayer = players.find((p) => p.id === cutOfferPlayerId);
+
+  const shufflePercent = Math.min(100, shuffleCount * 20);
 
   const handleCardClick = (idx: number) => {
     if (!isCutPlayer || isSwapping) return;
@@ -66,7 +69,7 @@ export const CutModal: React.FC<CutModalProps> = ({
         <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-2">
           <Scissors className="w-3.5 h-3.5 text-amber-400" />
           <span className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wider">
-            Deck Cut & Shuffle
+            Deck Cut & Controlled Shuffle
           </span>
         </div>
 
@@ -77,23 +80,44 @@ export const CutModal: React.FC<CutModalProps> = ({
             ? 'DECK CUT COMPLETE'
             : 'DEALER PRE-DEAL'}
         </h3>
-        <p className="text-xs sm:text-sm text-slate-300 mb-4">
+        <p className="text-xs sm:text-sm text-slate-300 mb-3">
           {statusMessage}
         </p>
 
         {/* Dealer Pre-Deal & Post-Cut Controls */}
         {!isCutPhase && (
-          <div className="flex flex-col items-center gap-3 py-3">
+          <div className="flex flex-col items-center gap-3 py-2">
             <div className="flex -space-x-3 justify-center mb-1">
               {[0, 1, 2, 3].map((i) => (
                 <PlayingCard key={i} faceDown size="sm" />
               ))}
             </div>
 
+            {/* Controlled Shuffle Intensity Progress Bar */}
+            <div className="w-full max-w-sm bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/30 flex flex-col gap-1.5 shadow-inner">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold">
+                <span className="text-slate-400">Shuffle Intensity:</span>
+                <span className={shufflePercent > 0 ? 'text-emerald-400' : 'text-amber-300'}>
+                  {shufflePercent}% {shufflePercent === 0 ? '(Natural Gathered Order)' : shufflePercent < 60 ? '(Partial Riffle)' : '(Thoroughly Mixed)'}
+                </span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-emerald-400"
+                  initial={false}
+                  animate={{ width: `${shufflePercent}%` }}
+                  transition={{ duration: 0.35 }}
+                />
+              </div>
+              <div className="text-[9px] text-slate-500 text-right">
+                {shuffleCount === 0 ? '0 clicks' : `${shuffleCount} click${shuffleCount > 1 ? 's' : ''} (+20% each)`}
+              </div>
+            </div>
+
             {/* Post-Cut State: Shuffle Disabled, Distribute 5 Cards Active */}
             {cutDone ? (
               isDealer ? (
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 mt-1">
                   <div className="text-[11px] text-emerald-400 font-bold">
                     ✓ Deck has been cut and locked. Shuffling is now disabled.
                   </div>
@@ -127,25 +151,18 @@ export const CutModal: React.FC<CutModalProps> = ({
             ) : (
               /* Pre-Cut State: Dealer can Shuffle or Offer Cut */
               isDealer ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="text-[11px] text-slate-400">
-                    {hasShuffled ? (
-                      <span className="text-emerald-400 font-bold">✓ Deck has been shuffled by you</span>
-                    ) : (
-                      <span>Deck is in natural order. You may shuffle or offer cut directly.</span>
-                    )}
-                  </div>
-
+                <div className="flex flex-col items-center gap-2 mt-1">
                   <div className="flex flex-col sm:flex-row gap-2.5">
                     <button
                       onClick={() => {
                         sound.playShuffle();
-                        setHasShuffled(true);
                         onShuffle();
                       }}
-                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer active:scale-95 shadow-md"
+                      title="Each click shuffles the deck by an additional 20%"
                     >
-                      <Shuffle className="w-4 h-4" /> {hasShuffled ? 'Shuffle Again' : 'Shuffle Deck'}
+                      <Shuffle className="w-4 h-4 text-amber-400" />
+                      <span>{shuffleCount === 0 ? 'Shuffle (+20%)' : `Shuffle Again (+20% → ${Math.min(100, (shuffleCount + 1) * 20)}%)`}</span>
                     </button>
 
                     <button
@@ -160,8 +177,9 @@ export const CutModal: React.FC<CutModalProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700">
-                  Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle / offer cut...
+                <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-2">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                  <span>Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle / offer cut...</span>
                 </div>
               )
             )}

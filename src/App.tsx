@@ -210,6 +210,7 @@ export const App: React.FC = () => {
           myPlayerId={myPlayerId}
           isCutPhase={phase === 'PRE_DEAL_CUT'}
           cutDone={publicState.cutDone}
+          shuffleCount={publicState.shuffleCount}
           onShuffle={handleDealerShuffle}
           onOfferCut={handleDealerOfferCut}
           onPerformCut={handlePerformCut}

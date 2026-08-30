@@ -53,6 +53,44 @@ export class Deck {
     this.isLocked = false;
   }
 
+  /**
+   * Controlled 20% partial shuffle:
+   * Simulates an authentic riffle weave + partial swaps (20% entropy increase per click).
+   */
+  public partialShuffle(intensity: number = 0.2): void {
+    if (this.isLocked) {
+      throw new Error('Deck is locked after cut and cannot be reshuffled');
+    }
+
+    // 1. Gilbert-Shannon-Reeds model riffle cut & weave
+    const cutPoint = Math.floor(this.cards.length / 2) + Math.floor((Math.random() - 0.5) * 6);
+    const clampedCut = Math.max(15, Math.min(this.cards.length - 15, cutPoint));
+    const leftPacket = this.cards.slice(0, clampedCut);
+    const rightPacket = this.cards.slice(clampedCut);
+
+    const woven: Card[] = [];
+    while (leftPacket.length > 0 || rightPacket.length > 0) {
+      const pLeft = leftPacket.length / (leftPacket.length + rightPacket.length);
+      const fromLeft = Math.random() < pLeft;
+      const count = Math.min(fromLeft ? leftPacket.length : rightPacket.length, 1 + Math.floor(Math.random() * 2));
+
+      if (fromLeft) {
+        woven.push(...leftPacket.splice(0, count));
+      } else {
+        woven.push(...rightPacket.splice(0, count));
+      }
+    }
+    this.cards = woven;
+
+    // 2. Perform localized random pair swaps based on intensity (~5-10 swaps per 20%)
+    const swapCount = Math.max(3, Math.floor(this.cards.length * intensity * 0.5));
+    for (let s = 0; s < swapCount; s++) {
+      const i = Math.floor(Math.random() * this.cards.length);
+      const j = Math.floor(Math.random() * this.cards.length);
+      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+    }
+  }
+
   public shuffle(): void {
     if (this.isLocked) {
       throw new Error('Deck is locked after cut and cannot be reshuffled');

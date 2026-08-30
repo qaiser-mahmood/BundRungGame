@@ -32,9 +32,10 @@ export class BundRungEngine {
   private currentTurnPlayerIndex: number = 0;
   private gameIndex: number = 1;
 
-  // Cut
+  // Cut & Controlled Shuffle
   private cutOfferPlayerId: string | null = null;
   private cutDone: boolean = false;
+  private shuffleCount: number = 0;
 
   // Rung & Bidding
   private trumpMode: TrumpMode | null = null;
@@ -382,7 +383,8 @@ export class BundRungEngine {
     this.phase = 'PRE_DEAL_SHUFFLE';
     this.cutDone = false;
     this.cutOfferPlayerId = null;
-    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck or offer cut directly.`;
+    this.shuffleCount = 0;
+    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck (each click +20%) or offer cut directly.`;
   }
 
   // --- Phase 4: Shuffling, Cutting & Card Distribution ---
@@ -397,9 +399,10 @@ export class BundRungEngine {
     if (this.cutDone) {
       throw new Error('Deck has already been cut and cannot be reshuffled');
     }
-    this.deck.reset();
-    this.deck.shuffle();
-    this.statusMessage = `${dealer.name} shuffled the deck. Dealer must click "Offer Cut".`;
+    this.shuffleCount += 1;
+    this.deck.partialShuffle(0.2);
+    const percent = Math.min(100, this.shuffleCount * 20);
+    this.statusMessage = `${dealer.name} shuffled the deck (+20% -> ${percent}% total). Click Shuffle again or Offer Cut.`;
   }
 
   public dealerOfferCut(playerId: string): void {
@@ -1405,6 +1408,7 @@ export class BundRungEngine {
 
     this.cutOfferPlayerId = null;
     this.cutDone = false;
+    this.shuffleCount = 0;
     this.trumpMode = null;
     this.trumpSuit = null;
     this.isTrumpRevealed = false;
@@ -1539,6 +1543,7 @@ export class BundRungEngine {
 
     this.cutOfferPlayerId = null;
     this.cutDone = false;
+    this.shuffleCount = 0;
     this.trumpMode = null;
     this.trumpSuit = null;
     this.isTrumpRevealed = false;
@@ -1648,6 +1653,7 @@ export class BundRungEngine {
       tiedPlayerIds: this.tossEngine.getActivePlayerIds(),
       cutOfferPlayerId: this.cutOfferPlayerId,
       cutDone: this.cutDone,
+      shuffleCount: this.shuffleCount,
       trumpMode: this.trumpMode,
       trumpSuit: this.isTrumpRevealed ? this.trumpSuit : null,
       isTrumpRevealed: this.isTrumpRevealed,

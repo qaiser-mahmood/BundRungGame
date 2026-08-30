@@ -637,5 +637,49 @@ describe('Bund Rung Engine Full State Flow', () => {
     expect(engine.getPhase()).toBe('TRICK_PLAYING');
     expect(engine.getPublicState().currentTrick.cards[0].isFaceDown).toBe(false);
   });
+
+  it('supports controlled 20% partial shuffling per dealer click with progress tracking', () => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice');
+    engine.addPlayer('p2', 'Bob');
+    engine.addPlayer('p3', 'Charlie');
+    engine.addPlayer('p4', 'Diana');
+
+    (engine as any).phase = 'TOSS_COMPLETE';
+    (engine as any).dealerIndex = 0; // Alice is dealer
+
+    // Dealer proceeds to shuffle phase
+    engine.dealerDistributeCards('p1');
+    expect(engine.getPhase()).toBe('PRE_DEAL_SHUFFLE');
+    expect(engine.getPublicState().shuffleCount).toBe(0);
+
+    // 1st click = 20%
+    engine.dealerShuffle('p1');
+    expect(engine.getPublicState().shuffleCount).toBe(1);
+    expect(engine.getPublicState().statusMessage).toContain('20% total');
+
+    // 2nd click = 40%
+    engine.dealerShuffle('p1');
+    expect(engine.getPublicState().shuffleCount).toBe(2);
+    expect(engine.getPublicState().statusMessage).toContain('40% total');
+
+    // Deck must still contain exactly 52 valid unique cards
+    const deckCards = (engine as any).deck.getCards();
+    expect(deckCards.length).toBe(52);
+    const uniqueIds = new Set(deckCards.map((c: any) => c.id));
+    expect(uniqueIds.size).toBe(52);
+
+    // Dealer offers cut to Bob (player 1)
+    engine.dealerOfferCut('p1');
+    expect(engine.getPhase()).toBe('PRE_DEAL_CUT');
+
+    // Bob cuts the deck
+    engine.performCut('p2', 20);
+    expect(engine.getPhase()).toBe('PRE_DEAL_SHUFFLE');
+    expect(engine.getPublicState().cutDone).toBe(true);
+
+    // Reshuffling after cut must be prevented
+    expect(() => engine.dealerShuffle('p1')).toThrow('Deck has already been cut and cannot be reshuffled');
+  });
 });
 
