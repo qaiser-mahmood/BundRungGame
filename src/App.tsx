@@ -26,13 +26,15 @@ export const App: React.FC = () => {
   const [showScorecardModal, setShowScorecardModal] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type?: string } | null>(null);
-
-  // Initialize Socket connection directly to backend server port 3001
+  // Initialize Socket connection
   useEffect(() => {
+    const isLocalDevVite = typeof window !== 'undefined' && (window.location.port === '5173' || window.location.port === '3000');
     const serverUrl =
       (import.meta as any).env?.VITE_SERVER_URL ||
       (typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.hostname}:3001`
+        ? isLocalDevVite
+          ? `${window.location.protocol}//${window.location.hostname}:3001`
+          : window.location.origin
         : 'http://localhost:3001');
 
     const socketInstance: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {

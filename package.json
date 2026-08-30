@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "tsc && vite build",
+    "start": "tsx server/server.ts",
     "test": "vitest run"
   },
   "dependencies": {
