@@ -545,22 +545,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
         {/* --- Center: 4-Way Trick Play Field --- */}
         <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-felt-border/60 bg-felt-dark/40 flex items-center justify-center shadow-inner mt-6 sm:mt-10 mb-1">
-          {/* Previous Turn Winner Floating Indicator */}
-          {isShowingPreviousTrick && prevWinnerPlayer && (
-            <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 px-3 py-0.5 bg-gradient-to-r from-amber-950/90 via-slate-900/90 to-amber-950/90 border border-amber-400/80 rounded-full shadow-glow-gold flex items-center gap-1.5 whitespace-nowrap text-[10px] sm:text-xs">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-bold text-slate-300">Previous Turn Won By:</span>
-              <span className="font-extrabold text-amber-300">{prevWinnerPlayer.name}</span>
-              {lastTrickWinningCard && (
-                <span className="font-semibold text-emerald-400">
-                  ({lastTrickWinningCard.rank} of {lastTrickWinningCard.suit} {suitSymbols[lastTrickWinningCard.suit]})
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Active Trick Pill Indicator (when playing trick) */}
-          {!isShowingPreviousTrick && phase === 'TRICK_PLAYING' && (
+          {/* Active Trick Pill Indicator */}
+          {phase === 'TRICK_PLAYING' && (
             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 px-3 py-0.5 bg-slate-950/80 border border-amber-500/40 rounded-full flex items-center gap-1.5 whitespace-nowrap text-[10px] sm:text-xs shadow-sm">
               <span className="font-cinzel font-bold text-amber-300">Trick {currentTrick.trickNumber}/13</span>
               {isTrumpRevealed && trumpSuit && (
