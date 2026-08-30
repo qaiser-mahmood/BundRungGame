@@ -378,11 +378,11 @@ export class BundRungEngine {
       throw new Error('Not in toss complete phase');
     }
     this.deck.reset();
-    this.deck.shuffle();
+    // Do NOT auto-shuffle: Dealer decides whether to shuffle or offer cut directly
     this.phase = 'PRE_DEAL_SHUFFLE';
     this.cutDone = false;
     this.cutOfferPlayerId = null;
-    this.statusMessage = `${dealer.name} shuffled the deck. Dealer must click "Offer Cut".`;
+    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck or offer cut directly.`;
   }
 
   // --- Phase 4: Shuffling, Cutting & Card Distribution ---
@@ -1381,7 +1381,7 @@ export class BundRungEngine {
       this.gameIndex += 1;
     }
     this.deck.reset();
-    this.deck.shuffle();
+    // Do NOT auto-shuffle: Dealer decides whether to shuffle or not
     this.hands = {};
     for (const p of this.players) {
       this.hands[p.id] = [];
@@ -1422,7 +1422,7 @@ export class BundRungEngine {
     this.resetCurrentTrick(1, '');
 
     this.phase = 'PRE_DEAL_SHUFFLE';
-    this.statusMessage = `${dealer.name} is the dealer. Shuffle and offer cut to the opponent on your right.`;
+    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck or offer cut directly.`;
   }
 
   public getTeamName(team: TeamId): string {
@@ -1454,7 +1454,7 @@ export class BundRungEngine {
 
     this.gameIndex += 1;
     this.deck.reset();
-    this.deck.shuffle();
+    // Do NOT auto-shuffle
     this.hands = {};
     for (const p of this.players) {
       this.hands[p.id] = [];
@@ -1515,7 +1515,7 @@ export class BundRungEngine {
     this.gameIndex = 1;
 
     this.deck.reset();
-    this.deck.shuffle();
+    // Do NOT auto-shuffle
     this.hands = {};
     for (const p of this.players) {
       this.hands[p.id] = [];

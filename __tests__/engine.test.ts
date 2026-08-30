@@ -34,6 +34,43 @@ describe('Deck & Cut Mechanics (Sections 2.3 & 4.2)', () => {
     // Reshuffle attempt on locked deck should throw
     expect(() => deck.shuffle()).toThrow();
   });
+
+  it('ensures engine does not auto-shuffle; dealer explicitly chooses to shuffle or offer cut directly', () => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice');
+    engine.addPlayer('p2', 'Bob');
+    engine.addPlayer('p3', 'Charlie');
+    engine.addPlayer('p4', 'Diana');
+
+    (engine as any).phase = 'TOSS_COMPLETE';
+    (engine as any).dealerIndex = 0; // P1 is dealer
+
+    // 1. Dealer distributes -> transitions to PRE_DEAL_SHUFFLE without auto-shuffling!
+    engine.dealerDistributeCards('p1');
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+
+    // Initial deck cards before any shuffle:
+    const initialDeckCards = (engine as any).deck.getCards();
+    expect(initialDeckCards[0].suit).toBe('HEARTS');
+    expect(initialDeckCards[0].rank).toBe('2');
+
+    // 2. Dealer offers cut directly WITHOUT shuffling:
+    engine.dealerOfferCut('p1');
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_CUT');
+    expect(engine.getPublicState().cutOfferPlayerId).toBe('p2');
+
+    // 3. P2 cuts at index 0 (card 'H_2' becomes bottom card, 'H_3' becomes top card)
+    engine.performCut('p2', 0);
+    expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
+
+    // P2's 5 cards contain the first 5 cards from the cut deck (H_3 through H_7)
+    const p2CardIds = engine.getPrivateState('p2').myHand.map((c) => c.id);
+    expect(p2CardIds).toContain('H_3');
+    expect(p2CardIds).toContain('H_4');
+    expect(p2CardIds).toContain('H_5');
+    expect(p2CardIds).toContain('H_6');
+    expect(p2CardIds).toContain('H_7');
+  });
 });
 
 describe('Toss Engine & Tie-Breaker (Section 3.1)', () => {

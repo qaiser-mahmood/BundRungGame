@@ -30,6 +30,7 @@ export const CutModal: React.FC<CutModalProps> = ({
 }) => {
   const [selectedCutIndex, setSelectedCutIndex] = useState<number | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
+  const [hasShuffled, setHasShuffled] = useState(false);
 
   const dealer = players[dealerPlayerIndex];
   const isDealer = dealer && dealer.id === myPlayerId;
@@ -66,45 +67,57 @@ export const CutModal: React.FC<CutModalProps> = ({
         </div>
 
         <h3 className="text-xl sm:text-2xl font-cinzel font-black gold-gradient-text mb-1">
-          {isCutPhase ? 'CUT THE DECK' : 'DEALER SHUFFLE'}
+          {isCutPhase ? 'CUT THE DECK' : 'DEALER PRE-DEAL'}
         </h3>
         <p className="text-xs sm:text-sm text-slate-300 mb-4">
           {statusMessage}
         </p>
 
-        {/* Dealer Pre-Deal Controls (Section 4.1) */}
+        {/* Dealer Pre-Deal Controls */}
         {!isCutPhase && (
-          <div className="flex flex-col items-center gap-4 py-4">
-            <div className="flex -space-x-3 justify-center mb-2">
+          <div className="flex flex-col items-center gap-3 py-3">
+            <div className="flex -space-x-3 justify-center mb-1">
               {[0, 1, 2, 3].map((i) => (
                 <PlayingCard key={i} faceDown size="sm" />
               ))}
             </div>
 
             {isDealer ? (
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => {
-                    sound.playShuffle();
-                    onShuffle();
-                  }}
-                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition"
-                >
-                  <Shuffle className="w-4 h-4" /> Reshuffle Deck
-                </button>
-                <button
-                  onClick={() => {
-                    sound.playCardSlide();
-                    onOfferCut();
-                  }}
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-sm shadow-glow-gold flex items-center justify-center gap-2 transition"
-                >
-                  <Hand className="w-4 h-4" /> Offer Cut to {players[(dealerPlayerIndex + 1) % 4]?.name}
-                </button>
+              <div className="flex flex-col items-center gap-3">
+                <div className="text-[11px] text-slate-400">
+                  {hasShuffled ? (
+                    <span className="text-emerald-400 font-bold">✓ Deck has been shuffled by you</span>
+                  ) : (
+                    <span>Deck is in natural order. You may shuffle or offer cut directly.</span>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <button
+                    onClick={() => {
+                      sound.playShuffle();
+                      setHasShuffled(true);
+                      onShuffle();
+                    }}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer"
+                  >
+                    <Shuffle className="w-4 h-4" /> {hasShuffled ? 'Shuffle Again' : 'Shuffle Deck'}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      sound.playCardSlide();
+                      onOfferCut();
+                    }}
+                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-glow-gold flex items-center justify-center gap-2 transition cursor-pointer"
+                  >
+                    <Hand className="w-4 h-4" /> Offer Cut to {players[(dealerPlayerIndex + 1) % 4]?.name}
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="text-xs text-amber-300/80 bg-slate-800/60 px-4 py-2 rounded-lg border border-slate-700">
-                Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle and offer cut...
+                Waiting for Dealer (<strong>{dealer?.name}</strong>) to shuffle / offer cut...
               </div>
             )}
           </div>

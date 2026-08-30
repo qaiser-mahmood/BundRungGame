@@ -48,6 +48,11 @@ export class Deck {
     }
   }
 
+  public setCards(cards: Card[]): void {
+    this.cards = [...cards];
+    this.isLocked = false;
+  }
+
   public shuffle(): void {
     if (this.isLocked) {
       throw new Error('Deck is locked after cut and cannot be reshuffled');
