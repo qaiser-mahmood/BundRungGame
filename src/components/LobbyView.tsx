@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player, TeamId } from '../../shared/types';
-import { Users, Bot, Play, Sparkles, Copy, Check, Shield, ArrowRightLeft, UserCheck, Shuffle, Pencil, X } from 'lucide-react';
+import { Users, Bot, Play, Sparkles, Copy, Check, Shield, ArrowRightLeft, UserCheck, Shuffle, Pencil, X, GraduationCap } from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface LobbyViewProps {
@@ -13,6 +13,7 @@ interface LobbyViewProps {
   onStartToss: () => void;
   onSwapSeats: (player1Id: string, player2Id: string) => void;
   onUpdateTeamName?: (team: TeamId, name: string) => void;
+  onOpenTutorial?: () => void;
   statusMessage: string;
 }
 
@@ -25,6 +26,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onStartToss,
   onSwapSeats,
   onUpdateTeamName,
+  onOpenTutorial,
   statusMessage,
 }) => {
   const [nameInput, setNameInput] = useState('');
@@ -138,13 +140,26 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
             <span className="text-amber-300 font-medium">{statusMessage}</span>
           </div>
 
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs border border-slate-600 transition"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied Link' : 'Invite via URL'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                sound.playCardSlide();
+                onOpenTutorial?.();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 rounded-lg text-xs border border-amber-500/40 transition shadow cursor-pointer font-semibold"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+              <span>Interactive Tutorial</span>
+            </button>
+
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs border border-slate-600 transition cursor-pointer"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? 'Copied Link' : 'Invite via URL'}
+            </button>
+          </div>
         </div>
 
         {/* Section 2.2: Interactive Team Formation & Seating Selection */}

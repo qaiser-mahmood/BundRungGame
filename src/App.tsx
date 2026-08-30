@@ -16,6 +16,7 @@ import { TableLayout } from './components/TableLayout';
 import { ScorecardModal } from './components/ScorecardModal';
 import { GameOverModal } from './components/GameOverModal';
 import { GameResolvedModal } from './components/GameResolvedModal';
+import { TutorialModal } from './components/TutorialModal';
 import { sound } from './utils/sound';
 
 export const App: React.FC = () => {
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
   const [gameState, setGameState] = useState<FullClientGameState | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string>('');
   const [showScorecardModal, setShowScorecardModal] = useState<boolean>(false);
+  const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type?: string } | null>(null);
 
   // Initialize Socket connection directly to backend server port 3001
@@ -145,6 +147,7 @@ export const App: React.FC = () => {
         privateState={privateState}
         onPlayCard={handlePlayCard}
         onOpenScorecard={() => setShowScorecardModal(true)}
+        onOpenTutorial={() => setShowTutorialModal(true)}
         onSelectOpenRungSuit={(suit) =>
           socket.emit('selectOpenRungSuit', { suit })
         }
@@ -182,6 +185,7 @@ export const App: React.FC = () => {
           onUpdateTeamName={(team, name) =>
             socket.emit('updateTeamName', { team, name })
           }
+          onOpenTutorial={() => setShowTutorialModal(true)}
           statusMessage={publicState.statusMessage}
         />
       )}
@@ -275,6 +279,12 @@ export const App: React.FC = () => {
           onRematchSameRoster={handleRematchSameRoster}
         />
       )}
+
+      {/* 7. Interactive Game & UI Tutorial Modal */}
+      <TutorialModal
+        isOpen={showTutorialModal}
+        onClose={() => setShowTutorialModal(false)}
+      />
     </div>
   );
 };

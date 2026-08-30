@@ -27,6 +27,7 @@ import {
   Play,
   X,
   Shield,
+  GraduationCap,
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 
@@ -35,6 +36,7 @@ interface TableLayoutProps {
   privateState: PrivatePlayerState;
   onPlayCard: (cardId: string) => void;
   onOpenScorecard: () => void;
+  onOpenTutorial?: () => void;
   onDeclareOpenRung?: (suit: Suit, cardId: string, isFaceDown: boolean) => void;
   onSelectOpenRungSuit?: (suit: Suit | null) => void;
   onDeclareBwinjiLead?: (cardId: string, isFaceDown: boolean) => void;
@@ -66,6 +68,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   privateState,
   onPlayCard,
   onOpenScorecard,
+  onOpenTutorial,
   onDeclareOpenRung,
   onSelectOpenRungSuit,
   onDeclareBwinjiLead,
@@ -312,8 +315,22 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
           </div>
         )}
 
-        {/* Right: Scorecard Trigger */}
-        <div>
+        {/* Right: Tutorial & Scorecard Trigger */}
+        <div className="flex items-center gap-1.5">
+          {onOpenTutorial && (
+            <button
+              onClick={() => {
+                sound.playCardSlide();
+                onOpenTutorial();
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 rounded-lg text-[10px] sm:text-xs transition font-semibold cursor-pointer shadow-sm"
+              title="Open Interactive Game & UI Tutorial"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Tutorial</span>
+            </button>
+          )}
+
           <button
             onClick={() => {
               sound.playCardSlide();
