@@ -45,16 +45,16 @@ describe('Deck & Cut Mechanics (Sections 2.3 & 4.2)', () => {
     (engine as any).phase = 'TOSS_COMPLETE';
     (engine as any).dealerIndex = 0; // P1 is dealer
 
-    // 1. Dealer distributes -> transitions to PRE_DEAL_SHUFFLE without auto-shuffling!
+    // 1. Dealer initiates deal -> transitions to PRE_DEAL_SHUFFLE with 40% baseline shuffle
     engine.dealerDistributeCards('p1');
     expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
 
-    // Initial deck cards before any shuffle:
+    // Deck contains all 52 unique cards
     const initialDeckCards = (engine as any).deck.getCards();
-    expect(initialDeckCards[0].suit).toBe('HEARTS');
-    expect(initialDeckCards[0].rank).toBe('2');
+    expect(initialDeckCards.length).toBe(52);
+    expect(new Set(initialDeckCards.map((c: any) => c.id)).size).toBe(52);
 
-    // 2. Dealer offers cut directly WITHOUT shuffling:
+    // 2. Dealer offers cut directly:
     engine.dealerOfferCut('p1');
     expect(engine.getPublicState().phase).toBe('PRE_DEAL_CUT');
     expect(engine.getPublicState().cutOfferPlayerId).toBe('p2');
@@ -72,13 +72,11 @@ describe('Deck & Cut Mechanics (Sections 2.3 & 4.2)', () => {
     engine.dealerDistribute5Cards('p1');
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
 
-    // P2's 5 cards contain the first 5 cards from the cut deck (H_3 through H_7)
-    const p2CardIds = engine.getPrivateState('p2').myHand.map((c) => c.id);
-    expect(p2CardIds).toContain('H_3');
-    expect(p2CardIds).toContain('H_4');
-    expect(p2CardIds).toContain('H_5');
-    expect(p2CardIds).toContain('H_6');
-    expect(p2CardIds).toContain('H_7');
+    // All 4 players receive exactly 5 valid cards each
+    expect(engine.getPrivateState('p1').myHand.length).toBe(5);
+    expect(engine.getPrivateState('p2').myHand.length).toBe(5);
+    expect(engine.getPrivateState('p3').myHand.length).toBe(5);
+    expect(engine.getPrivateState('p4').myHand.length).toBe(5);
   });
 });
 
@@ -653,15 +651,15 @@ describe('Bund Rung Engine Full State Flow', () => {
     expect(engine.getPhase()).toBe('PRE_DEAL_SHUFFLE');
     expect(engine.getPublicState().shuffleCount).toBe(0);
 
-    // 1st click = 20%
+    // 1st click adds further shuffling
     engine.dealerShuffle('p1');
     expect(engine.getPublicState().shuffleCount).toBe(1);
-    expect(engine.getPublicState().statusMessage).toContain('20% total');
+    expect(engine.getPublicState().statusMessage).toContain('shuffled the deck');
 
-    // 2nd click = 40%
+    // 2nd click adds further shuffling
     engine.dealerShuffle('p1');
     expect(engine.getPublicState().shuffleCount).toBe(2);
-    expect(engine.getPublicState().statusMessage).toContain('40% total');
+    expect(engine.getPublicState().statusMessage).toContain('shuffled the deck');
 
     // Deck must still contain exactly 52 valid unique cards
     const deckCards = (engine as any).deck.getCards();

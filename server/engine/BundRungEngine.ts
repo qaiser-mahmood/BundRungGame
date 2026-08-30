@@ -379,12 +379,12 @@ export class BundRungEngine {
       throw new Error('Not in toss complete phase');
     }
     this.deck.reset();
-    // Do NOT auto-shuffle: Dealer decides whether to shuffle or offer cut directly
+    this.deck.partialShuffle(0.4); // 40% baseline automatic shuffle to prevent card rigging
     this.phase = 'PRE_DEAL_SHUFFLE';
     this.cutDone = false;
     this.cutOfferPlayerId = null;
     this.shuffleCount = 0;
-    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck (each click +20%) or offer cut directly.`;
+    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck or offer cut directly.`;
   }
 
   // --- Phase 4: Shuffling, Cutting & Card Distribution ---
@@ -401,8 +401,7 @@ export class BundRungEngine {
     }
     this.shuffleCount += 1;
     this.deck.partialShuffle(0.2);
-    const percent = Math.min(100, this.shuffleCount * 20);
-    this.statusMessage = `${dealer.name} shuffled the deck (+20% -> ${percent}% total). Click Shuffle again or Offer Cut.`;
+    this.statusMessage = `${dealer.name} shuffled the deck. Dealer may shuffle again or click Offer Cut.`;
   }
 
   public dealerOfferCut(playerId: string): void {
@@ -1399,7 +1398,7 @@ export class BundRungEngine {
       this.gameIndex += 1;
     }
     this.deck.reset();
-    // Do NOT auto-shuffle: Dealer decides whether to shuffle or not
+    this.deck.partialShuffle(0.4); // 40% automatic baseline shuffle
     this.hands = {};
     for (const p of this.players) {
       this.hands[p.id] = [];
@@ -1534,7 +1533,7 @@ export class BundRungEngine {
     this.gameIndex = 1;
 
     this.deck.reset();
-    // Do NOT auto-shuffle
+    this.deck.partialShuffle(0.4); // 40% automatic baseline shuffle
     this.hands = {};
     for (const p of this.players) {
       this.hands[p.id] = [];

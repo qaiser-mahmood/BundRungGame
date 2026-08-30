@@ -69,7 +69,7 @@ export const CutModal: React.FC<CutModalProps> = ({
         <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-2">
           <Scissors className="w-3.5 h-3.5 text-amber-400" />
           <span className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wider">
-            Deck Cut & Controlled Shuffle
+            Deck Cut & Shuffle
           </span>
         </div>
 
@@ -91,27 +91,6 @@ export const CutModal: React.FC<CutModalProps> = ({
               {[0, 1, 2, 3].map((i) => (
                 <PlayingCard key={i} faceDown size="sm" />
               ))}
-            </div>
-
-            {/* Controlled Shuffle Intensity Progress Bar */}
-            <div className="w-full max-w-sm bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/30 flex flex-col gap-1.5 shadow-inner">
-              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold">
-                <span className="text-slate-400">Shuffle Intensity:</span>
-                <span className={shufflePercent > 0 ? 'text-emerald-400' : 'text-amber-300'}>
-                  {shufflePercent}% {shufflePercent === 0 ? '(Natural Gathered Order)' : shufflePercent < 60 ? '(Partial Riffle)' : '(Thoroughly Mixed)'}
-                </span>
-              </div>
-              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-emerald-400"
-                  initial={false}
-                  animate={{ width: `${shufflePercent}%` }}
-                  transition={{ duration: 0.35 }}
-                />
-              </div>
-              <div className="text-[9px] text-slate-500 text-right">
-                {shuffleCount === 0 ? '0 clicks' : `${shuffleCount} click${shuffleCount > 1 ? 's' : ''} (+20% each)`}
-              </div>
             </div>
 
             {/* Post-Cut State: Shuffle Disabled, Distribute 5 Cards Active */}
@@ -151,7 +130,11 @@ export const CutModal: React.FC<CutModalProps> = ({
             ) : (
               /* Pre-Cut State: Dealer can Shuffle or Offer Cut */
               isDealer ? (
-                <div className="flex flex-col items-center gap-2 mt-1">
+                <div className="flex flex-col items-center gap-2.5 mt-1">
+                  <div className="text-[11px] text-slate-400 text-center">
+                    Tip: More clicks perform more thorough shuffling.
+                  </div>
+
                   <div className="flex flex-col sm:flex-row gap-2.5">
                     <button
                       onClick={() => {
@@ -159,10 +142,9 @@ export const CutModal: React.FC<CutModalProps> = ({
                         onShuffle();
                       }}
                       className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs sm:text-sm border border-amber-500/30 flex items-center justify-center gap-2 transition cursor-pointer active:scale-95 shadow-md"
-                      title="Each click shuffles the deck by an additional 20%"
                     >
                       <Shuffle className="w-4 h-4 text-amber-400" />
-                      <span>{shuffleCount === 0 ? 'Shuffle (+20%)' : `Shuffle Again (+20% → ${Math.min(100, (shuffleCount + 1) * 20)}%)`}</span>
+                      <span>{shuffleCount === 0 ? 'Shuffle Deck' : 'Shuffle Again'}</span>
                     </button>
 
                     <button
