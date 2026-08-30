@@ -343,6 +343,36 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
         </div>
       </header>
 
+      {/* --- Active Turn Interactive Floating Status Banner --- */}
+      {phase === 'TRICK_PLAYING' && !faceDownLeadPending && !isTrumpRevealPending && (
+        <div className="w-full flex justify-center mt-1 sm:mt-1.5 z-20 px-2">
+          {isMyTurn ? (
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="px-4 py-1 sm:py-1.5 bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-950 border-2 border-emerald-400 rounded-full shadow-[0_0_25px_rgba(52,211,153,0.6)] flex items-center gap-2 text-xs sm:text-sm font-black text-emerald-100 animate-pulse"
+            >
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span>👉 <strong>YOUR TURN:</strong> Play a card to lead or follow suit</span>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="px-4 py-1 bg-slate-950/90 border border-amber-500/50 rounded-full shadow-lg flex items-center gap-2 text-xs sm:text-sm text-amber-200"
+            >
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+              <span>
+                Waiting for <strong className="text-amber-300 font-extrabold">{players.find((p) => p.id === currentTurnPlayerId)?.name || 'Player'}</strong> ({players.find((p) => p.id === currentTurnPlayerId)?.team === myPlayer.team ? 'Teammate' : 'Opponent'}) to play a card...
+              </span>
+            </motion.div>
+          )}
+        </div>
+      )}
+
       {/* --- Main Casino Table Play Area --- */}
       <main className="relative flex-1 flex items-center justify-center my-0.5 sm:my-2 w-full overflow-hidden">
         {/* --- Top Player (Partner) --- */}
@@ -524,6 +554,18 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               {lastTrickWinningCard && (
                 <span className="font-semibold text-emerald-400">
                   ({lastTrickWinningCard.rank} of {lastTrickWinningCard.suit} {suitSymbols[lastTrickWinningCard.suit]})
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Active Trick Pill Indicator (when playing trick) */}
+          {!isShowingPreviousTrick && phase === 'TRICK_PLAYING' && (
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 px-3 py-0.5 bg-slate-950/80 border border-amber-500/40 rounded-full flex items-center gap-1.5 whitespace-nowrap text-[10px] sm:text-xs shadow-sm">
+              <span className="font-cinzel font-bold text-amber-300">Trick {currentTrick.trickNumber}/13</span>
+              {isTrumpRevealed && trumpSuit && (
+                <span className="text-slate-400 font-semibold flex items-center gap-0.5">
+                  • Rung: <span className="text-white font-bold">{trumpSuit} {suitSymbols[trumpSuit]}</span>
                 </span>
               )}
             </div>
@@ -1407,83 +1449,132 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
 
   if (isSide) {
     return (
-      <div
-        className={`px-1 py-1.5 rounded-lg border bg-slate-950/90 flex flex-col items-center justify-center min-w-[22px] transition-all shadow-md ${isCurrentTurn
-            ? 'bg-amber-950/95 border-amber-400 shadow-glow-gold scale-105 z-20 animate-pulse'
-            : isPrevWinner
-              ? 'border-amber-400/80'
-              : 'border-slate-700'
-          }`}
-      >
-        {/* Badges container at the top */}
-        {(isDealer || isTrumpCaller || isPrevWinner) && (
-          <div className="flex flex-col items-center gap-0.5 mb-1">
-            {isDealer && (
-              <span className="w-3.5 h-3.5 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] flex items-center justify-center shadow" title="Dealer">
-                D
-              </span>
-            )}
-            {isTrumpCaller && (
-              <span title="Rung Caller" className="flex-shrink-0">
-                <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
-              </span>
-            )}
-            {isPrevWinner && (
-              <span
-                className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] flex items-center justify-center shadow-glow-gold"
-                title="Won previous turn (+1 trick)"
-              >
-                1
-              </span>
-            )}
+      <div className="relative flex flex-col items-center">
+        {/* Active Turn Floating Directional Arrow Indicator */}
+        {isCurrentTurn && (
+          <div
+            className={`absolute ${
+              position === 'left' ? '-right-14 sm:-right-16' : '-left-14 sm:-left-16'
+            } top-1/2 -translate-y-1/2 z-30 flex items-center gap-0.5 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(245,158,11,0.9)] animate-bounce whitespace-nowrap`}
+          >
+            {position === 'left' ? '👉 TURN' : 'TURN 👈'}
           </div>
         )}
 
-        {/* Vertical First Name: First letter at top, last letter at bottom */}
-        <div className="flex flex-col items-center leading-none select-none">
-          {firstName.split('').map((char, idx) => (
-            <span
-              key={idx}
-              className="text-[10px] sm:text-[11px] font-extrabold text-white uppercase leading-[11px] sm:leading-[12px] tracking-normal"
-            >
-              {char}
-            </span>
-          ))}
+        <div
+          className={`px-1.5 py-2 rounded-xl border bg-slate-950/95 flex flex-col items-center justify-center min-w-[26px] sm:min-w-[30px] transition-all ${
+            isCurrentTurn
+              ? 'ring-4 ring-amber-400 bg-gradient-to-b from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
+              : isPrevWinner
+              ? 'border-amber-400/80 shadow-md'
+              : 'border-slate-700 shadow-sm'
+          }`}
+        >
+          {/* Badges container at the top */}
+          {(isDealer || isTrumpCaller || isPrevWinner) && (
+            <div className="flex flex-col items-center gap-0.5 mb-1">
+              {isDealer && (
+                <span
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow"
+                  title="Dealer"
+                >
+                  D
+                </span>
+              )}
+              {isTrumpCaller && (
+                <span title="Rung Caller" className="flex-shrink-0">
+                  <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 fill-amber-400" />
+                </span>
+              )}
+              {isPrevWinner && (
+                <span
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow-glow-gold"
+                  title="Won previous turn (+1 trick)"
+                >
+                  1
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Vertical First Name */}
+          <div className="flex flex-col items-center leading-none select-none">
+            {firstName.split('').map((char, idx) => (
+              <span
+                key={idx}
+                className={`text-[10px] sm:text-[12px] font-black uppercase leading-[11px] sm:leading-[13px] tracking-normal ${
+                  isCurrentTurn ? 'text-amber-200' : 'text-white'
+                }`}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={`px-2.5 sm:px-3 py-1 rounded-xl border flex items-center gap-1.5 transition-all shadow ${isCurrentTurn
-          ? 'bg-amber-950/90 border-amber-400 shadow-glow-gold scale-105 z-20 animate-pulse'
-          : isPrevWinner
-            ? 'bg-slate-900/90 border-amber-400/70'
-            : 'bg-slate-900/80 border-slate-700'
+    <div className="relative flex flex-col items-center">
+      {/* Top Active Turn Bouncing Badge */}
+      {isCurrentTurn && position === 'top' && (
+        <div className="absolute -bottom-5 sm:-bottom-6 z-30 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(245,158,11,0.9)] animate-bounce flex items-center gap-1 whitespace-nowrap">
+          <span>👇 ACTIVE TURN</span>
+        </div>
+      )}
+
+      {/* Bottom Active Turn Bouncing Badge */}
+      {isCurrentTurn && position === 'bottom' && (
+        <div className="absolute -top-5 sm:-top-6 z-30 px-2 py-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(52,211,153,0.9)] animate-bounce flex items-center gap-1 whitespace-nowrap">
+          <span>👆 YOUR TURN</span>
+        </div>
+      )}
+
+      <div
+        className={`px-3 py-1 sm:py-1.5 rounded-xl border flex items-center gap-2 transition-all ${
+          isCurrentTurn
+            ? position === 'bottom'
+              ? 'ring-4 ring-emerald-400 bg-gradient-to-r from-emerald-950 via-teal-900/90 to-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.9)] scale-110 z-20 animate-pulse border-emerald-300'
+              : 'ring-4 ring-amber-400 bg-gradient-to-r from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
+            : isPrevWinner
+            ? 'bg-slate-900/90 border-amber-400/70 shadow'
+            : 'bg-slate-900/80 border-slate-700 shadow'
         }`}
-    >
-      <span className="text-[11px] sm:text-xs font-bold text-white truncate max-w-[80px] sm:max-w-[120px]">
-        {firstName}
-      </span>
-      {isDealer && (
-        <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow flex-shrink-0" title="Dealer">
-          D
-        </span>
-      )}
-      {isTrumpCaller && (
-        <span title="Rung Caller" className="flex-shrink-0">
-          <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 fill-amber-400" />
-        </span>
-      )}
-      {isPrevWinner && (
+      >
         <span
-          className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow-glow-gold flex-shrink-0"
-          title="Won previous turn (+1 trick)"
+          className={`text-[11px] sm:text-sm font-black truncate max-w-[90px] sm:max-w-[140px] ${
+            isCurrentTurn
+              ? position === 'bottom'
+                ? 'text-emerald-200'
+                : 'text-amber-200'
+              : 'text-white'
+          }`}
         >
-          1
+          {firstName}
         </span>
-      )}
+        {isDealer && (
+          <span
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow flex-shrink-0"
+            title="Dealer"
+          >
+            D
+          </span>
+        )}
+        {isTrumpCaller && (
+          <span title="Rung Caller" className="flex-shrink-0">
+            <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400" />
+          </span>
+        )}
+        {isPrevWinner && (
+          <span
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow-glow-gold flex-shrink-0"
+            title="Won previous turn (+1 trick)"
+          >
+            1
+          </span>
+        )}
+      </div>
     </div>
   );
 };
