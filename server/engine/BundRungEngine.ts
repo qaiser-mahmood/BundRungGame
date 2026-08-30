@@ -379,8 +379,10 @@ export class BundRungEngine {
     }
     this.deck.reset();
     this.deck.shuffle();
-    // Proceed to First Pass 5 cards distribution
-    this.dealFirstPass();
+    this.phase = 'PRE_DEAL_SHUFFLE';
+    this.cutDone = false;
+    this.cutOfferPlayerId = null;
+    this.statusMessage = `${dealer.name} shuffled the deck. Dealer must click "Offer Cut".`;
   }
 
   // --- Phase 4: Shuffling, Cutting & Card Distribution ---
@@ -1419,8 +1421,8 @@ export class BundRungEngine {
     this.surrenderVotes.TEAM_2.clear();
     this.resetCurrentTrick(1, '');
 
-    // Distribute 5 cards each and transition to BIDDING_PHASE
-    this.dealFirstPass();
+    this.phase = 'PRE_DEAL_SHUFFLE';
+    this.statusMessage = `${dealer.name} is the dealer. Shuffle and offer cut to the opponent on your right.`;
   }
 
   public getTeamName(team: TeamId): string {

@@ -252,8 +252,12 @@ describe('Bund Rung Engine Full State Flow', () => {
     // Non-dealer trying to distribute throws
     expect(() => engine.dealerDistributeNextGame('p2')).toThrow();
 
-    // Dealer P1 distributes 5 cards for Game 2
+    // Dealer P1 distributes and offers cut, P2 cuts
     engine.dealerDistributeNextGame('p1');
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerOfferCut('p1');
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_CUT');
+    engine.performCut('p2', 20);
 
     const state = engine.getPublicState();
     expect(state.gameIndex).toBe(2);
@@ -298,10 +302,12 @@ describe('Bund Rung Engine Full State Flow', () => {
     engine.addPlayer('p3', 'Charlie');
     engine.addPlayer('p4', 'Diana');
 
-    // Deal 5 cards
+    // Deal 5 cards with cut
     (engine as any).phase = 'TOSS_COMPLETE';
     (engine as any).dealerIndex = 0; // P1 is dealer, P2 is first bidder
     engine.dealerDistributeCards('p1');
+    engine.dealerOfferCut('p1');
+    engine.performCut('p2', 20);
 
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
     expect(engine.getPublicState().biddingTurnPlayerId).toBe('p2');
@@ -340,6 +346,8 @@ describe('Bund Rung Engine Full State Flow', () => {
     (engine as any).phase = 'TOSS_COMPLETE';
     (engine as any).dealerIndex = 0;
     engine.dealerDistributeCards('p1');
+    engine.dealerOfferCut('p1');
+    engine.performCut('p2', 20);
 
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
     expect(engine.getPublicState().biddingTurnPlayerId).toBe('p2');
@@ -395,8 +403,11 @@ describe('Bund Rung Engine Full State Flow', () => {
     expect(state.players[2].name).toBe('Charlie');
     expect(state.statusMessage).toContain('Charlie is the new dealer');
 
-    // New dealer Charlie distributes cards for Game 1
+    // New dealer Charlie distributes cards for Game 1 and offers cut to Diana
     engine.dealerDistributeNextGame('p3');
+    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    engine.dealerOfferCut('p3');
+    engine.performCut('p4', 20);
     expect(engine.getPublicState().phase).toBe('BIDDING_PHASE');
 
     // Test Case B: Dealer Charlie (Team 1, idx 2) opponent team (Team 2) becomes KHOTI

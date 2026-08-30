@@ -58,17 +58,17 @@ export const CutModal: React.FC<CutModalProps> = ({
         className="w-full max-w-xl bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-2xl text-center relative overflow-hidden"
       >
         {/* Header */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full mb-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-2">
           <Scissors className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
-            Section 4: Pre-Deal Deck Cut & Shuffle
+          <span className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-wider">
+            Deck Cut & Shuffle
           </span>
         </div>
 
-        <h3 className="text-2xl font-cinzel font-bold gold-gradient-text mb-2">
-          {isCutPhase ? 'INTERACTIVE DECK CUT' : 'DEALER PRE-DEAL SHUFFLE'}
+        <h3 className="text-xl sm:text-2xl font-cinzel font-black gold-gradient-text mb-1">
+          {isCutPhase ? 'CUT THE DECK' : 'DEALER SHUFFLE'}
         </h3>
-        <p className="text-xs sm:text-sm text-slate-300 mb-6">
+        <p className="text-xs sm:text-sm text-slate-300 mb-4">
           {statusMessage}
         </p>
 
