@@ -545,18 +545,6 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
         {/* --- Center: 4-Way Trick Play Field --- */}
         <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-felt-border/60 bg-felt-dark/40 flex items-center justify-center shadow-inner mt-6 sm:mt-10 mb-1">
-          {/* Active Trick Pill Indicator */}
-          {phase === 'TRICK_PLAYING' && (
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 px-3 py-0.5 bg-slate-950/80 border border-amber-500/40 rounded-full flex items-center gap-1.5 whitespace-nowrap text-[10px] sm:text-xs shadow-sm">
-              <span className="font-cinzel font-bold text-amber-300">Trick {currentTrick.trickNumber}/13</span>
-              {isTrumpRevealed && trumpSuit && (
-                <span className="text-slate-400 font-semibold flex items-center gap-0.5">
-                  • Rung: <span className="text-white font-bold">{trumpSuit} {suitSymbols[trumpSuit]}</span>
-                </span>
-              )}
-            </div>
-          )}
-
           {/* Game Name on Table Felt */}
           <div className="absolute text-center pointer-events-none select-none flex flex-col items-center justify-center opacity-20">
             <div className="text-xl sm:text-3xl font-cinzel font-black tracking-widest text-amber-200 uppercase">

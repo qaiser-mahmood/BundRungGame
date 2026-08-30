@@ -132,19 +132,6 @@ export const App: React.FC = () => {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans select-none">
-      {/* Toast Notification Popup */}
-      {notification && (
-        <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-sm font-semibold shadow-2xl backdrop-blur-md border animate-bounce ${
-            notification.type === 'error'
-              ? 'bg-rose-950/90 text-rose-200 border-rose-500/50 shadow-rose-900/50'
-              : 'bg-amber-950/90 text-amber-200 border-amber-500/50 shadow-amber-900/50'
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       {/* Main Table Layout (Always in background / active during play) */}
       <TableLayout
         publicState={publicState}
