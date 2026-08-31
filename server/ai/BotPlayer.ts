@@ -21,6 +21,21 @@ export class BotPlayer {
   }
 
   /**
+   * Returns a list of suits that the partner has led in previous completed tricks.
+   */
+  public static getPartnerLedSuits(publicState: PublicGameState, partnerId: string): Suit[] {
+    const suits: Suit[] = [];
+    for (const trick of publicState.completedTricks) {
+      if (trick.leadPlayerId === partnerId && trick.leadSuit) {
+        if (!suits.includes(trick.leadSuit)) {
+          suits.push(trick.leadSuit);
+        }
+      }
+    }
+    return suits;
+  }
+
+  /**
    * Checks if a card is currently the "Boss" card of its suit (highest remaining unplayed card in the game).
    */
   public static isBossCard(card: Card, playedCards: Card[], myHand: Card[]): boolean {
@@ -323,6 +338,12 @@ export class BotPlayer {
     const playedCards = BotPlayer.getPlayedCards(publicState);
     const voids = BotPlayer.inferPlayerVoids(publicState);
     const activeTrumpSuit = publicState.isTrumpRevealed ? publicState.trumpSuit : null;
+    const partnerLedSuits = BotPlayer.getPartnerLedSuits(publicState, partnerId);
+    const isPartnerOpenRungCaller = Boolean(
+      partnerId &&
+      publicState.trumpCallerPlayerId === partnerId &&
+      publicState.trumpMode === 'OPEN_TRUMP'
+    );
 
     // --- CASE 1: Bot is LEADING the trick (0 cards played) ---
     if (trick.cards.length === 0 || !trick.leadSuit) {
@@ -395,7 +416,26 @@ export class BotPlayer {
         }
       }
 
-      // 4. Cross-Ruff Partner: Lead low card in suit where partner is known to be void
+      // 4. Partner Loyalty (Open Rung caller support):
+      // "If your partner has called open rung then you should follow partner like return his suit tricks whenever you win the trick"
+      if (isPartnerOpenRungCaller && activeTrumpSuit) {
+        // A. Return partner's established lead suit
+        for (const suit of partnerLedSuits) {
+          const cardsInPartnerSuit = eligibleLeadCards.filter((c) => c.suit === suit);
+          if (cardsInPartnerSuit.length > 0) {
+            cardsInPartnerSuit.sort((a, b) => a.playValue - b.playValue);
+            return cardsInPartnerSuit[0];
+          }
+        }
+        // B. Lead small card in partner's Open Trump suit
+        const trumpCards = eligibleLeadCards.filter((c) => c.suit === activeTrumpSuit);
+        if (trumpCards.length > 0) {
+          trumpCards.sort((a, b) => a.playValue - b.playValue);
+          return trumpCards[0];
+        }
+      }
+
+      // 5. Cross-Ruff Partner: Lead low card in suit where partner is known to be void
       if (activeTrumpSuit && partnerId && voids.get(partnerId)) {
         const partnerVoids = voids.get(partnerId)!;
         for (const suit of Array.from(partnerVoids)) {
@@ -409,13 +449,47 @@ export class BotPlayer {
         }
       }
 
+      // 6. Return Partner's Established Suit (When weak/holding 1-2 cards in partner's suit):
+      // "if you are weak and not holding a lot of that suit cards then you can return the play with the partner suit so he can get rid of his weak cards"
+      for (const pSuit of partnerLedSuits) {
+        if (pSuit !== activeTrumpSuit) {
+          const cardsInPSuit = eligibleLeadCards.filter((c) => c.suit === pSuit);
+          if (cardsInPSuit.length > 0 && cardsInPSuit.length <= 2) {
+            cardsInPSuit.sort((a, b) => a.playValue - b.playValue);
+            return cardsInPSuit[0];
+          }
+        }
+      }
+
+      // 7. Ace Follow-Through / Big Honor Extraction:
+      // "If you have played ace of a suit and you know other big cards of the suit are still in opponents hands
+      // then you can play the same suit in second turn so others big cards also get on to the table."
+      const allSuits: Suit[] = ['HEARTS', 'DIAMONDS', 'CLUBS', 'SPADES'];
+      for (const suit of allSuits) {
+        const isAcePlayedByMe = publicState.completedTricks.some((t) =>
+          t.cards.some((c) => c.playerId === botPlayerId && c.card.suit === suit && c.card.rank === 'A')
+        );
+        if (isAcePlayedByMe) {
+          const honorsStillUnseen = [13, 12, 11].some(
+            (pv) =>
+              !playedCards.some((c) => c.suit === suit && c.playValue === pv) &&
+              !myHand.some((c) => c.suit === suit && c.playValue === pv)
+          );
+          if (honorsStillUnseen) {
+            const myFollowThroughCards = eligibleLeadCards.filter((c) => c.suit === suit);
+            if (myFollowThroughCards.length > 0) {
+              myFollowThroughCards.sort((a, b) => a.playValue - b.playValue);
+              return myFollowThroughCards[0];
+            }
+          }
+        }
+      }
+
       // =========================================================================
       // --- ADVANCED CLOSE RUNG & SUIT LENGTH REVEAL PROBABILITY STRATEGIES ---
       // =========================================================================
       if (!publicState.isTrumpRevealed) {
-        // --- STRATEGY 1: Weak Rung Flush-off (Caller only) ---
-        // If caller has weak/moderate trump holding (no Ace, <= 5 trumps), lead secret Rung suit
-        // to force other players to play their big trump honors before Rung is revealed!
+        // --- Weak Rung Flush-off (Caller only) ---
         if (isCaller && secretTrumpSuit) {
           const myTrumps = myHand.filter((c) => c.suit === secretTrumpSuit);
           const hasTrumpAce = myTrumps.some((c) => c.rank === 'A');
@@ -430,8 +504,7 @@ export class BotPlayer {
           }
         }
 
-        // --- STRATEGY 2 & 3: Suit Length vs Rung Reveal Probability ---
-        const allSuits: Suit[] = ['HEARTS', 'DIAMONDS', 'CLUBS', 'SPADES'];
+        // --- Suit Length vs Rung Reveal Probability ---
         const suitStats = allSuits
           .map((suit) => {
             const playedInSuit = playedCards.filter((c) => c.suit === suit).length;
@@ -453,8 +526,7 @@ export class BotPlayer {
           .filter((s) => s.myCards.length > 0);
 
         if (isCallerTeam) {
-          // CALLER TEAM: Minimize Rung Reveal Probability!
-          // Avoid suits with myCount >= 4 (high void risk for opponents), pick highest unseen
+          // Caller Team: Minimize Rung Reveal Probability
           suitStats.sort((a, b) => {
             const aRisk = a.myCount >= 4 ? 1 : 0;
             const bRisk = b.myCount >= 4 ? 1 : 0;
@@ -464,7 +536,6 @@ export class BotPlayer {
 
           const chosenSuitStat = suitStats[0];
           if (chosenSuitStat) {
-            // STRATEGY 2: If holding Ace + small cards, under-lead the small card to clear weak cards & keep Ace stopper!
             if (chosenSuitStat.hasAce && chosenSuitStat.smallCards.length > 0) {
               chosenSuitStat.smallCards.sort((a, b) => a.playValue - b.playValue);
               return chosenSuitStat.smallCards[0];
@@ -473,8 +544,7 @@ export class BotPlayer {
             return chosenSuitStat.myCards[0];
           }
         } else {
-          // OPPONENT TEAM: Maximize Rung Reveal Probability!
-          // Lead longest suit (lowest unseenInOtherHands / highest myCount) to catch caller/partner void!
+          // Opponent Team: Maximize Rung Reveal Probability
           suitStats.sort((a, b) => {
             return b.myCount - a.myCount || a.unseenInOtherHands - b.unseenInOtherHands;
           });
@@ -488,7 +558,7 @@ export class BotPlayer {
           }
         }
 
-        // --- STRATEGY 4: The Ace Gambit (Caller holding 2+ Aces with weak other suits) ---
+        // --- The Ace Gambit ---
         if (isCaller) {
           const myAces = eligibleLeadCards.filter((c) => c.rank === 'A');
           if (myAces.length >= 2) {
@@ -497,7 +567,7 @@ export class BotPlayer {
         }
       }
 
-      // 5. Standard Master Lead (Rung Revealed or fallback):
+      // 8. Standard Master Lead (Rung Revealed or fallback):
       const bossAces = eligibleLeadCards.filter((c) => c.rank === 'A' && c.suit !== activeTrumpSuit);
       if (bossAces.length > 0) return bossAces[0];
 
@@ -540,6 +610,19 @@ export class BotPlayer {
     if (matchingSuitCards.length > 0) {
       // 1. If Teammate is currently winning:
       if (evalResult.isPartnerWinning && evalResult.winningCard) {
+        // TACTIC: Partner started the suit & Bot is Strong in that suit -> Overtake to change suit & take control!
+        // "If you are strong in those suits then you change the suit by playing higher card and taking the control"
+        const isPartnerLead = trick.leadPlayerId === partnerId;
+        const strongWinningCards = matchingSuitCards.filter(
+          (c) => c.playValue > evalResult.winningCard!.card.playValue && (c.rank === 'A' || BotPlayer.isBossCard(c, playedCards, myHand))
+        );
+        // If bot has strong cards in OTHER suits to lead next, overtake to switch suits!
+        const hasOtherStrongSuits = myHand.some((c) => c.suit !== leadSuit && (c.rank === 'A' || c.suit === activeTrumpSuit));
+        if (isPartnerLead && strongWinningCards.length > 0 && hasOtherStrongSuits && evalResult.winningCard.card.playValue < 12) {
+          strongWinningCards.sort((a, b) => a.playValue - b.playValue);
+          return strongWinningCards[0];
+        }
+
         const isPartnerCardUnbeatable =
           evalResult.opponentsLeftToPlay === 0 ||
           BotPlayer.isBossCard(evalResult.winningCard.card, playedCards, myHand) ||

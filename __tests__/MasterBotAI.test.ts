@@ -361,4 +361,126 @@ describe('Master / Pro Level AI Bot Tests', () => {
     // Opponent leads from its longest suit (DIAMONDS) to catch caller/partner void and force reveal!
     expect(chosenCard.suit).toBe('DIAMONDS');
   });
+
+  it('executes Ace follow-through: leads same suit on second turn to force opponents big cards onto the table', () => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice', true); // Team 1 (Bot)
+    engine.addPlayer('p2', 'Bob');   // Team 2
+    engine.addPlayer('p3', 'Charlie');// Team 1
+    engine.addPlayer('p4', 'Diana');  // Team 2
+
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).dealerIndex = 3;
+    (engine as any).trumpMode = 'OPEN_TRUMP';
+    (engine as any).trumpSuit = 'CLUBS';
+    (engine as any).isTrumpRevealed = true;
+
+    // Trick 1: P1 played Hearts Ace (H_A) and won
+    (engine as any).completedTricks = [
+      {
+        trickNumber: 1,
+        leadPlayerId: 'p1',
+        leadSuit: 'HEARTS',
+        cards: [
+          { playerId: 'p1', card: createCard('HEARTS', 'A', 14), playedAt: Date.now() },
+          { playerId: 'p2', card: createCard('HEARTS', '2', 2), playedAt: Date.now() },
+          { playerId: 'p3', card: createCard('HEARTS', '3', 3), playedAt: Date.now() },
+          { playerId: 'p4', card: createCard('HEARTS', '4', 4), playedAt: Date.now() },
+        ],
+        winnerPlayerId: 'p1',
+        winningTeam: 'TEAM_1',
+      },
+    ];
+
+    // Trick 2: P1 starts turn. Opponents still hold H_K and H_Q!
+    (engine as any).currentTrick = {
+      trickNumber: 2,
+      leadPlayerId: 'p1',
+      leadSuit: null,
+      cards: [],
+      winnerPlayerId: null,
+      winningTeam: null,
+    };
+
+    // P1 holds low Heart (H_5) and Diamonds (D_6)
+    const p1Hand = [
+      createCard('HEARTS', '5', 5),
+      createCard('DIAMONDS', '6', 6),
+    ];
+    (engine as any).hands['p1'] = p1Hand;
+    (engine as any).currentTurnPlayerIndex = 0;
+
+    const chosenCard = BotPlayer.chooseMasterCard(
+      engine,
+      'p1',
+      p1Hand,
+      p1Hand,
+      engine.getPublicState(),
+      engine.getPrivateState('p1')
+    );
+
+    // Bot leads Hearts 5 (Ace follow-through) to force out opponents' King and Queen!
+    expect(chosenCard.suit).toBe('HEARTS');
+  });
+
+  it('returns partners established suit when weak to help partner clear weak cards', () => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice'); // Team 1 (Partner)
+    engine.addPlayer('p2', 'Bob');   // Team 2
+    engine.addPlayer('p3', 'Charlie', true);// Team 1 (Bot)
+    engine.addPlayer('p4', 'Diana');  // Team 2
+
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).dealerIndex = 3;
+    (engine as any).trumpMode = 'OPEN_TRUMP';
+    (engine as any).trumpSuit = 'CLUBS';
+    (engine as any).isTrumpRevealed = true;
+
+    // Trick 1: Partner Alice (P1) led DIAMONDS
+    (engine as any).completedTricks = [
+      {
+        trickNumber: 1,
+        leadPlayerId: 'p1',
+        leadSuit: 'DIAMONDS',
+        cards: [
+          { playerId: 'p1', card: createCard('DIAMONDS', 'A', 14), playedAt: Date.now() },
+          { playerId: 'p2', card: createCard('DIAMONDS', '2', 2), playedAt: Date.now() },
+          { playerId: 'p3', card: createCard('DIAMONDS', '3', 3), playedAt: Date.now() },
+          { playerId: 'p4', card: createCard('DIAMONDS', '4', 4), playedAt: Date.now() },
+        ],
+        winnerPlayerId: 'p1',
+        winningTeam: 'TEAM_1',
+      },
+    ];
+
+    // Trick 2: Bot Charlie (P3) wins and leads.
+    (engine as any).currentTrick = {
+      trickNumber: 2,
+      leadPlayerId: 'p3',
+      leadSuit: null,
+      cards: [],
+      winnerPlayerId: null,
+      winningTeam: null,
+    };
+
+    // Bot P3 has 1 small Diamond (D_5) and Hearts (H_7)
+    const p3Hand = [
+      createCard('DIAMONDS', '5', 5),
+      createCard('HEARTS', '7', 7),
+    ];
+    (engine as any).hands['p3'] = p3Hand;
+    (engine as any).currentTurnPlayerIndex = 2;
+
+    const chosenCard = BotPlayer.chooseMasterCard(
+      engine,
+      'p3',
+      p3Hand,
+      p3Hand,
+      engine.getPublicState(),
+      engine.getPrivateState('p3')
+    );
+
+    // Bot returns partner's suit (DIAMONDS)!
+    expect(chosenCard.suit).toBe('DIAMONDS');
+  });
 });
