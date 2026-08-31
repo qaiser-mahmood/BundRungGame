@@ -84,6 +84,7 @@ export class BundRungEngine {
   private lastTrickWinnerPlayerId: string | null = null;
   private lastTrickWinningCard: Card | null = null;
   private playerConsecutiveTricksCount: number = 0;
+  private playerConsecutiveTricksWinnerId: string | null = null;
 
   // Show Cards & Surrender
   private shownHandPlayerIds: Set<string> = new Set();
@@ -150,6 +151,7 @@ export class BundRungEngine {
     this.lastTrickWinnerPlayerId = null;
     this.lastTrickWinningCard = null;
     this.playerConsecutiveTricksCount = 0;
+    this.playerConsecutiveTricksWinnerId = null;
     this.shownHandPlayerIds.clear();
     this.surrenderVotes.TEAM_1.clear();
     this.surrenderVotes.TEAM_2.clear();
@@ -237,7 +239,9 @@ export class BundRungEngine {
     this.consecutiveTricksCount = 0;
     this.lastTrickWinnerTeam = null;
     this.lastTrickWinnerPlayerId = null;
+    this.lastTrickWinningCard = null;
     this.playerConsecutiveTricksCount = 0;
+    this.playerConsecutiveTricksWinnerId = null;
     this.isMatchOver = false;
     this.losingTeamKhoti = null;
     this.matchWinnerTeam = null;
@@ -1001,8 +1005,10 @@ export class BundRungEngine {
     if (this.players[this.currentTurnPlayerIndex]?.id !== playerId) return [];
 
     const isTrumpCaller = playerId === this.trumpCallerPlayerId;
-    // Rung caller cannot play the chosen separate trump card until Rung is revealed
-    const canPlayTrumpCard = isTrumpCaller && this.trumpCard && this.isTrumpRevealed;
+    // Rung caller cannot play the chosen separate trump card until Rung is revealed,
+    // UNLESS it is the last turn (Trick 13 / no cards left in hand), where caller plays the Rung card!
+    const isLastTurnForCaller = isTrumpCaller && hand.length === 0 && Boolean(this.trumpCard);
+    const canPlayTrumpCard = isTrumpCaller && Boolean(this.trumpCard) && (this.isTrumpRevealed || isLastTurnForCaller);
     const allAvailableCards = canPlayTrumpCard ? [...hand, this.trumpCard!] : [...hand];
 
     // If leading, any card in hand (or revealed trump card) is legal
@@ -1066,11 +1072,15 @@ export class BundRungEngine {
 
     // Check if caller is playing their separate revealed rung card
     if (this.trumpCard && this.trumpCard.id === cardId && playerId === this.trumpCallerPlayerId) {
-      if (!this.isTrumpRevealed) {
+      const isLastTurnForCaller = (this.hands[playerId]?.length || 0) === 0;
+      if (!this.isTrumpRevealed && !isLastTurnForCaller) {
         throw new Error('Cannot play chosen Rung card until Rung is revealed');
       }
       playedCard = this.trumpCard;
       this.trumpCard = null;
+      if (!this.isTrumpRevealed) {
+        this.isTrumpRevealed = true;
+      }
       this.statusMessage = `${player.name} played their Rung Card (${playedCard.rank} of ${playedCard.suit})!`;
     } else {
       const hand = this.hands[playerId] || [];
@@ -1286,17 +1296,22 @@ export class BundRungEngine {
     const caller = this.players.find((p) => p.id === this.trumpCallerPlayerId);
     const isOpponentTeam = caller ? winner.team !== caller.team : true;
 
+    // Always record the winner of the trick that just ended (used for UI badge and Consecutive Lead Ace rule):
+    this.lastTrickWinnerPlayerId = winner.id;
+
+    // Consecutive Win Streak tracking for Early Game Win Condition:
+    // (Opponent winning 2 consecutive tricks after Rung is revealed, starting from Trick 2 onward)
     if (!this.isTrumpRevealed || currentTrickNum === 1) {
       // Trick 1 NEVER counts towards the 2-consecutive-win streak condition in any mode.
-      // Also, prior to Rung reveal, streaks do not count.
-      this.lastTrickWinnerPlayerId = null;
+      // Also, prior to Rung reveal, streaks do not count towards early victory.
+      this.playerConsecutiveTricksWinnerId = null;
       this.playerConsecutiveTricksCount = 0;
     } else {
       // Trick 2 onwards AND Rung is revealed:
-      if (this.lastTrickWinnerPlayerId === winner.id) {
+      if (this.playerConsecutiveTricksWinnerId === winner.id) {
         this.playerConsecutiveTricksCount += 1;
       } else {
-        this.lastTrickWinnerPlayerId = winner.id;
+        this.playerConsecutiveTricksWinnerId = winner.id;
         this.playerConsecutiveTricksCount = 1;
       }
     }
@@ -1434,6 +1449,7 @@ export class BundRungEngine {
     this.lastTrickWinnerPlayerId = null;
     this.lastTrickWinningCard = null;
     this.playerConsecutiveTricksCount = 0;
+    this.playerConsecutiveTricksWinnerId = null;
     this.shownHandPlayerIds.clear();
     this.surrenderVotes.TEAM_1.clear();
     this.surrenderVotes.TEAM_2.clear();
@@ -1570,6 +1586,7 @@ export class BundRungEngine {
     this.lastTrickWinnerPlayerId = null;
     this.lastTrickWinningCard = null;
     this.playerConsecutiveTricksCount = 0;
+    this.playerConsecutiveTricksWinnerId = null;
     this.resetCurrentTrick(1, '');
     this.shownHandPlayerIds.clear();
     this.surrenderVotes.TEAM_1.clear();
@@ -1720,7 +1737,8 @@ export class BundRungEngine {
     const secretTrumpSuit = isCaller ? this.trumpSuit : null;
     const myTrumpCard = isCaller && this.trumpCard ? { ...this.trumpCard } : null;
     const legalCards = this.getLegalCardsForPlayer(playerId);
-    const isMyTrumpCardPlayable = isCaller && this.trumpCard && this.isTrumpRevealed ? legalCards.some((c) => c.id === this.trumpCard!.id) : false;
+    const isLastTurnForCaller = isCaller && myHand.length === 0 && Boolean(this.trumpCard);
+    const isMyTrumpCardPlayable = isCaller && this.trumpCard && (this.isTrumpRevealed || isLastTurnForCaller) ? legalCards.some((c) => c.id === this.trumpCard!.id) : false;
 
     // Check if player can request Rung reveal:
     // Only opponent team can ask! Must be this player's turn, Rung unrevealed, not pending, not paused, leadSuit exists, and player is void in leadSuit
