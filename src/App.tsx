@@ -18,6 +18,7 @@ import { GameOverModal } from './components/GameOverModal';
 import { GameResolvedModal } from './components/GameResolvedModal';
 import { TutorialModal } from './components/TutorialModal';
 import { useVoiceChat } from './hooks/useVoiceChat';
+import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { sound } from './utils/sound';
 
 export const App: React.FC = () => {
@@ -200,7 +201,61 @@ export const App: React.FC = () => {
           }
           onOpenTutorial={() => setShowTutorialModal(true)}
           statusMessage={publicState.statusMessage}
+          speakingPlayerIds={speakingPlayerIds}
+          mutedPlayerIds={mutedPlayerIds}
+          isMicMuted={isMicMuted}
+          isTableDeafened={isTableDeafened}
+          onToggleMic={toggleMic}
+          onToggleDeafen={toggleDeafen}
         />
+      )}
+
+      {/* Floating Persistent Voice Controls during Toss, Cut, Bidding, Scorecard & Game Over Modals */}
+      {phase !== 'TRICK_PLAYING' && phase !== 'WAITING_FOR_PLAYERS' && phase !== 'TEAM_FORMATION' && (
+        <div className="fixed top-3 right-3 z-60 flex items-center gap-1.5 bg-slate-900/95 border border-amber-500/50 rounded-xl p-1 shadow-2xl backdrop-blur-md">
+          <button
+            onClick={() => {
+              sound.playCardSlide();
+              toggleMic();
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              !isMicMuted
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.7)] border border-emerald-400'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+            }`}
+            title={isMicMuted ? 'Unmute Microphone' : 'Mute Microphone'}
+          >
+            {!isMicMuted ? <Mic className="w-3.5 h-3.5 text-emerald-200 animate-pulse" /> : <MicOff className="w-3.5 h-3.5 text-slate-400" />}
+            <span>{!isMicMuted ? 'Mic On' : 'Mic Off'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sound.playCardSlide();
+              toggleDeafen();
+            }}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+              isTableDeafened
+                ? 'bg-red-900/90 text-red-200 border border-red-500/60 shadow-md'
+                : 'hover:bg-slate-800 text-slate-300'
+            }`}
+            title={isTableDeafened ? 'Table Audio Muted (Click to Unmute)' : 'Mute Table Audio'}
+          >
+            {isTableDeafened ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-slate-300" />}
+          </button>
+
+          {/* Live Speaking Indicator in Floating Bar */}
+          {speakingPlayerIds.size > 0 && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-950/80 border border-emerald-500/60 rounded-lg text-[10px] font-bold text-emerald-300 animate-pulse">
+              <Mic className="w-3 h-3 text-emerald-300 animate-bounce" />
+              <span>
+                {Array.from(speakingPlayerIds)
+                  .map((id) => publicState.players.find((p) => p.id === id)?.name.split(' ')[0] || 'Player')
+                  .join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
       )}
 
       {/* 2. Initial Toss Modal (Section 3.1) */}

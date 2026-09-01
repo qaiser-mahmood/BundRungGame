@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player, TeamId } from '../../shared/types';
-import { Users, Bot, Play, Sparkles, Copy, Check, Shield, ArrowRightLeft, UserCheck, Shuffle, Pencil, X, GraduationCap } from 'lucide-react';
+import {
+  Users,
+  Bot,
+  Play,
+  Sparkles,
+  Copy,
+  Check,
+  Shield,
+  ArrowRightLeft,
+  UserCheck,
+  Shuffle,
+  Pencil,
+  X,
+  GraduationCap,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface LobbyViewProps {
@@ -15,6 +33,12 @@ interface LobbyViewProps {
   onUpdateTeamName?: (team: TeamId, name: string) => void;
   onOpenTutorial?: () => void;
   statusMessage: string;
+  speakingPlayerIds?: Set<string>;
+  mutedPlayerIds?: Set<string>;
+  isMicMuted?: boolean;
+  isTableDeafened?: boolean;
+  onToggleMic?: () => void;
+  onToggleDeafen?: () => void;
 }
 
 export const LobbyView: React.FC<LobbyViewProps> = ({
@@ -28,6 +52,12 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onUpdateTeamName,
   onOpenTutorial,
   statusMessage,
+  speakingPlayerIds,
+  mutedPlayerIds,
+  isMicMuted = true,
+  isTableDeafened = false,
+  onToggleMic,
+  onToggleDeafen,
 }) => {
   const [nameInput, setNameInput] = useState('');
   const [copied, setCopied] = useState(false);
@@ -56,6 +86,9 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
     if (!nameInput.trim()) return;
     onJoinLobby(nameInput.trim());
     sound.playCardPlace();
+    if (onToggleMic && isMicMuted) {
+      onToggleMic();
+    }
   };
 
   const handleCopyLink = () => {
@@ -109,7 +142,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
         {!me && (
           <form onSubmit={handleJoin} className="mb-5 bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner">
             <label className="block text-xs font-bold text-amber-300 uppercase tracking-wider mb-2">
-              Enter Your Player Name to Join Table
+              Enter Your Player Name to Join Table & Voice Chat
             </label>
             <div className="flex gap-2">
               <input
@@ -123,15 +156,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               />
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-lg text-sm transition shadow-lg cursor-pointer"
+                className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-lg text-sm transition shadow-lg cursor-pointer flex items-center gap-1.5"
               >
-                Join Game
+                <span>Join & Talk</span>
               </button>
             </div>
           </form>
         )}
 
-        {/* Status Bar */}
+        {/* Status Bar with Voice Chat Controls */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 bg-slate-950/60 border border-slate-800 px-4 py-2.5 rounded-xl">
           <div className="flex items-center gap-2 text-xs">
             <Users className="w-4 h-4 text-amber-400" />
@@ -141,6 +174,46 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Live Table Voice Chat Controls in Lobby */}
+            {onToggleMic && (
+              <div className="flex items-center gap-0.5 bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playCardSlide();
+                    onToggleMic();
+                  }}
+                  className={`px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    !isMicMuted
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)] border border-emerald-400'
+                      : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
+                  }`}
+                  title={isMicMuted ? 'Click to Unmute Microphone (Voice Chat)' : 'Click to Mute Microphone'}
+                >
+                  {!isMicMuted ? <Mic className="w-3.5 h-3.5 text-emerald-200 animate-pulse" /> : <MicOff className="w-3.5 h-3.5 text-slate-400" />}
+                  <span>{!isMicMuted ? 'Mic On' : 'Mic Off'}</span>
+                </button>
+
+                {onToggleDeafen && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playCardSlide();
+                      onToggleDeafen();
+                    }}
+                    className={`p-1 rounded-md transition-all cursor-pointer ${
+                      isTableDeafened
+                        ? 'bg-red-900/80 text-red-200 border border-red-500/50'
+                        : 'hover:bg-slate-800 text-slate-300'
+                    }`}
+                    title={isTableDeafened ? 'Table Audio Muted (Click to Unmute Table)' : 'Mute Table Audio (Deafen)'}
+                  >
+                    {isTableDeafened ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-slate-300" />}
+                  </button>
+                )}
+              </div>
+            )}
+
             <button
               onClick={() => {
                 sound.playCardSlide();
@@ -149,7 +222,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 rounded-lg text-xs border border-amber-500/40 transition shadow cursor-pointer font-semibold"
             >
               <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-              <span>Interactive Tutorial</span>
+              <span>Tutorial</span>
             </button>
 
             <button
@@ -157,7 +230,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs border border-slate-600 transition cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Copied Link' : 'Invite via URL'}
+              {copied ? 'Copied' : 'Invite'}
             </button>
           </div>
         </div>
@@ -247,13 +320,17 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                     .map((p) => {
                       const isMe = p.id === myPlayerId;
                       const isSelected = selectedForSwap === p.id;
+                      const isSpeaking = speakingPlayerIds?.has(p.id);
+                      const isMuted = mutedPlayerIds?.has(p.id) || (isMe && isMicMuted);
 
                       return (
                         <div
                           key={p.id}
                           onClick={() => handlePlayerSlotClick(p.id)}
                           className={`p-2.5 rounded-lg border flex items-center justify-between cursor-pointer transition-all ${
-                            isSelected
+                            isSpeaking
+                              ? 'bg-emerald-950/60 border-emerald-400 ring-4 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.8)] animate-pulse'
+                              : isSelected
                               ? 'bg-amber-500/30 border-amber-400 ring-2 ring-amber-400 shadow-glow-gold'
                               : isMe
                               ? 'bg-blue-900/50 border-blue-400'
@@ -261,12 +338,24 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${p.isBot ? 'bg-indigo-600 text-white' : 'bg-blue-600 text-white'}`}>
-                              {p.isBot ? <Bot className="w-3.5 h-3.5" /> : p.name.charAt(0).toUpperCase()}
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                              isSpeaking
+                                ? 'bg-emerald-500 text-slate-950'
+                                : p.isBot
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-blue-600 text-white'
+                            }`}>
+                              {isSpeaking ? <Mic className="w-3.5 h-3.5 animate-bounce" /> : p.isBot ? <Bot className="w-3.5 h-3.5" /> : p.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
                               <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
-                                {p.name} {isMe && <span className="text-amber-400 text-[10px]">(You)</span>}
+                                <span className={isSpeaking ? 'text-emerald-200' : 'text-white'}>{p.name}</span>
+                                {isMe && <span className="text-amber-400 text-[10px]">(You)</span>}
+                                {isMuted && !p.isBot && !isSpeaking && (
+                                  <span title="Muted" className="flex-shrink-0">
+                                    <MicOff className="w-3 h-3 text-red-400/80" />
+                                  </span>
+                                )}
                               </div>
                               <div className="text-[10px] text-blue-300/80">
                                 Position: {p.seat === 'BOTTOM' ? 'Bottom (South)' : 'Top (North)'}
@@ -350,13 +439,17 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                     .map((p) => {
                       const isMe = p.id === myPlayerId;
                       const isSelected = selectedForSwap === p.id;
+                      const isSpeaking = speakingPlayerIds?.has(p.id);
+                      const isMuted = mutedPlayerIds?.has(p.id) || (isMe && isMicMuted);
 
                       return (
                         <div
                           key={p.id}
                           onClick={() => handlePlayerSlotClick(p.id)}
                           className={`p-2.5 rounded-lg border flex items-center justify-between cursor-pointer transition-all ${
-                            isSelected
+                            isSpeaking
+                              ? 'bg-emerald-950/60 border-emerald-400 ring-4 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.8)] animate-pulse'
+                              : isSelected
                               ? 'bg-amber-500/30 border-amber-400 ring-2 ring-amber-400 shadow-glow-gold'
                               : isMe
                               ? 'bg-rose-900/50 border-rose-400'
@@ -364,12 +457,24 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${p.isBot ? 'bg-indigo-600 text-white' : 'bg-rose-600 text-white'}`}>
-                              {p.isBot ? <Bot className="w-3.5 h-3.5" /> : p.name.charAt(0).toUpperCase()}
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                              isSpeaking
+                                ? 'bg-emerald-500 text-slate-950'
+                                : p.isBot
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-rose-600 text-white'
+                            }`}>
+                              {isSpeaking ? <Mic className="w-3.5 h-3.5 animate-bounce" /> : p.isBot ? <Bot className="w-3.5 h-3.5" /> : p.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
                               <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
-                                {p.name} {isMe && <span className="text-amber-400 text-[10px]">(You)</span>}
+                                <span className={isSpeaking ? 'text-emerald-200' : 'text-white'}>{p.name}</span>
+                                {isMe && <span className="text-amber-400 text-[10px]">(You)</span>}
+                                {isMuted && !p.isBot && !isSpeaking && (
+                                  <span title="Muted" className="flex-shrink-0">
+                                    <MicOff className="w-3 h-3 text-red-400/80" />
+                                  </span>
+                                )}
                               </div>
                               <div className="text-[10px] text-rose-300/80">
                                 Position: {p.seat === 'RIGHT' ? 'Right (East)' : 'Left (West)'}
@@ -395,22 +500,41 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               {[0, 1, 2, 3].map((idx) => {
                 const p = players[idx];
                 const seatName = ['Bottom (Team 1)', 'Right (Team 2)', 'Top (Team 1)', 'Left (Team 2)'][idx];
+                const isMe = p && p.id === myPlayerId;
+                const isSpeaking = p && speakingPlayerIds?.has(p.id);
+                const isMuted = p && (mutedPlayerIds?.has(p.id) || (isMe && isMicMuted));
 
                 return (
                   <div
                     key={idx}
-                    className={`p-3 rounded-xl border flex items-center gap-3 ${
-                      p
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-all ${
+                      isSpeaking
+                        ? 'bg-emerald-950/60 border-emerald-400 ring-4 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.8)] animate-pulse'
+                        : p
                         ? 'bg-slate-800/80 border-slate-600'
                         : 'bg-slate-900/40 border-dashed border-slate-700 opacity-60'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400">
-                      {p ? (p.isBot ? <Bot className="w-4 h-4" /> : p.name.charAt(0).toUpperCase()) : idx + 1}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      isSpeaking
+                        ? 'bg-emerald-500 text-slate-950'
+                        : p
+                        ? p.isBot
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-amber-600 text-white'
+                        : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {isSpeaking ? <Mic className="w-4 h-4 animate-bounce" /> : p ? (p.isBot ? <Bot className="w-4 h-4" /> : p.name.charAt(0).toUpperCase()) : idx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-white truncate">
-                        {p ? p.name : 'Waiting for player...'}
+                      <div className="text-xs font-semibold text-white truncate flex items-center gap-1.5">
+                        <span className={isSpeaking ? 'text-emerald-200' : 'text-white'}>{p ? p.name : 'Waiting for player...'}</span>
+                        {isMe && <span className="text-amber-400 text-[10px]">(You)</span>}
+                        {isMuted && p && !p.isBot && !isSpeaking && (
+                          <span title="Muted" className="flex-shrink-0">
+                            <MicOff className="w-3 h-3 text-red-400/80" />
+                          </span>
+                        )}
                       </div>
                       <div className="text-[10px] text-slate-400">{seatName}</div>
                     </div>
@@ -445,7 +569,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               }}
               className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-cinzel font-bold text-base rounded-xl transition shadow-glow-gold flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Play className="w-5 h-5 fill-current" /> Begin Toss
+              <Play className="w-5 h-5 fill-current" /> Let's Play (Start Toss)
             </motion.button>
           )}
         </div>
