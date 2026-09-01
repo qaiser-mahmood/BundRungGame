@@ -236,6 +236,8 @@ export interface ClientToServerEvents {
   startNewMatch: () => void;
   toggleShowHand: () => void;
   voteSurrender: () => void;
+  voiceStreamSend: (data: { roomId?: string; playerId: string; audioChunk: string }) => void;
+  voiceMuteStatusChanged: (data: { roomId?: string; playerId: string; isMuted: boolean }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -244,4 +246,6 @@ export interface ServerToClientEvents {
   cardPlayedAnimation: (data: { playerId: string; card: Card }) => void;
   trickWonAnimation: (data: { winnerPlayerId: string; team: TeamId }) => void;
   khotiAnimation: (data: { losingTeam: TeamId }) => void;
+  voiceStreamReceive: (data: { playerId: string; audioChunk: string }) => void;
+  voiceMuteStatusUpdated: (data: { playerId: string; isMuted: boolean }) => void;
 }

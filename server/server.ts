@@ -639,6 +639,17 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
+  // --- Voice Chat Streaming Handlers ---
+  socket.on('voiceStreamSend', ({ playerId, audioChunk }) => {
+    // Relay audio chunk to all other sockets in this room
+    socket.broadcast.emit('voiceStreamReceive', { playerId, audioChunk });
+  });
+
+  socket.on('voiceMuteStatusChanged', ({ playerId, isMuted }) => {
+    // Broadcast mute status to all clients
+    io.emit('voiceMuteStatusUpdated', { playerId, isMuted });
+  });
+
   socket.on('disconnect', () => {
     const playerId = room.socketMap[socket.id];
     delete room.socketMap[socket.id];

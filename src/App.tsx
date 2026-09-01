@@ -17,6 +17,7 @@ import { ScorecardModal } from './components/ScorecardModal';
 import { GameOverModal } from './components/GameOverModal';
 import { GameResolvedModal } from './components/GameResolvedModal';
 import { TutorialModal } from './components/TutorialModal';
+import { useVoiceChat } from './hooks/useVoiceChat';
 import { sound } from './utils/sound';
 
 export const App: React.FC = () => {
@@ -26,6 +27,19 @@ export const App: React.FC = () => {
   const [showScorecardModal, setShowScorecardModal] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type?: string } | null>(null);
+
+  const {
+    isMicMuted,
+    isTableDeafened,
+    speakingPlayerIds,
+    mutedPlayerIds,
+    toggleMic,
+    toggleDeafen,
+  } = useVoiceChat({
+    socket,
+    myPlayerId,
+    players: gameState?.publicState?.players || [],
+  });
   // Initialize Socket connection
   useEffect(() => {
     const isLocalDevVite = typeof window !== 'undefined' && (window.location.port === '5173' || window.location.port === '3000');
@@ -161,6 +175,12 @@ export const App: React.FC = () => {
         onResumeAfterTrumpReveal={() => socket.emit('resumeAfterTrumpReveal')}
         onToggleShowHand={() => socket.emit('toggleShowHand')}
         onVoteSurrender={() => socket.emit('voteSurrender')}
+        speakingPlayerIds={speakingPlayerIds}
+        mutedPlayerIds={mutedPlayerIds}
+        isMicMuted={isMicMuted}
+        isTableDeafened={isTableDeafened}
+        onToggleMic={toggleMic}
+        onToggleDeafen={toggleDeafen}
       />
 
       {/* 1. Lobby Waiting Screen (Section 2.1 & 2.2) */}

@@ -28,6 +28,10 @@ import {
   X,
   Shield,
   GraduationCap,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 
@@ -47,6 +51,12 @@ interface TableLayoutProps {
   onResumeAfterTrumpReveal?: () => void;
   onToggleShowHand?: () => void;
   onVoteSurrender?: () => void;
+  speakingPlayerIds?: Set<string>;
+  mutedPlayerIds?: Set<string>;
+  isMicMuted?: boolean;
+  isTableDeafened?: boolean;
+  onToggleMic?: () => void;
+  onToggleDeafen?: () => void;
 }
 
 const suitSymbols: Record<Suit, string> = {
@@ -79,6 +89,12 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   onResumeAfterTrumpReveal,
   onToggleShowHand,
   onVoteSurrender,
+  speakingPlayerIds,
+  mutedPlayerIds,
+  isMicMuted = true,
+  isTableDeafened = false,
+  onToggleMic,
+  onToggleDeafen,
 }) => {
   const {
     phase,
@@ -220,7 +236,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     if (playedItem.playerId === faceDownLeadPlayerId && faceDownLeadPending) {
       if (faceDownCaller && myPlayer.team === faceDownCaller.team) {
         sound.playCardSlide();
-        setIsPeekingFaceDownCard(!isPeekingFaceDownCard);
+        setIsPeekingFaceDownCard((prev) => !prev);
       }
     }
   };
@@ -266,7 +282,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
   return (
     <div className="relative w-full h-full min-h-[100dvh] flex flex-col justify-between pt-[max(env(safe-area-inset-top),0.75rem)] pb-[max(env(safe-area-inset-bottom),0.5rem)] px-1.5 sm:px-3 overflow-hidden select-none table-felt">
-      {/* --- Top Bar: Show Cards, Surrender & Score --- */}
+      {/* --- Top Bar: Show Cards, Voice, Surrender & Score --- */}
       <header className="flex items-center justify-between z-30 px-2 sm:px-3 py-1.5 bg-slate-950/90 backdrop-blur-md rounded-xl border border-amber-500/40 gap-1.5 sm:gap-2 shadow-lg flex-shrink-0">
         {/* Left: Show Cards & Team Surrender */}
         <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -286,6 +302,44 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               {isMyHandRevealed ? <Eye className="w-3.5 h-3.5 text-emerald-200" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
               <span>{isMyHandRevealed ? 'Public Hand' : 'Show Cards'}</span>
             </button>
+          )}
+
+          {/* Voice Chat Controls (Mic + Deafen) */}
+          {onToggleMic && (
+            <div className="flex items-center gap-0.5 bg-slate-900/90 border border-slate-700 rounded-lg p-0.5 shadow-sm flex-shrink-0">
+              <button
+                onClick={() => {
+                  sound.playCardSlide();
+                  onToggleMic();
+                }}
+                className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  !isMicMuted
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)] border border-emerald-400'
+                    : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
+                }`}
+                title={isMicMuted ? 'Click to Unmute Microphone (Voice Chat)' : 'Click to Mute Microphone'}
+              >
+                {!isMicMuted ? <Mic className="w-3.5 h-3.5 text-emerald-200 animate-pulse" /> : <MicOff className="w-3.5 h-3.5 text-slate-400" />}
+                <span className="hidden sm:inline">{!isMicMuted ? 'Mic On' : 'Mic Off'}</span>
+              </button>
+
+              {onToggleDeafen && (
+                <button
+                  onClick={() => {
+                    sound.playCardSlide();
+                    onToggleDeafen();
+                  }}
+                  className={`p-1 rounded-md transition-all cursor-pointer ${
+                    isTableDeafened
+                      ? 'bg-red-900/80 text-red-200 border border-red-500/50'
+                      : 'hover:bg-slate-800 text-slate-300'
+                  }`}
+                  title={isTableDeafened ? 'Table Audio Muted (Click to Unmute Table)' : 'Mute Table Audio (Deafen)'}
+                >
+                  {isTableDeafened ? <VolumeX className="w-3.5 h-3.5 text-red-400" /> : <Volume2 className="w-3.5 h-3.5 text-slate-300" />}
+                </button>
+              )}
+            </div>
           )}
 
           {/* Team Surrender Vote Button */}
@@ -384,6 +438,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isDealer={topPlayer.id === dealer?.id}
               isTrumpCaller={topPlayer.id === rungCaller?.id}
               isPrevWinner={topPlayer.id === lastTrickWinnerPlayerId}
+              isSpeaking={speakingPlayerIds?.has(topPlayer.id)}
+              isMuted={mutedPlayerIds?.has(topPlayer.id)}
               position="top"
             />
             <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
@@ -481,6 +537,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isDealer={leftPlayer.id === dealer?.id}
               isTrumpCaller={leftPlayer.id === rungCaller?.id}
               isPrevWinner={leftPlayer.id === lastTrickWinnerPlayerId}
+              isSpeaking={speakingPlayerIds?.has(leftPlayer.id)}
+              isMuted={mutedPlayerIds?.has(leftPlayer.id)}
               position="left"
             />
           </div>
@@ -538,6 +596,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isDealer={rightPlayer.id === dealer?.id}
               isTrumpCaller={rightPlayer.id === rungCaller?.id}
               isPrevWinner={rightPlayer.id === lastTrickWinnerPlayerId}
+              isSpeaking={speakingPlayerIds?.has(rightPlayer.id)}
+              isMuted={mutedPlayerIds?.has(rightPlayer.id)}
               position="right"
             />
           </div>
@@ -1155,6 +1215,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 isDealer={bottomPlayer.id === dealer?.id}
                 isTrumpCaller={bottomPlayer.id === rungCaller?.id}
                 isPrevWinner={bottomPlayer.id === lastTrickWinnerPlayerId}
+                isSpeaking={speakingPlayerIds?.has(bottomPlayer.id)}
+                isMuted={mutedPlayerIds?.has(bottomPlayer.id) || (isMicMuted && bottomPlayer.id === myPlayerId)}
                 position="bottom"
               />
             </div>
@@ -1407,6 +1469,8 @@ interface PlayerBadgeProps {
   isDealer: boolean;
   isTrumpCaller: boolean;
   isPrevWinner?: boolean;
+  isSpeaking?: boolean;
+  isMuted?: boolean;
   position: 'top' | 'bottom' | 'left' | 'right';
 }
 
@@ -1416,6 +1480,8 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
   isDealer,
   isTrumpCaller,
   isPrevWinner,
+  isSpeaking,
+  isMuted,
   position,
 }) => {
   const isSide = position === 'left' || position === 'right';
@@ -1437,7 +1503,9 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
 
         <div
           className={`px-1.5 py-2 rounded-xl border bg-slate-950/95 flex flex-col items-center justify-center min-w-[26px] sm:min-w-[30px] transition-all ${
-            isCurrentTurn
+            isSpeaking
+              ? 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(52,211,153,0.9)] border-emerald-300 scale-105 z-25 animate-pulse'
+              : isCurrentTurn
               ? 'ring-4 ring-amber-400 bg-gradient-to-b from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
               : isPrevWinner
               ? 'border-amber-400/80 shadow-md'
@@ -1445,31 +1513,39 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
           }`}
         >
           {/* Badges container at the top */}
-          {(isDealer || isTrumpCaller || isPrevWinner) && (
-            <div className="flex flex-col items-center gap-0.5 mb-1">
-              {isDealer && (
-                <span
-                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow"
-                  title="Dealer"
-                >
-                  D
-                </span>
-              )}
-              {isTrumpCaller && (
-                <span title="Rung Caller" className="flex-shrink-0">
-                  <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 fill-amber-400" />
-                </span>
-              )}
-              {isPrevWinner && (
-                <span
-                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow-glow-gold"
-                  title="Won previous turn (+1 trick)"
-                >
-                  1
-                </span>
-              )}
-            </div>
-          )}
+          <div className="flex flex-col items-center gap-0.5 mb-1">
+            {isSpeaking && (
+              <span className="flex-shrink-0" title="Speaking">
+                <Mic className="w-3 h-3 text-emerald-300 animate-bounce" />
+              </span>
+            )}
+            {isMuted && !player.isBot && !isSpeaking && (
+              <span className="flex-shrink-0" title="Muted">
+                <MicOff className="w-3 h-3 text-red-400/80" />
+              </span>
+            )}
+            {isDealer && (
+              <span
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow"
+                title="Dealer"
+              >
+                D
+              </span>
+            )}
+            {isTrumpCaller && (
+              <span title="Rung Caller" className="flex-shrink-0">
+                <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 fill-amber-400" />
+              </span>
+            )}
+            {isPrevWinner && (
+              <span
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow-glow-gold"
+                title="Won previous turn (+1 trick)"
+              >
+                1
+              </span>
+            )}
+          </div>
 
           {/* Vertical First Name */}
           <div className="flex flex-col items-center leading-none select-none">
@@ -1477,7 +1553,11 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
               <span
                 key={idx}
                 className={`text-[10px] sm:text-[12px] font-black uppercase leading-[11px] sm:leading-[13px] tracking-normal ${
-                  isCurrentTurn ? 'text-amber-200' : 'text-white'
+                  isSpeaking
+                    ? 'text-emerald-200 font-extrabold'
+                    : isCurrentTurn
+                    ? 'text-amber-200'
+                    : 'text-white'
                 }`}
               >
                 {char}
@@ -1500,7 +1580,9 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
 
       <div
         className={`px-3 py-1 sm:py-1.5 rounded-xl border flex items-center gap-2 transition-all ${
-          isCurrentTurn
+          isSpeaking
+            ? 'ring-4 ring-emerald-400 bg-gradient-to-r from-emerald-950 via-teal-900/90 to-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.9)] scale-105 z-25 animate-pulse border-emerald-300'
+            : isCurrentTurn
             ? position === 'bottom'
               ? 'ring-4 ring-emerald-400 bg-gradient-to-r from-emerald-950 via-teal-900/90 to-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.9)] scale-110 z-20 animate-pulse border-emerald-300'
               : 'ring-4 ring-amber-400 bg-gradient-to-r from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
@@ -1509,9 +1591,17 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
             : 'bg-slate-900/80 border-slate-700 shadow'
         }`}
       >
+        {isSpeaking && <Mic className="w-3.5 h-3.5 text-emerald-300 animate-bounce flex-shrink-0" />}
+        {isMuted && !player.isBot && !isSpeaking && (
+          <span title="Muted" className="flex-shrink-0">
+            <MicOff className="w-3.5 h-3.5 text-red-400/80" />
+          </span>
+        )}
         <span
           className={`text-[11px] sm:text-sm font-black truncate max-w-[90px] sm:max-w-[140px] ${
-            isCurrentTurn
+            isSpeaking
+              ? 'text-emerald-200'
+              : isCurrentTurn
               ? position === 'bottom'
                 ? 'text-emerald-200'
                 : 'text-amber-200'
