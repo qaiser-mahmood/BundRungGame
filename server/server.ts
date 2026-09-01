@@ -640,9 +640,9 @@ io.on('connection', (socket: Socket) => {
   });
 
   // --- Voice Chat Streaming Handlers ---
-  socket.on('voiceStreamSend', ({ playerId, audioChunk }) => {
+  socket.on('voiceStreamSend', ({ playerId, audioChunk, sampleRate }) => {
     // Relay audio chunk to all other sockets in this room
-    socket.broadcast.emit('voiceStreamReceive', { playerId, audioChunk });
+    socket.broadcast.emit('voiceStreamReceive', { playerId, audioChunk, sampleRate });
   });
 
   socket.on('voiceMuteStatusChanged', ({ playerId, isMuted }) => {

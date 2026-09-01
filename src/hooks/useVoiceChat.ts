@@ -24,14 +24,17 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
   const [micPermissionDenied, setMicPermissionDenied] = useState<boolean>(false);
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const mediaSourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const speakingTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const pannerNodesRef = useRef<Map<string, StereoPannerNode>>(new Map());
-  const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
+  const playerNextPlayTimesRef = useRef<Map<string, number>>(new Map());
   const isDeafenedRef = useRef<boolean>(isTableDeafened);
   const isMutedRef = useRef<boolean>(isMicMuted);
+  const socketRef = useRef(socket);
 
+  socketRef.current = socket;
   isDeafenedRef.current = isTableDeafened;
   isMutedRef.current = isMicMuted;
 
@@ -42,7 +45,6 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       const speaker = players.find((p) => p.id === speakingPlayerId);
       if (!myPlayer || !speaker || myPlayer.id === speaker.id) return 0;
 
-      // 4-player circular table relative offset: 0 = Bottom (Me), 1 = Right, 2 = Top (Partner), 3 = Left
       const mySeatIdx = SEAT_ORDER[myPlayer.seat] ?? 0;
       const speakerSeatIdx = SEAT_ORDER[speaker.seat] ?? 0;
       const relativePosition = (speakerSeatIdx - mySeatIdx + 4) % 4;
@@ -54,16 +56,31 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
     [players, myPlayerId]
   );
 
-  // Initialize or resume Web Audio Context
+  // Initialize or resume Web Audio Context (handles iOS & mobile autoplay policies)
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       audioContextRef.current = new AudioCtx();
     }
     if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+      audioContextRef.current.resume().catch(() => {});
     }
     return audioContextRef.current;
+  }, []);
+
+  // Unlock audio on mobile touch or click
+  useEffect(() => {
+    const unlock = () => {
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {});
+      }
+    };
+    window.addEventListener('touchstart', unlock, { passive: true });
+    window.addEventListener('click', unlock, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('click', unlock);
+    };
   }, []);
 
   // Helper to mark a player as actively speaking with debounce
@@ -84,16 +101,21 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
         return next;
       });
       speakingTimeoutsRef.current.delete(playerId);
-    }, 400);
+    }, 450);
 
     speakingTimeoutsRef.current.set(playerId, newTimeout);
   }, []);
 
-  // Initialize Microphone stream
+  // Initialize Microphone stream via Direct PCM Processing
   const initMicrophone = useCallback(async () => {
     if (mediaStreamRef.current) return true;
 
     try {
+      const audioCtx = getAudioContext();
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -106,35 +128,45 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       mediaStreamRef.current = stream;
       setMicPermissionDenied(false);
 
-      // Determine best supported audio MIME type
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
-        ? 'audio/ogg;codecs=opus'
-        : '';
+      const source = audioCtx.createMediaStreamSource(stream);
+      mediaSourceNodeRef.current = source;
 
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-      mediaRecorderRef.current = recorder;
+      // 2048 samples buffer size (~45ms latency per frame)
+      const processor = audioCtx.createScriptProcessor(2048, 1, 1);
+      scriptProcessorRef.current = processor;
 
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0 && socket && !isMutedRef.current) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Audio = reader.result as string;
-            socket.emit('voiceStreamSend', {
-              playerId: myPlayerId,
-              audioChunk: base64Audio,
-            });
-            triggerSpeakingAnimation(myPlayerId);
-          };
-          reader.readAsDataURL(event.data);
+      processor.onaudioprocess = (e) => {
+        if (isMutedRef.current || !socketRef.current) return;
+        const inputData = e.inputBuffer.getChannelData(0);
+
+        // Convert Float32 [-1.0, 1.0] to 16-bit PCM Int16Array
+        let maxAmp = 0;
+        const int16Data = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          const sample = Math.max(-1, Math.min(1, inputData[i]));
+          int16Data[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+          const abs = Math.abs(sample);
+          if (abs > maxAmp) maxAmp = abs;
         }
+
+        // Voice Activity Detection (VAD): Only transmit if speaking
+        if (maxAmp > 0.012) {
+          socketRef.current.emit('voiceStreamSend', {
+            playerId: myPlayerId,
+            audioChunk: int16Data.buffer,
+            sampleRate: audioCtx.sampleRate,
+          });
+          triggerSpeakingAnimation(myPlayerId);
+        }
+
+        // Output silence to avoid local microphone loopback
+        const outputData = e.outputBuffer.getChannelData(0);
+        outputData.fill(0);
       };
 
-      // Record in 120ms slices for smooth streaming
-      recorder.start(120);
+      source.connect(processor);
+      processor.connect(audioCtx.destination); // Keeps processor alive in WebKit
+
       setIsVoiceActive(true);
       return true;
     } catch (err) {
@@ -142,16 +174,21 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       setMicPermissionDenied(true);
       return false;
     }
-  }, [socket, myPlayerId, triggerSpeakingAnimation]);
+  }, [getAudioContext, myPlayerId, triggerSpeakingAnimation]);
 
   // Toggle Mute / Unmute
   const toggleMic = useCallback(async () => {
+    const audioCtx = getAudioContext();
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume().catch(() => {});
+    }
+
     if (!mediaStreamRef.current) {
       const success = await initMicrophone();
       if (!success) return;
       setIsMicMuted(false);
-      if (socket) {
-        socket.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: false });
+      if (socketRef.current) {
+        socketRef.current.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: false });
       }
       return;
     }
@@ -165,10 +202,10 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       });
     }
 
-    if (socket) {
-      socket.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: nextMuted });
+    if (socketRef.current) {
+      socketRef.current.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: nextMuted });
     }
-  }, [isMicMuted, initMicrophone, socket, myPlayerId]);
+  }, [isMicMuted, initMicrophone, myPlayerId, getAudioContext]);
 
   // Toggle Table Sound (Deafen)
   const toggleDeafen = useCallback(() => {
@@ -179,46 +216,83 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
   useEffect(() => {
     if (!socket) return;
 
-    const handleVoiceReceive = async ({ playerId, audioChunk }: { playerId: string; audioChunk: string }) => {
+    const handleVoiceReceive = ({
+      playerId,
+      audioChunk,
+      sampleRate,
+    }: {
+      playerId: string;
+      audioChunk: string | ArrayBuffer | number[];
+      sampleRate?: number;
+    }) => {
       if (playerId === myPlayerId || isDeafenedRef.current) return;
 
       try {
-        triggerSpeakingAnimation(playerId);
-
         const audioCtx = getAudioContext();
-        const response = await fetch(audioChunk);
-        const arrayBuffer = await response.arrayBuffer();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
 
-        audioCtx.decodeAudioData(
-          arrayBuffer,
-          (decodedBuffer) => {
-            const source = audioCtx.createBufferSource();
-            source.buffer = decodedBuffer;
-
-            // Apply spatial stereo panning based on table seat position
-            const pan = calculateSpatialPan(playerId);
-            let destinationNode: AudioNode = audioCtx.destination;
-
-            if (audioCtx.createStereoPanner) {
-              let panner = pannerNodesRef.current.get(playerId);
-              if (!panner) {
-                panner = audioCtx.createStereoPanner();
-                pannerNodesRef.current.set(playerId, panner);
-              }
-              panner.pan.value = pan;
-              panner.connect(audioCtx.destination);
-              destinationNode = panner;
-            }
-
-            source.connect(destinationNode);
-            source.start(0);
-          },
-          (decodeError) => {
-            // Silently ignore minor decode errors on partial packet boundaries
+        // Convert incoming chunk to Int16Array
+        let int16Array: Int16Array;
+        if (audioChunk instanceof ArrayBuffer) {
+          int16Array = new Int16Array(audioChunk);
+        } else if (Array.isArray(audioChunk)) {
+          int16Array = new Int16Array(audioChunk);
+        } else if (typeof audioChunk === 'string') {
+          const binaryString = atob(audioChunk.replace(/^data:.*?;base64,/, ''));
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
           }
-        );
+          int16Array = new Int16Array(bytes.buffer);
+        } else {
+          return;
+        }
+
+        if (int16Array.length === 0) return;
+
+        // Convert Int16 PCM to Float32 [-1.0, 1.0]
+        const float32Array = new Float32Array(int16Array.length);
+        for (let i = 0; i < int16Array.length; i++) {
+          float32Array[i] = int16Array[i] / 32768;
+        }
+
+        const rate = sampleRate || audioCtx.sampleRate;
+        const audioBuffer = audioCtx.createBuffer(1, float32Array.length, rate);
+        audioBuffer.copyToChannel(float32Array, 0);
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioBuffer;
+
+        // Apply Spatial Stereo Panning
+        const pan = calculateSpatialPan(playerId);
+        if (audioCtx.createStereoPanner) {
+          let panner = pannerNodesRef.current.get(playerId);
+          if (!panner) {
+            panner = audioCtx.createStereoPanner();
+            pannerNodesRef.current.set(playerId, panner);
+            panner.connect(audioCtx.destination);
+          }
+          panner.pan.value = pan;
+          source.connect(panner);
+        } else {
+          source.connect(audioCtx.destination);
+        }
+
+        // Timeline audio scheduling for glitch-free continuous audio
+        const currentTime = audioCtx.currentTime;
+        let nextPlayTime = playerNextPlayTimesRef.current.get(playerId) || currentTime;
+        if (nextPlayTime < currentTime) {
+          nextPlayTime = currentTime;
+        }
+
+        source.start(nextPlayTime);
+        playerNextPlayTimesRef.current.set(playerId, nextPlayTime + audioBuffer.duration);
+
+        triggerSpeakingAnimation(playerId);
       } catch (err) {
-        // Ignore audio playback errors
+        console.warn('Voice playback error:', err);
       }
     };
 
@@ -246,8 +320,11 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
+      if (scriptProcessorRef.current) {
+        scriptProcessorRef.current.disconnect();
+      }
+      if (mediaSourceNodeRef.current) {
+        mediaSourceNodeRef.current.disconnect();
       }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop());
