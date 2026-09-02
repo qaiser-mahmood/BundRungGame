@@ -1,7 +1,14 @@
 import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedCard } from '../../shared/types';
 import { BundRungEngine } from '../engine/BundRungEngine';
+import { ModelManager } from './neural/ModelManager';
+import { StateVectorizer } from './neural/StateVectorizer';
 
 export class BotPlayer {
+  /**
+   * Set to true in live games to activate autonomous learned neural policy
+   */
+  public static useNeuralPolicy: boolean = false;
+
   // --- Master AI Card Counting & Memory Helpers ---
 
   /**
@@ -331,6 +338,26 @@ export class BotPlayer {
     privateState: PrivatePlayerState
   ): Card {
     const players = engine.getPlayers();
+
+    // --- Autonomous Neural AI Inference ---
+    if (BotPlayer.useNeuralPolicy && legalCards.length > 1) {
+      const neuralBrain = ModelManager.getModel();
+      if (neuralBrain) {
+        try {
+          const stateVector = StateVectorizer.vectorize(publicState, privateState, botPlayerId, players);
+          const legalIndices = legalCards.map((c) => StateVectorizer.cardToIndex(c));
+          const chosenAction = neuralBrain.selectAction(stateVector, legalIndices, 0.0);
+          const chosenCardInfo = StateVectorizer.indexToCard(chosenAction);
+          const matched = legalCards.find((c) => c.suit === chosenCardInfo.suit && c.rank === chosenCardInfo.rank);
+          if (matched) {
+            return matched;
+          }
+        } catch (err) {
+          // Gracefully falls back to heuristic rules
+        }
+      }
+    }
+
     const me = players.find((p) => p.id === botPlayerId)!;
     const partner = players.find((p) => p.team === me.team && p.id !== me.id);
     const partnerId = partner?.id || '';

@@ -9,7 +9,8 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "tsc && vite build",
     "start": "tsx server/server.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "train:ai": "tsx scripts/train_ai.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
