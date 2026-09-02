@@ -7,7 +7,9 @@ import {
   Suit,
   TeamId,
   OpenTrumpModifier,
+  GameType,
 } from '../shared/types';
+import { WelcomePortal } from './components/WelcomePortal';
 import { LobbyView } from './components/LobbyView';
 import { TossModal } from './components/TossModal';
 import { CutModal } from './components/CutModal';
@@ -25,6 +27,7 @@ export const App: React.FC = () => {
   const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const [gameState, setGameState] = useState<FullClientGameState | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string>('');
+  const [showWelcomePortal, setShowWelcomePortal] = useState<boolean>(true);
   const [showScorecardModal, setShowScorecardModal] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type?: string } | null>(null);
@@ -66,6 +69,10 @@ export const App: React.FC = () => {
       setGameState(state);
       if (state.privateState.myPlayerId) {
         setMyPlayerId(state.privateState.myPlayerId);
+        const me = state.publicState.players.find((p) => p.id === state.privateState.myPlayerId);
+        if (me) {
+          setShowWelcomePortal(false);
+        }
       }
     });
 
@@ -96,6 +103,14 @@ export const App: React.FC = () => {
   const phase = publicState.phase;
 
   // Handlers
+  const handleWelcomeJoin = (name: string, gameType: GameType) => {
+    socket.emit('joinLobby', { playerName: name, gameType });
+    setShowWelcomePortal(false);
+    if (isMicMuted) {
+      toggleMic();
+    }
+  };
+
   const handleJoinLobby = (name: string) => {
     socket.emit('joinLobby', { playerName: name });
   };
@@ -184,11 +199,23 @@ export const App: React.FC = () => {
         onToggleDeafen={toggleDeafen}
       />
 
+      {/* 0. Welcome & Game Selection Portal (Always available before joining or on Switch Game) */}
+      {showWelcomePortal && (
+        <WelcomePortal
+          initialPlayerName={localStorage.getItem('bund_rung_player_name') || ''}
+          isMicMuted={isMicMuted}
+          onToggleMic={toggleMic}
+          onSelectGameAndJoin={handleWelcomeJoin}
+          activePlayerCount={publicState?.players?.length || 0}
+        />
+      )}
+
       {/* 1. Lobby Waiting Screen (Section 2.1 & 2.2) */}
-      {(phase === 'WAITING_FOR_PLAYERS' || phase === 'TEAM_FORMATION') && (
+      {(phase === 'WAITING_FOR_PLAYERS' || phase === 'TEAM_FORMATION') && !showWelcomePortal && (
         <LobbyView
           players={publicState.players}
           myPlayerId={myPlayerId}
+          gameType={publicState.gameType || 'BUND_RUNG'}
           teamNames={publicState.teamNames}
           onJoinLobby={handleJoinLobby}
           onAddBots={handleAddBots}
@@ -200,6 +227,7 @@ export const App: React.FC = () => {
             socket.emit('updateTeamName', { team, name })
           }
           onOpenTutorial={() => setShowTutorialModal(true)}
+          onChangeGame={() => setShowWelcomePortal(true)}
           statusMessage={publicState.statusMessage}
           speakingPlayerIds={speakingPlayerIds}
           mutedPlayerIds={mutedPlayerIds}

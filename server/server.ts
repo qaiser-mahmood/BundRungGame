@@ -299,9 +299,13 @@ io.on('connection', (socket: Socket) => {
     },
   });
 
-  socket.on('joinLobby', ({ playerName, roomId }) => {
+  socket.on('joinLobby', ({ playerName, roomId, gameType }) => {
     const targetRoomId = roomId || 'main_room';
     const targetRoom = getOrCreateRoom(targetRoomId);
+
+    if (gameType) {
+      targetRoom.engine.setGameType(gameType);
+    }
 
     try {
       // Check if this socket already has a player

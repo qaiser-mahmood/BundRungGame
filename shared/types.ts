@@ -12,6 +12,8 @@ export interface Card {
 
 export type SeatPosition = 'BOTTOM' | 'RIGHT' | 'TOP' | 'LEFT';
 
+export type GameType = 'BUND_RUNG' | 'OPEN_RUNG' | 'BHABHI_THULLA';
+
 export type TeamId = 'TEAM_1' | 'TEAM_2'; // Team 1: BOTTOM & TOP; Team 2: RIGHT & LEFT
 
 export interface Player {
@@ -105,6 +107,7 @@ export interface ScorecardState {
 }
 
 export interface PublicGameState {
+  gameType?: GameType;
   phase: GamePhase;
   players: Player[];
   activePlayerIndex: number;
@@ -208,7 +211,7 @@ export interface FullClientGameState {
 
 // Socket Events
 export interface ClientToServerEvents {
-  joinLobby: (data: { playerName: string; roomId?: string }) => void;
+  joinLobby: (data: { playerName: string; roomId?: string; gameType?: GameType }) => void;
   selectTeam: (data: { team: TeamId; seat: SeatPosition }) => void;
   swapPlayerSeats: (data: { player1Id: string; player2Id: string }) => void;
   updateTeamName: (data: { team: TeamId; name: string }) => void;

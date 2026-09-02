@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Player, TeamId } from '../../shared/types';
+import { Player, TeamId, GameType } from '../../shared/types';
 import {
   Users,
   Bot,
@@ -25,6 +25,7 @@ import { sound } from '../utils/sound';
 interface LobbyViewProps {
   players: Player[];
   myPlayerId: string;
+  gameType?: GameType;
   teamNames?: { TEAM_1: string; TEAM_2: string };
   onJoinLobby: (name: string) => void;
   onAddBots: () => void;
@@ -32,6 +33,7 @@ interface LobbyViewProps {
   onSwapSeats: (player1Id: string, player2Id: string) => void;
   onUpdateTeamName?: (team: TeamId, name: string) => void;
   onOpenTutorial?: () => void;
+  onChangeGame?: () => void;
   statusMessage: string;
   speakingPlayerIds?: Set<string>;
   mutedPlayerIds?: Set<string>;
@@ -44,6 +46,7 @@ interface LobbyViewProps {
 export const LobbyView: React.FC<LobbyViewProps> = ({
   players,
   myPlayerId,
+  gameType = 'BUND_RUNG',
   teamNames,
   onJoinLobby,
   onAddBots,
@@ -51,6 +54,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onSwapSeats,
   onUpdateTeamName,
   onOpenTutorial,
+  onChangeGame,
   statusMessage,
   speakingPlayerIds,
   mutedPlayerIds,
@@ -128,6 +132,24 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
 
         {/* Title Header */}
         <div className="text-center mb-5">
+          <div className="flex items-center justify-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              🎴 {gameType === 'BUND_RUNG' ? 'BUND RUNG (HIDDEN TRUMP)' : gameType}
+            </span>
+            {onChangeGame && (
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playCardSlide();
+                  onChangeGame();
+                }}
+                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-300 hover:text-amber-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer"
+                title="Change Game Variant"
+              >
+                Switch Game
+              </button>
+            )}
+          </div>
           <h1 className="text-3xl sm:text-4xl font-cinzel font-black gold-gradient-text tracking-wide mb-1">
             BUND RUNG
           </h1>

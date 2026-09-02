@@ -18,8 +18,9 @@ import {
 import { Deck } from './Deck';
 import { TossEngine } from './TossEngine';
 import { ScoringEngine, ScoreCalculationInput } from './ScoringEngine';
+import { BaseRungEngine } from './BaseRungEngine';
 
-export class BundRungEngine {
+export class BundRungEngine extends BaseRungEngine {
   private players: Player[] = [];
   private hands: { [playerId: string]: Card[] } = {};
   private phase: GamePhase = 'WAITING_FOR_PLAYERS';
@@ -107,6 +108,7 @@ export class BundRungEngine {
   private pendingOpenRungPlayerId: string | null = null;
 
   constructor() {
+    super('BUND_RUNG');
     this.resetLobby();
   }
 
@@ -1644,6 +1646,7 @@ export class BundRungEngine {
   // --- Client State Serialization ---
   public getPublicState(): PublicGameState {
     return {
+      gameType: this.gameType,
       phase: this.phase,
       players: this.players.map((p) => ({ ...p })),
       teamNames: {
