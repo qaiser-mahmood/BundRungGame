@@ -126,7 +126,7 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-4xl bg-gradient-to-b from-slate-900 via-slate-900 to-felt-dark border-2 border-amber-500/50 rounded-3xl shadow-2xl p-5 sm:p-8 relative my-auto overflow-hidden"
+        className="w-full max-w-5xl bg-gradient-to-b from-slate-900 via-slate-900 to-felt-dark border-2 border-amber-500/50 rounded-3xl shadow-2xl p-5 sm:p-8 relative my-auto overflow-hidden"
       >
         {/* Decorative Golden Corners */}
         <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-amber-400 m-3 rounded-tl pointer-events-none" />
@@ -254,7 +254,7 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Tile 1: Bund Rung */}
             <div className="relative p-5 rounded-2xl bg-gradient-to-b from-amber-950/40 via-slate-900 to-slate-900 border-2 border-amber-500 shadow-glow-gold flex flex-col justify-between group hover:border-amber-400 transition-all">
               <div className="absolute top-3 right-3">
@@ -295,6 +295,41 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({
                 >
                   <BookOpen className="w-3 h-3" />
                   <span>Read Rules</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Tile 2: Bund Rung (Bidding) */}
+            <div className="relative p-5 rounded-2xl bg-gradient-to-b from-amber-950/20 via-slate-900 to-slate-900 border border-slate-800 hover:border-amber-500/50 transition-all flex flex-col justify-between opacity-85 hover:opacity-100">
+              <div className="absolute top-3 right-3">
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-500/40">
+                  COMING SOON
+                </span>
+              </div>
+
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-3">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                </div>
+                <h3 className="font-cinzel font-bold text-lg text-amber-200 mb-1">
+                  BUND RUNG (BIDDING)
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                  Contract trick bidding (7 to 13) with secret trump, trick bonuses, under-tricking penalties, and accumulation.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playCardSlide();
+                    setSelectedRulesModal('BUND_RUNG_BIDDING');
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Rules & Preview</span>
                 </button>
               </div>
             </div>

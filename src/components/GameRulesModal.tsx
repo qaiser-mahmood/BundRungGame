@@ -49,6 +49,35 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({
         },
       ],
     },
+    BUND_RUNG_BIDDING: {
+      title: 'Bund Rung (Bidding)',
+      subtitle: 'Contract Trick Bidding with Secret Trump & Center Accumulation',
+      badge: 'COMING SOON IN ENGINE',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      icon: <Sparkles className="w-5 h-5 text-amber-400" />,
+      sections: [
+        {
+          heading: '1. Contract Trick Bidding (7 to 13)',
+          body: 'After receiving their initial 5 cards, players bid clockwise on the number of tricks their partnership contracts to win (minimum bid 7, up to 13 for Grand Slam). Each player may raise the bid or pass.',
+        },
+        {
+          heading: '2. Highest Bidder & Secret Trump',
+          body: 'The highest bidder wins the contract and places their chosen trump card face-down ("Bund"). The remaining 32 cards are dealt in two 4-card passes.',
+        },
+        {
+          heading: '3. Fulfilling the Contract',
+          body: 'The contracting team must achieve or exceed their bid trick target to win the round. Meeting or exceeding the contract earns bonus match points.',
+        },
+        {
+          heading: '4. The Penalty for Under-Tricking',
+          body: 'If the declaring team fails to reach their contracted number of tricks, the defending team is awarded penalty points proportional to the deficit.',
+        },
+        {
+          heading: '5. Center Accumulation & Ace Downgrade',
+          body: 'All classic Bund Rung rules apply: tricks accumulate in the center until the secret trump is revealed, and leading consecutive Aces downgrades the second Ace to 2.',
+        },
+      ],
+    },
     OPEN_RUNG: {
       title: 'Open Rung (Sir Rung / Court Piece)',
       subtitle: 'Classic Subcontinent Court Piece with Instant Public Trump',

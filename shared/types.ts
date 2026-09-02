@@ -12,7 +12,7 @@ export interface Card {
 
 export type SeatPosition = 'BOTTOM' | 'RIGHT' | 'TOP' | 'LEFT';
 
-export type GameType = 'BUND_RUNG' | 'OPEN_RUNG' | 'BHABHI_THULLA';
+export type GameType = 'BUND_RUNG' | 'BUND_RUNG_BIDDING' | 'OPEN_RUNG' | 'BHABHI_THULLA';
 
 export type TeamId = 'TEAM_1' | 'TEAM_2'; // Team 1: BOTTOM & TOP; Team 2: RIGHT & LEFT
 
