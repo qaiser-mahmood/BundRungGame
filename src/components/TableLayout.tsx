@@ -34,7 +34,6 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { sound } from '../utils/sound';
-import { Table3DCanvas } from './3d/Table3DCanvas';
 
 interface TableLayoutProps {
   publicState: PublicGameState;
@@ -152,7 +151,6 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   const [selectedLeadCardId, setSelectedLeadCardId] = useState<string | null>(null);
   const [isPeekingFaceDownCard, setIsPeekingFaceDownCard] = useState<boolean>(false);
   const [showPartnerInspection, setShowPartnerInspection] = useState<boolean>(false);
-  const [is3DView, setIs3DView] = useState<boolean>(true);
 
   const myPlayer = players.find((p) => p.id === myPlayerId) || players[0];
   const myIndex = players.findIndex((p) => p.id === myPlayerId);
@@ -387,22 +385,6 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
             </button>
           )}
 
-          {/* 3D / 2D View Toggle */}
-          <button
-            onClick={() => {
-              sound.playCardSlide();
-              setIs3DView((prev) => !prev);
-            }}
-            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold border transition-all cursor-pointer shadow-sm flex-shrink-0 ${
-              is3DView
-                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black border-amber-300 shadow-glow-gold'
-                : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
-            }`}
-            title="Toggle between 3D Arena View and Classic 2D Table"
-          >
-            <span>{is3DView ? '🎮 3D View' : '🃏 2D View'}</span>
-          </button>
-
           <button
             onClick={() => {
               sound.playCardSlide();
@@ -447,25 +429,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
       {/* --- Main Casino Table Play Area --- */}
       <main className="relative flex-1 flex items-center justify-center my-0.5 sm:my-2 w-full overflow-hidden">
-        {/* 3D WebGL Arena Canvas */}
-        {is3DView && (
-          <div className="absolute inset-0 w-full h-full z-0">
-            <Table3DCanvas
-              publicState={publicState}
-              privateState={privateState}
-              onPlayCard={onPlayCard}
-              speakingPlayerIds={speakingPlayerIds || new Set()}
-              mutedPlayerIds={mutedPlayerIds || new Set()}
-              isMyTurn={isMyTurn}
-            />
-          </div>
-        )}
-
-        {/* 2D Classic Felt Table (Displayed when 3D is toggled off) */}
-        {!is3DView && (
-          <>
-            {/* --- Top Player (Partner) --- */}
-            {topPlayer && (
+        {/* --- Top Player (Partner) --- */}
+        {topPlayer && (
           <div className="absolute top-0.5 sm:top-1 flex flex-col items-center z-10">
             <PlayerBadge
               player={topPlayer}
@@ -762,8 +727,6 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
             </div>
           </div>
         </div>
-          </>
-        )}
 
         {/* --- In-Game Modals & Action Strips --- */}
         {/* Opponent Card Inspection Banner for Defending Team */}
