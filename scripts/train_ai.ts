@@ -4,14 +4,36 @@ import { StateVectorizer } from '../server/ai/neural/StateVectorizer';
 import { ModelManager } from '../server/ai/neural/ModelManager';
 import { BotPlayer } from '../server/ai/BotPlayer';
 
-async function trainSelfPlay(totalGames: number = 200) {
+async function trainSelfPlay(totalGames: number = 1000) {
   console.log(`=======================================================`);
   console.log(`🚀 Starting Bund Rung Autonomous AI Self-Play Training`);
   console.log(`Target Games: ${totalGames} matches`);
+  console.log(`Tip: Press Ctrl + C at any time to safely stop & save!`);
   console.log(`=======================================================\n`);
 
   const learner = new ReinforcementLearner();
+
+  // 1. Resume from existing trained model if available
+  const existingBrain = ModelManager.getModel();
   let epsilon = 1.0;
+  if (existingBrain) {
+    learner.onlineNetwork = existingBrain.clone();
+    learner.targetNetwork = existingBrain.clone();
+    epsilon = 0.25; // Lower exploration since it already has learned foundations
+    console.log(`📥 Resumed training from existing bund_rung_brain.json! Starting exploration: ${(epsilon * 100).toFixed(0)}%\n`);
+  }
+
+  // Graceful Ctrl + C handler so user can stop anytime without losing progress
+  let isTerminating = false;
+  process.on('SIGINT', () => {
+    if (isTerminating) process.exit(0);
+    isTerminating = true;
+    console.log(`\n\n🛑 Training interrupted by user (Ctrl+C).`);
+    console.log(`💾 Saving learned weights to bund_rung_brain.json...`);
+    ModelManager.saveModel(learner.onlineNetwork);
+    console.log(`✅ Brain safely saved! You can run training again anytime to continue.`);
+    process.exit(0);
+  });
   const minEpsilon = 0.05;
   const epsilonDecay = Math.exp(Math.log(minEpsilon / 1.0) / (totalGames * 0.8));
 
@@ -174,6 +196,11 @@ async function trainSelfPlay(totalGames: number = 200) {
         `Memory: ${replaySize} steps | Time: ${elapsedSec}s`
       );
     }
+
+    // Periodic checkpoint auto-save every 500 games
+    if (gameIdx % 500 === 0 && gameIdx !== totalGames) {
+      ModelManager.saveModel(learner.onlineNetwork);
+    }
   }
 
   console.log(`\n=======================================================`);
@@ -184,7 +211,7 @@ async function trainSelfPlay(totalGames: number = 200) {
   console.log(`=======================================================\n`);
 }
 
-// Parse optional CLI arguments
+// Parse optional CLI arguments (default 5,000 matches)
 const args = process.argv.slice(2);
-const gamesCount = args.includes('--games') ? parseInt(args[args.indexOf('--games') + 1], 10) : 100;
-trainSelfPlay(isNaN(gamesCount) ? 100 : gamesCount);
+const gamesCount = args.includes('--games') ? parseInt(args[args.indexOf('--games') + 1], 10) : 5000;
+trainSelfPlay(isNaN(gamesCount) ? 5000 : gamesCount);
