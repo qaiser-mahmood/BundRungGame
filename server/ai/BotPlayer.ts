@@ -2,6 +2,7 @@ import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedC
 import { BundRungEngine } from '../engine/BundRungEngine';
 import { ModelManager } from './neural/ModelManager';
 import { StateVectorizer } from './neural/StateVectorizer';
+import { LiveLearningEngine } from './neural/LiveLearningEngine';
 
 export class BotPlayer {
   /**
@@ -322,7 +323,13 @@ export class BotPlayer {
         privateState
       );
 
-      engine.playCard(botPlayerId, chosenCard.id);
+      if (BotPlayer.useNeuralPolicy) {
+        LiveLearningEngine.onBeforeCardPlayed(engine, (engine as any).roomId || 'main_room', botPlayerId, chosenCard.id);
+        engine.playCard(botPlayerId, chosenCard.id);
+        LiveLearningEngine.onAfterCardPlayed(engine, (engine as any).roomId || 'main_room');
+      } else {
+        engine.playCard(botPlayerId, chosenCard.id);
+      }
     }
   }
 

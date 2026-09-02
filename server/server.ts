@@ -8,6 +8,7 @@ import cors from 'cors';
 import { BundRungEngine } from './engine/BundRungEngine';
 import { BotPlayer } from './ai/BotPlayer';
 import { ModelManager } from './ai/neural/ModelManager';
+import { LiveLearningEngine } from './ai/neural/LiveLearningEngine';
 import {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -571,7 +572,9 @@ io.on('connection', (socket: Socket) => {
     const playerId = room.socketMap[socket.id];
     if (playerId) {
       try {
+        LiveLearningEngine.onBeforeCardPlayed(room.engine, room.id, playerId, cardId);
         const result = room.engine.playCard(playerId, cardId);
+        LiveLearningEngine.onAfterCardPlayed(room.engine, room.id);
         broadcastRoomState(room);
       } catch (err: any) {
         socket.emit('notification', { message: err.message, type: 'error' });
@@ -722,5 +725,7 @@ server.listen(PORT, () => {
   const brain = ModelManager.getModel();
   if (brain) {
     console.log(`🧠 Autonomous Neural AI Brain: ACTIVE & IN USE (server/ai/models/bund_rung_brain.json)`);
+    LiveLearningEngine.init();
+    console.log(`🎓 Continuous Live Learning: ENABLED (Learning from Human & Bot matches)`);
   }
 });
