@@ -7,6 +7,7 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import { BundRungEngine } from './engine/BundRungEngine';
 import { BotPlayer } from './ai/BotPlayer';
+import { ModelManager } from './ai/neural/ModelManager';
 import {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -718,4 +719,8 @@ if (fs.existsSync(distPath)) {
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`🎴 Bund Rung Server listening on port ${PORT}`);
+  const brain = ModelManager.getModel();
+  if (brain) {
+    console.log(`🧠 Autonomous Neural AI Brain: ACTIVE & IN USE (server/ai/models/bund_rung_brain.json)`);
+  }
 });

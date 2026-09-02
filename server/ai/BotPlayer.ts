@@ -338,6 +338,7 @@ export class BotPlayer {
     privateState: PrivatePlayerState
   ): Card {
     const players = engine.getPlayers();
+    const me = players.find((p) => p.id === botPlayerId)!;
 
     // --- Autonomous Neural AI Inference ---
     if (BotPlayer.useNeuralPolicy && legalCards.length > 1) {
@@ -350,6 +351,7 @@ export class BotPlayer {
           const chosenCardInfo = StateVectorizer.indexToCard(chosenAction);
           const matched = legalCards.find((c) => c.suit === chosenCardInfo.suit && c.rank === chosenCardInfo.rank);
           if (matched) {
+            console.log(`🧠 [Neural AI Brain] ${me.name} (${me.team}): Evaluated 183 features -> Played ${matched.rank} of ${matched.suit}`);
             return matched;
           }
         } catch (err) {
@@ -357,8 +359,6 @@ export class BotPlayer {
         }
       }
     }
-
-    const me = players.find((p) => p.id === botPlayerId)!;
     const partner = players.find((p) => p.team === me.team && p.id !== me.id);
     const partnerId = partner?.id || '';
     const trick = publicState.currentTrick;
