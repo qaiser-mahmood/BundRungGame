@@ -48,7 +48,7 @@ describe('Neural AI & Reinforcement Learning Architecture', () => {
 
     const vector = StateVectorizer.vectorize(publicState, privateState, 'p1', players);
     expect(vector.length).toBe(StateVectorizer.FEATURE_COUNT);
-    expect(vector.length).toBe(183);
+    expect(vector.length).toBe(229);
 
     // All values must be finite and within reasonable bounds
     for (let i = 0; i < vector.length; i++) {
@@ -58,9 +58,9 @@ describe('Neural AI & Reinforcement Learning Architecture', () => {
     }
   });
 
-  it('neural network computes 52 Q-values and masks illegal actions', () => {
-    const net = new NeuralNetwork(183, 128, 64, 52);
-    const input = new Float32Array(183);
+  it('dueling neural network computes 52 Q-values and masks illegal actions', () => {
+    const net = new NeuralNetwork(229);
+    const input = new Float32Array(229);
     input[0] = 1.0;
     input[10] = 0.5;
 
@@ -112,12 +112,12 @@ describe('Neural AI & Reinforcement Learning Architecture', () => {
   });
 
   it('serializes and deserializes neural weights identically', () => {
-    const originalNet = new NeuralNetwork(183, 128, 64, 52);
+    const originalNet = new NeuralNetwork(229);
     const json = originalNet.toJSON();
     const loadedNet = NeuralNetwork.fromJSON(json);
 
-    const testInput = new Float32Array(183);
-    for (let i = 0; i < 183; i++) testInput[i] = Math.sin(i);
+    const testInput = new Float32Array(229);
+    for (let i = 0; i < 229; i++) testInput[i] = Math.sin(i);
 
     const outOriginal = originalNet.forward(testInput);
     const outLoaded = loadedNet.forward(testInput);
