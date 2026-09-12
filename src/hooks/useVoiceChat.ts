@@ -19,6 +19,7 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
   const [isMicMuted, setIsMicMuted] = useState<boolean>(true);
   const [isTableDeafened, setIsTableDeafened] = useState<boolean>(false);
   const [isVoiceActive, setIsVoiceActive] = useState<boolean>(false);
+  const [micAudioLevel, setMicAudioLevel] = useState<number>(0);
   const [speakingPlayerIds, setSpeakingPlayerIds] = useState<Set<string>>(new Set());
   const [mutedPlayerIds, setMutedPlayerIds] = useState<Set<string>>(new Set());
   const [micPermissionDenied, setMicPermissionDenied] = useState<boolean>(false);
@@ -33,16 +34,22 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
   const isDeafenedRef = useRef<boolean>(isTableDeafened);
   const isMutedRef = useRef<boolean>(isMicMuted);
   const socketRef = useRef(socket);
+  const myPlayerIdRef = useRef(myPlayerId);
+  const playersRef = useRef(players);
 
   socketRef.current = socket;
   isDeafenedRef.current = isTableDeafened;
   isMutedRef.current = isMicMuted;
+  myPlayerIdRef.current = myPlayerId;
+  playersRef.current = players;
 
   // Calculate spatial stereo pan (-1.0 to +1.0) based on player's seat position relative to bottom player
   const calculateSpatialPan = useCallback(
     (speakingPlayerId: string): number => {
-      const myPlayer = players.find((p) => p.id === myPlayerId);
-      const speaker = players.find((p) => p.id === speakingPlayerId);
+      const myId = myPlayerIdRef.current;
+      const currentPlayers = playersRef.current;
+      const myPlayer = currentPlayers.find((p) => p.id === myId);
+      const speaker = currentPlayers.find((p) => p.id === speakingPlayerId);
       if (!myPlayer || !speaker || myPlayer.id === speaker.id) return 0;
 
       const mySeatIdx = SEAT_ORDER[myPlayer.seat] ?? 0;
@@ -51,9 +58,9 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
 
       if (relativePosition === 1) return 0.75; // Right ear
       if (relativePosition === 3) return -0.75; // Left ear
-      return 0.0; // Center (Partner across table)
+      return 0.0; // Center (Partner across table or in lobby)
     },
-    [players, myPlayerId]
+    []
   );
 
   // Initialize or resume Web Audio Context (handles iOS & mobile autoplay policies)
@@ -125,6 +132,15 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
         video: false,
       });
 
+      stream.getAudioTracks().forEach((track) => {
+        track.onended = () => {
+          console.warn('[VoiceChat] Microphone track ended or was disconnected');
+          mediaStreamRef.current = null;
+          setIsVoiceActive(false);
+          setIsMicMuted(true);
+        };
+      });
+
       mediaStreamRef.current = stream;
       setMicPermissionDenied(false);
 
@@ -136,7 +152,10 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       scriptProcessorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
-        if (isMutedRef.current || !socketRef.current) return;
+        if (isMutedRef.current || !socketRef.current) {
+          setMicAudioLevel(0);
+          return;
+        }
         const inputData = e.inputBuffer.getChannelData(0);
 
         // Convert Float32 [-1.0, 1.0] to 16-bit PCM Int16Array
@@ -149,14 +168,24 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
           if (abs > maxAmp) maxAmp = abs;
         }
 
+        // Live mic level indicator (0 - 100)
+        const currentLevel = Math.min(100, Math.round(maxAmp * 180));
+        setMicAudioLevel(currentLevel);
+
+        // Dynamic sender ID (uses current myPlayerId or falls back to socket.id)
+        const currentSenderId = myPlayerIdRef.current || socketRef.current?.id || '';
+
         // Voice Activity Detection (VAD): Only transmit if speaking
-        if (maxAmp > 0.012) {
+        if (maxAmp > 0.012 && socketRef.current) {
           socketRef.current.emit('voiceStreamSend', {
-            playerId: myPlayerId,
+            playerId: currentSenderId,
+            socketId: socketRef.current.id,
             audioChunk: int16Data.buffer,
             sampleRate: audioCtx.sampleRate,
           });
-          triggerSpeakingAnimation(myPlayerId);
+          if (currentSenderId) {
+            triggerSpeakingAnimation(currentSenderId);
+          }
         }
 
         // Output silence to avoid local microphone loopback
@@ -174,7 +203,7 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       setMicPermissionDenied(true);
       return false;
     }
-  }, [getAudioContext, myPlayerId, triggerSpeakingAnimation]);
+  }, [getAudioContext, triggerSpeakingAnimation]);
 
   // Toggle Mute / Unmute
   const toggleMic = useCallback(async () => {
@@ -187,8 +216,9 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       const success = await initMicrophone();
       if (!success) return;
       setIsMicMuted(false);
-      if (socketRef.current) {
-        socketRef.current.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: false });
+      const currentSenderId = myPlayerIdRef.current || socketRef.current?.id || '';
+      if (socketRef.current && currentSenderId) {
+        socketRef.current.emit('voiceMuteStatusChanged', { playerId: currentSenderId, isMuted: false });
       }
       return;
     }
@@ -202,10 +232,18 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       });
     }
 
-    if (socketRef.current) {
-      socketRef.current.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: nextMuted });
+    const currentSenderId = myPlayerIdRef.current || socketRef.current?.id || '';
+    if (socketRef.current && currentSenderId) {
+      socketRef.current.emit('voiceMuteStatusChanged', { playerId: currentSenderId, isMuted: nextMuted });
     }
-  }, [isMicMuted, initMicrophone, myPlayerId, getAudioContext]);
+  }, [isMicMuted, initMicrophone, getAudioContext]);
+
+  // Sync mute status when player ID updates (e.g. after joining lobby)
+  useEffect(() => {
+    if (socket && myPlayerId && mediaStreamRef.current) {
+      socket.emit('voiceMuteStatusChanged', { playerId: myPlayerId, isMuted: isMicMuted });
+    }
+  }, [socket, myPlayerId, isMicMuted]);
 
   // Toggle Table Sound (Deafen)
   const toggleDeafen = useCallback(() => {
@@ -218,14 +256,26 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
 
     const handleVoiceReceive = ({
       playerId,
+      socketId,
       audioChunk,
       sampleRate,
     }: {
       playerId: string;
+      socketId?: string;
       audioChunk: string | ArrayBuffer | number[];
       sampleRate?: number;
     }) => {
-      if (playerId === myPlayerId || isDeafenedRef.current) return;
+      const currentMyId = myPlayerIdRef.current;
+      const currentSocketId = socketRef.current?.id;
+
+      // Drop self loopback (by socket ID or by player ID)
+      if (
+        (currentSocketId && socketId && socketId === currentSocketId) ||
+        (currentMyId && playerId && playerId === currentMyId) ||
+        isDeafenedRef.current
+      ) {
+        return;
+      }
 
       try {
         const audioCtx = getAudioContext();
@@ -315,7 +365,7 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
       socket.off('voiceStreamReceive', handleVoiceReceive);
       socket.off('voiceMuteStatusUpdated', handleMuteUpdated);
     };
-  }, [socket, myPlayerId, getAudioContext, calculateSpatialPan, triggerSpeakingAnimation]);
+  }, [socket, getAudioContext, calculateSpatialPan, triggerSpeakingAnimation]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -337,6 +387,7 @@ export function useVoiceChat({ socket, myPlayerId, players }: UseVoiceChatProps)
     isMicMuted,
     isTableDeafened,
     isVoiceActive,
+    micAudioLevel,
     speakingPlayerIds,
     mutedPlayerIds,
     micPermissionDenied,

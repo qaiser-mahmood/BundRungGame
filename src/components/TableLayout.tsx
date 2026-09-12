@@ -51,6 +51,7 @@ interface TableLayoutProps {
   onResumeAfterTrumpReveal?: () => void;
   onToggleShowHand?: () => void;
   onVoteSurrender?: () => void;
+  onDistributeNextGame?: () => void;
   speakingPlayerIds?: Set<string>;
   mutedPlayerIds?: Set<string>;
   isMicMuted?: boolean;
@@ -89,6 +90,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   onResumeAfterTrumpReveal,
   onToggleShowHand,
   onVoteSurrender,
+  onDistributeNextGame,
   speakingPlayerIds,
   mutedPlayerIds,
   isMicMuted = true,
@@ -98,6 +100,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 }) => {
   const {
     phase,
+    gameIndex,
     players,
     dealerPlayerIndex,
     currentTurnPlayerId,
@@ -111,6 +114,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     revealedTrumpCard,
     team1TricksWon,
     team2TricksWon,
+    lastGameWinningTeam,
+    teamNames,
     consecutiveTricksCount,
     lastTrickWinnerTeam,
     lastTrickWinnerPlayerId,
@@ -196,12 +201,18 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   };
 
   // Position of cards played in the trick relative to seating
-  // If current trick has 0 cards, display the 4 cards from previous trick face-up until next trick is started
-  const isShowingPreviousTrick = currentTrick.cards.length === 0 && Boolean(publicState.previousTrickCards);
+  // If current trick has 0 cards, display the 4 cards from previous trick face-up until next trick is started.
+  // When the game is resolved or match is over, always keep the final trick cards fully visible on the table!
+  const isGameResolved = phase === 'GAME_RESOLVED' || Boolean(publicState.isMatchOver);
+  const lastCompletedTrick = publicState.completedTricks[publicState.completedTricks.length - 1];
+  const isShowingPreviousTrick =
+    isGameResolved || (currentTrick.cards.length === 0 && Boolean(publicState.previousTrickCards));
   const displayTrickCards =
     currentTrick.cards.length > 0
       ? currentTrick.cards
-      : (publicState.previousTrickCards || []);
+      : (publicState.previousTrickCards && publicState.previousTrickCards.length > 0
+          ? publicState.previousTrickCards
+          : (lastCompletedTrick ? lastCompletedTrick.cards : []));
 
   const getPlayedCardForPlayer = (playerId?: string) => {
     if (!playerId) return null;
@@ -266,6 +277,9 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     }
     if (playedItem.isAceDowngraded) {
       return 'Ace as 2';
+    }
+    if ((isShowingPreviousTrick || isGameResolved) && playedItem.playerId === lastTrickWinnerPlayerId) {
+      return '👑 Winner';
     }
     return undefined;
   };
@@ -396,6 +410,45 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
           </button>
         </div>
       </header>
+
+      {/* --- Game Won In-Scene Simple Notification (Game Resolved) --- */}
+      {phase === 'GAME_RESOLVED' && !publicState.isMatchOver && (
+        <div className="w-full flex justify-center mt-1 sm:mt-1.5 z-30 px-2">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: -6 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="px-4 py-1.5 sm:py-2 bg-slate-950/95 border-2 border-amber-400 rounded-full shadow-[0_0_25px_rgba(245,158,11,0.5)] flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-amber-200"
+          >
+            <span className="flex items-center gap-1.5 font-bold">
+              <span className="text-base">🏆</span>
+              <strong className="text-amber-300 font-cinzel">
+                {lastGameWinningTeam === 'TEAM_1'
+                  ? (teamNames?.TEAM_1 || 'Team 1')
+                  : lastGameWinningTeam === 'TEAM_2'
+                  ? (teamNames?.TEAM_2 || 'Team 2')
+                  : team1TricksWon >= 7
+                  ? (teamNames?.TEAM_1 || 'Team 1')
+                  : (teamNames?.TEAM_2 || 'Team 2')}
+              </strong>{' '}
+              Won Game {gameIndex}!
+            </span>
+
+            <span className="text-slate-400 text-xs hidden md:inline">
+              (Dealer Score: <strong className="text-amber-400">{scorecard.dealerScore} pts</strong>)
+            </span>
+
+            <button
+              onClick={() => {
+                sound.playCardSlide();
+                if (onDistributeNextGame) onDistributeNextGame();
+              }}
+              className="px-3.5 py-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 text-slate-950 font-cinzel font-black text-xs sm:text-sm rounded-full shadow-glow-gold flex items-center gap-1.5 cursor-pointer animate-pulse"
+            >
+              <span>▶</span> Play Next Game
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {/* --- Active Turn Interactive Floating Status Banner --- */}
       {phase === 'TRICK_PLAYING' && !faceDownLeadPending && !isTrumpRevealPending && (
@@ -625,8 +678,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                     exit={{ opacity: 0, scale: 0.85 }}
                     transition={{ duration: 0.2 }}
                     className={
-                      isShowingPreviousTrick && playedTop.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-2 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                      (isShowingPreviousTrick || isGameResolved) && playedTop.playerId === lastTrickWinnerPlayerId
+                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
                         : ''
                     }
                   >
@@ -653,8 +706,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                     exit={{ opacity: 0, scale: 0.85 }}
                     transition={{ duration: 0.2 }}
                     className={
-                      isShowingPreviousTrick && playedBottom.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-2 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                      (isShowingPreviousTrick || isGameResolved) && playedBottom.playerId === lastTrickWinnerPlayerId
+                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
                         : ''
                     }
                   >
@@ -681,8 +734,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                     exit={{ opacity: 0, scale: 0.85 }}
                     transition={{ duration: 0.2 }}
                     className={
-                      isShowingPreviousTrick && playedLeft.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-2 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                      (isShowingPreviousTrick || isGameResolved) && playedLeft.playerId === lastTrickWinnerPlayerId
+                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
                         : ''
                     }
                   >
@@ -709,8 +762,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                     exit={{ opacity: 0, scale: 0.85 }}
                     transition={{ duration: 0.2 }}
                     className={
-                      isShowingPreviousTrick && playedRight.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-2 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                      (isShowingPreviousTrick || isGameResolved) && playedRight.playerId === lastTrickWinnerPlayerId
+                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
                         : ''
                     }
                   >
@@ -1205,10 +1258,41 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
           </motion.button>
         )}
 
+        {/* Below Table & Above Player Name: Rung Caller Face-Down Cards Panel */}
+        {faceDownCallerCards && faceDownCallerCards.length > 0 && !isRungRevealPaused && (
+          <div className="flex justify-center my-1.5 sm:my-2 z-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-1.5 px-3 py-1 bg-slate-950/95 border-2 border-amber-500/70 rounded-xl backdrop-blur-md shadow-lg"
+            >
+              <div className="text-[9px] sm:text-[10px] font-cinzel font-bold text-amber-300 flex items-center gap-1 flex-shrink-0">
+                <EyeOff className="w-3.5 h-3.5 text-amber-400" />
+                <span>{rungCaller?.name || 'Caller'}'s Hidden ({faceDownCallerCards.length}):</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {faceDownCallerCards.map((fd, i) => (
+                  <div key={fd.id || i} className="flex flex-col items-center hover:z-30 hover:-translate-y-0.5 transition-transform">
+                    {fd.isRevealed ? (
+                      <PlayingCard card={fd.card} size="xs" badge={`T${fd.trickNumber}`} />
+                    ) : (
+                      <PlayingCard faceDown size="xs" badge={`T${fd.trickNumber}`} />
+                    )}
+                    <span className="text-[7px] sm:text-[8px] text-amber-300/80 font-semibold leading-none mt-0.5">
+                      {fd.isRevealed ? 'Revealed' : 'Hidden'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {/* Player Badge & Hand Container */}
         <div className="w-full max-w-5xl flex flex-col items-center">
+          {/* Player Badge (Below Face-Down Cards, Above Hand Cards) */}
           {bottomPlayer && (
-            <div className="mb-0.5 sm:mb-1 flex">
+            <div className="mb-1 sm:mb-1.5 flex z-10">
               <PlayerBadge
                 player={bottomPlayer}
                 isCurrentTurn={bottomPlayer.id === currentTurnPlayerId}
@@ -1222,31 +1306,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
             </div>
           )}
 
-          {/* Interactive Hand Cards + Caller Hidden Cards + Dedicated Separate Rung Slot */}
+          {/* Interactive Hand Cards + Dedicated Separate Rung Slot */}
           <div className="flex items-start justify-center gap-1.5 sm:gap-3 max-w-full">
-            {/* Rung Caller Hidden / Revealed Cards Panel (Left of Hand Cards, Top-Aligned) */}
-            {faceDownCallerCards && faceDownCallerCards.length > 0 && !isRungRevealPaused && (
-              <div className="flex flex-col items-center flex-shrink-0 p-1 sm:p-2 bg-slate-950/90 border-2 border-amber-500/60 rounded-xl backdrop-blur-md shadow-2xl mr-1 sm:mr-2">
-                <div className="text-[9px] sm:text-[10px] font-cinzel font-bold text-amber-300 mb-1 flex items-center gap-1">
-                  <EyeOff className="w-3 h-3 text-amber-400" />
-                  <span>{rungCaller?.name || 'Caller'}'s Hidden ({faceDownCallerCards.length})</span>
-                </div>
-                <div className="flex gap-1 sm:gap-1.5">
-                  {faceDownCallerCards.map((fd, i) => (
-                    <div key={fd.id || i} className="flex flex-col items-center hover:z-30 hover:-translate-y-1 transition-transform">
-                      {fd.isRevealed ? (
-                        <PlayingCard card={fd.card} size="xs" badge={`T${fd.trickNumber}`} />
-                      ) : (
-                        <PlayingCard faceDown size="xs" badge={`T${fd.trickNumber}`} />
-                      )}
-                      <span className="text-[8px] text-amber-300/80 font-semibold mt-0.5">
-                        {fd.isRevealed ? 'Revealed' : 'Face-Down'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Mobile 2-Row Layout for Hand Cards (< sm screens) */}
             <div className="flex sm:hidden flex-col items-center gap-1 max-w-full overflow-x-auto py-0.5">

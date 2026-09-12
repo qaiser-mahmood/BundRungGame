@@ -97,6 +97,8 @@ export class BundRungEngine extends BaseRungEngine {
   // Match / KHOTI
   private isMatchOver: boolean = false;
   private isStartingNewMatch: boolean = false;
+  private isPostKhoti: boolean = false;
+  private initialSeatPlayerIds: string[] = [];
   private losingTeamKhoti: TeamId | null = null;
   private matchWinnerTeam: TeamId | null = null;
   private lastGameWinningTeam: TeamId | null = null;
@@ -158,6 +160,9 @@ export class BundRungEngine extends BaseRungEngine {
     this.surrenderVotes.TEAM_1.clear();
     this.surrenderVotes.TEAM_2.clear();
     this.isMatchOver = false;
+    this.isStartingNewMatch = false;
+    this.isPostKhoti = false;
+    this.initialSeatPlayerIds = [];
     this.losingTeamKhoti = null;
     this.matchWinnerTeam = null;
     this.statusMessage = 'Waiting for other players to join...';
@@ -181,9 +186,10 @@ export class BundRungEngine extends BaseRungEngine {
     // Section 2.2: Opposite Seating Requirement (Team 1 at Top/Bottom; Team 2 at Left/Right)
     const team: TeamId = seat === 'BOTTOM' || seat === 'TOP' ? 'TEAM_1' : 'TEAM_2';
 
+    const cleanPlayerName = (name || `Player ${this.players.length + 1}`).replace(/\s*\(AI\)/gi, '').trim();
     const player: Player = {
       id,
-      name: name || `Player ${this.players.length + 1}`,
+      name: cleanPlayerName || `Player ${this.players.length + 1}`,
       seat,
       team,
       isBot,
@@ -271,11 +277,11 @@ export class BundRungEngine extends BaseRungEngine {
   }
 
   public fillWithBots(): void {
-    const botNames = ['Zara (AI)', 'Arjun (AI)', 'Bilal (AI)'];
+    const botNames = ['Zara', 'Arjun', 'Bilal', 'Hamza', 'Ayesha', 'Tariq'];
     let nameIdx = 0;
     while (this.players.length < 4) {
       const botId = `bot_${Date.now()}_${this.players.length + 1}`;
-      this.addPlayer(botId, botNames[nameIdx++] || `Bot ${this.players.length + 1}`, true);
+      this.addPlayer(botId, botNames[nameIdx++] || `Player ${this.players.length + 1}`, true);
     }
   }
 
@@ -324,11 +330,27 @@ export class BundRungEngine extends BaseRungEngine {
     player.seat = seat;
   }
 
+  public hasSwappedSeats(): boolean {
+    if (!this.isPostKhoti || this.initialSeatPlayerIds.length !== 4) return false;
+    return this.players.some((p, i) => p.id !== this.initialSeatPlayerIds[i]);
+  }
+
+  public startWithoutToss(): void {
+    if (this.players.length !== 4) {
+      throw new Error('Cannot start game without 4 players');
+    }
+    this.isPostKhoti = false;
+    this.phase = 'PRE_DEAL_SHUFFLE';
+    const dealer = this.players[this.dealerIndex];
+    this.statusMessage = `${dealer.name} is the dealer. You may shuffle the deck or offer cut directly.`;
+  }
+
   // --- Phase 3: Interactive Toss Mechanics ---
   public startInitialToss(): void {
     if (this.players.length !== 4) {
       throw new Error('Cannot start toss without 4 players');
     }
+    this.isPostKhoti = false;
     this.phase = 'INITIAL_TOSS';
     this.scoringEngine.resetMatch(); // Reset scorecard to 0 for every toss
     this.gameIndex = 1;
@@ -959,7 +981,7 @@ export class BundRungEngine extends BaseRungEngine {
           this.isMatchOver = true;
           this.losingTeamKhoti = result.losingTeam;
           this.matchWinnerTeam = result.winningTeam;
-          this.statusMessage = `MATCH OVER: Defending team surrendered! ${this.getTeamName(result.losingTeam || 'TEAM_1')} reached ${result.newDealerScore} pts (KHOTI)!`;
+          this.statusMessage = `Match Over: ${this.getTeamName(result.losingTeam || 'TEAM_1')} is KHOTI (${result.newDealerScore} pts).`;
         } else {
           if (result.dealerTransferred) {
             this.dealerIndex = (this.dealerIndex + 1) % 4;
@@ -1080,6 +1102,7 @@ export class BundRungEngine extends BaseRungEngine {
       }
       playedCard = this.trumpCard;
       this.trumpCard = null;
+      this.chosenTrumpCard = null;
       if (!this.isTrumpRevealed) {
         this.isTrumpRevealed = true;
       }
@@ -1380,7 +1403,7 @@ export class BundRungEngine extends BaseRungEngine {
       this.isMatchOver = true;
       this.losingTeamKhoti = result.losingTeam;
       this.matchWinnerTeam = result.winningTeam;
-      this.statusMessage = `MATCH OVER: ${this.getTeamName(result.losingTeam || 'TEAM_1')} reached ${result.newDealerScore} points and is declared KHOTI!`;
+      this.statusMessage = `Match Over: ${this.getTeamName(result.losingTeam || 'TEAM_1')} is KHOTI (${result.newDealerScore} pts).`;
     } else {
       const nextGame = this.gameIndex + 1;
       if (result.dealerTransferred) {
@@ -1398,7 +1421,10 @@ export class BundRungEngine extends BaseRungEngine {
 
   public dealerDistributeNextGame(playerId: string): void {
     const dealer = this.players[this.dealerIndex];
-    if (!dealer || dealer.id !== playerId) {
+    if (!dealer) {
+      throw new Error('No active dealer found');
+    }
+    if (dealer.id !== playerId && !dealer.isBot) {
       throw new Error('Only the active dealer can distribute cards for the next game');
     }
     if (this.phase !== 'GAME_RESOLVED') {
@@ -1463,13 +1489,14 @@ export class BundRungEngine extends BaseRungEngine {
 
   public getTeamName(team: TeamId): string {
     if (this.customTeamNames[team]) {
-      return this.customTeamNames[team]!;
+      return this.customTeamNames[team]!.replace(/\s*\(AI\)/gi, '').trim();
     }
     const teamPlayers = this.players.filter((p) => p.team === team);
+    const cleanName = (n: string) => n.replace(/\s*\(AI\)/gi, '').trim();
     if (teamPlayers.length === 2) {
-      return `${teamPlayers[0].name}/${teamPlayers[1].name} Team`;
+      return `${cleanName(teamPlayers[0].name)}/${cleanName(teamPlayers[1].name)} Team`;
     } else if (teamPlayers.length === 1) {
-      return `${teamPlayers[0].name}'s Team`;
+      return `${cleanName(teamPlayers[0].name)}'s Team`;
     }
     return team === 'TEAM_1' ? 'Team 1' : 'Team 2';
   }
@@ -1594,10 +1621,11 @@ export class BundRungEngine extends BaseRungEngine {
     this.surrenderVotes.TEAM_1.clear();
     this.surrenderVotes.TEAM_2.clear();
 
-    // User requirement: Do NOT distribute 5 cards automatically. Transition to GAME_RESOLVED so the New Dealer clicks to deal!
-    this.phase = 'GAME_RESOLVED';
+    this.phase = 'TEAM_FORMATION';
+    this.isPostKhoti = true;
+    this.initialSeatPlayerIds = this.players.map((p) => p.id);
     const newDealer = this.players[this.dealerIndex];
-    this.statusMessage = `New Match Ready! ${newDealer.name} is the new dealer. ${newDealer.name} must click 'Distribute 5 Cards' to start Game 1.`;
+    this.statusMessage = `New Match: You may swap seats if desired. If seats are kept, ${newDealer.name} deals; if swapped, Toss begins.`;
   }
 
   // --- Show Hand & Team Surrender ---
@@ -1679,7 +1707,7 @@ export class BundRungEngine extends BaseRungEngine {
       trumpCallerPlayerId: this.trumpCallerPlayerId,
       trumpCardPlaced: this.trumpCard !== null,
       trumpCardPlayerId: this.trumpCallerPlayerId,
-      revealedTrumpCard: this.isTrumpRevealed && (this.chosenTrumpCard || this.trumpCard) ? { ...(this.chosenTrumpCard || this.trumpCard)! } : null,
+      revealedTrumpCard: this.isTrumpRevealed && this.trumpCard ? { ...this.trumpCard } : null,
       openTrumpModifier: this.openTrumpModifier,
       bwinjiModifier: this.bwinjiModifier,
       firstRoundOpenTrumpAvailable:
@@ -1728,6 +1756,8 @@ export class BundRungEngine extends BaseRungEngine {
       losingTeamKhoti: this.losingTeamKhoti,
       matchWinnerTeam: this.matchWinnerTeam,
       lastGameWinningTeam: this.lastGameWinningTeam,
+      isPostKhoti: this.isPostKhoti,
+      hasSwappedSeats: this.hasSwappedSeats(),
       statusMessage: this.statusMessage,
     };
   }

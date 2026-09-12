@@ -35,10 +35,14 @@ interface LobbyViewProps {
   onOpenTutorial?: () => void;
   onChangeGame?: () => void;
   statusMessage: string;
+  isPostKhoti?: boolean;
+  hasSwappedSeats?: boolean;
+  dealerPlayerIndex?: number;
   speakingPlayerIds?: Set<string>;
   mutedPlayerIds?: Set<string>;
   isMicMuted?: boolean;
   isTableDeafened?: boolean;
+  micAudioLevel?: number;
   onToggleMic?: () => void;
   onToggleDeafen?: () => void;
 }
@@ -56,10 +60,14 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   onOpenTutorial,
   onChangeGame,
   statusMessage,
+  isPostKhoti = false,
+  hasSwappedSeats = false,
+  dealerPlayerIndex,
   speakingPlayerIds,
   mutedPlayerIds,
   isMicMuted = true,
   isTableDeafened = false,
+  micAudioLevel = 0,
   onToggleMic,
   onToggleDeafen,
 }) => {
@@ -215,6 +223,28 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
                   {!isMicMuted ? <Mic className="w-3.5 h-3.5 text-emerald-200 animate-pulse" /> : <MicOff className="w-3.5 h-3.5 text-slate-400" />}
                   <span>{!isMicMuted ? 'Mic On' : 'Mic Off'}</span>
                 </button>
+
+                {/* Live Mic Volume Level Indicator in Lobby */}
+                {!isMicMuted && (
+                  <div className="flex items-center gap-0.5 px-1.5 py-1 bg-slate-950/80 rounded border border-emerald-500/30" title={`Live Mic Volume: ${micAudioLevel}%`}>
+                    {[1, 2, 3, 4].map((barIdx) => {
+                      const threshold = barIdx * 20;
+                      const isActive = micAudioLevel >= threshold;
+                      return (
+                        <div
+                          key={barIdx}
+                          className={`w-1 rounded-full transition-all duration-75 ${
+                            isActive
+                              ? barIdx > 3
+                                ? 'bg-amber-400 h-3'
+                                : 'bg-emerald-400 h-2.5'
+                              : 'bg-slate-700/50 h-1'
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
 
                 {onToggleDeafen && (
                   <button
@@ -577,22 +607,43 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
               }}
               className="px-5 py-3 bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg cursor-pointer"
             >
-              <Bot className="w-4 h-4" /> Fill with Smart AI Bots
+              <Bot className="w-4 h-4" /> Fill with Bots
             </button>
           )}
 
           {isFull && (
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                sound.playTrumpReveal();
-                onStartToss();
-              }}
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-cinzel font-bold text-base rounded-xl transition shadow-glow-gold flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Play className="w-5 h-5 fill-current" /> Let's Play (Start Toss)
-            </motion.button>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+              {isPostKhoti && (
+                <div className="text-xs text-slate-300 bg-slate-800/80 px-3 py-2 rounded-xl border border-amber-500/30 text-center sm:text-left">
+                  {hasSwappedSeats ? (
+                    <span className="text-amber-300 font-semibold flex items-center gap-1.5">
+                      <span>🔄</span> Seats swapped: Toss will decide dealer.
+                    </span>
+                  ) : (
+                    <span className="text-slate-300 flex items-center gap-1.5">
+                      <span>✓</span> Seats kept: <strong className="text-amber-300">{players[dealerPlayerIndex ?? 0]?.name || 'Dealer'}</strong> deals as per rules.
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  sound.playTrumpReveal();
+                  onStartToss();
+                }}
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-cinzel font-bold text-base rounded-xl transition shadow-glow-gold flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Play className="w-5 h-5 fill-current" />
+                {isPostKhoti
+                  ? hasSwappedSeats
+                    ? 'Start Toss'
+                    : 'Start Game (Without Toss)'
+                  : "Let's Play (Start Toss)"}
+              </motion.button>
+            </div>
           )}
         </div>
       </motion.div>

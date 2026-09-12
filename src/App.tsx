@@ -17,7 +17,6 @@ import { BiddingModal } from './components/BiddingModal';
 import { TableLayout } from './components/TableLayout';
 import { ScorecardModal } from './components/ScorecardModal';
 import { GameOverModal } from './components/GameOverModal';
-import { GameResolvedModal } from './components/GameResolvedModal';
 import { TutorialModal } from './components/TutorialModal';
 import { useVoiceChat } from './hooks/useVoiceChat';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
@@ -35,6 +34,7 @@ export const App: React.FC = () => {
   const {
     isMicMuted,
     isTableDeafened,
+    micAudioLevel,
     speakingPlayerIds,
     mutedPlayerIds,
     toggleMic,
@@ -106,9 +106,6 @@ export const App: React.FC = () => {
   const handleWelcomeJoin = (name: string, gameType: GameType) => {
     socket.emit('joinLobby', { playerName: name, gameType });
     setShowWelcomePortal(false);
-    if (isMicMuted) {
-      toggleMic();
-    }
   };
 
   const handleJoinLobby = (name: string) => {
@@ -191,6 +188,7 @@ export const App: React.FC = () => {
         onResumeAfterTrumpReveal={() => socket.emit('resumeAfterTrumpReveal')}
         onToggleShowHand={() => socket.emit('toggleShowHand')}
         onVoteSurrender={() => socket.emit('voteSurrender')}
+        onDistributeNextGame={() => socket.emit('dealerDistributeNextGame')}
         speakingPlayerIds={speakingPlayerIds}
         mutedPlayerIds={mutedPlayerIds}
         isMicMuted={isMicMuted}
@@ -207,6 +205,7 @@ export const App: React.FC = () => {
           onToggleMic={toggleMic}
           onSelectGameAndJoin={handleWelcomeJoin}
           activePlayerCount={publicState?.players?.length || 0}
+          micAudioLevel={micAudioLevel}
         />
       )}
 
@@ -217,6 +216,9 @@ export const App: React.FC = () => {
           myPlayerId={myPlayerId}
           gameType={publicState.gameType || 'BUND_RUNG'}
           teamNames={publicState.teamNames}
+          isPostKhoti={publicState.isPostKhoti}
+          hasSwappedSeats={publicState.hasSwappedSeats}
+          dealerPlayerIndex={publicState.dealerPlayerIndex}
           onJoinLobby={handleJoinLobby}
           onAddBots={handleAddBots}
           onStartToss={() => socket.emit('startMatchToss')}
@@ -233,6 +235,7 @@ export const App: React.FC = () => {
           mutedPlayerIds={mutedPlayerIds}
           isMicMuted={isMicMuted}
           isTableDeafened={isTableDeafened}
+          micAudioLevel={micAudioLevel}
           onToggleMic={toggleMic}
           onToggleDeafen={toggleDeafen}
         />
@@ -347,24 +350,6 @@ export const App: React.FC = () => {
           activeDealerTeam={activeDealer.team}
           teamNames={publicState.teamNames}
           onClose={() => setShowScorecardModal(false)}
-        />
-      )}
-
-      {/* 5b. Game Resolved / Next Game Modal (Between 13-trick Games) */}
-      {phase === 'GAME_RESOLVED' && !publicState.isMatchOver && (
-        <GameResolvedModal
-          gameIndex={publicState.gameIndex}
-          players={publicState.players}
-          dealerPlayerIndex={publicState.dealerPlayerIndex}
-          myPlayerId={myPlayerId}
-          team1TricksWon={publicState.team1TricksWon}
-          team2TricksWon={publicState.team2TricksWon}
-          lastGameWinningTeam={publicState.lastGameWinningTeam}
-          scorecard={publicState.scorecard}
-          statusMessage={publicState.statusMessage}
-          teamNames={publicState.teamNames}
-          onDistributeNextGame={() => socket?.emit('dealerDistributeNextGame')}
-          onOpenScorecard={() => setShowScorecardModal(true)}
         />
       )}
 

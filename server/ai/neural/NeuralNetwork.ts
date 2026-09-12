@@ -46,7 +46,7 @@ export class NeuralNetwork {
   public b_adv2: Float32Array; // [outputSize]
 
   constructor(
-    inputSize: number = 229,
+    inputSize: number = 241,
     sharedSize1: number = 256,
     sharedSize2: number = 128,
     valHiddenSize: number = 64,
@@ -518,7 +518,7 @@ export class NeuralNetwork {
    */
   public static fromJSON(data: any): NeuralNetwork {
     const net = new NeuralNetwork(
-      data.inputSize || 229,
+      data.inputSize || 241,
       data.sharedSize1 || 256,
       data.sharedSize2 || 128,
       data.valHiddenSize || 64,

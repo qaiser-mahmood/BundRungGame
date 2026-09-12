@@ -82,8 +82,8 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose })
           text: 'In the lobby, click any two player cards to swap seats with your desired partner before beginning.',
         },
         {
-          title: 'Smart Bots & Team Names',
-          text: 'Fill empty seats instantly with AI Bots if playing with 2 or 3 friends, and customize team names with the pencil icon.',
+          title: 'Bots & Team Names',
+          text: 'Fill empty seats instantly with Bots if playing with 2 or 3 friends, and customize team names with the pencil icon.',
         },
       ],
       interactiveType: 'SEATING',

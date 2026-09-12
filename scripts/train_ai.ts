@@ -80,12 +80,25 @@ async function trainSelfPlay(totalGames: number = 1000) {
     }
 
     // Track state transitions per trick
-    interface BotHistoryItem {
-      botId: string;
+    // Track state transitions per bot player independently (True Multi-Agent MDP)
+    interface PendingTransition {
       state: Float32Array;
       actionIndex: number;
+      cardPlayed: Card;
+      wasAceDowngrade: boolean;
     }
-    let currentTrickHistory: BotHistoryItem[] = [];
+    const pendingTransitions: Record<string, PendingTransition | null> = {
+      bot_south: null,
+      bot_east: null,
+      bot_north: null,
+      bot_west: null,
+    };
+    const playerAccumulatedReward: Record<string, number> = {
+      bot_south: 0,
+      bot_east: 0,
+      bot_north: 0,
+      bot_west: 0,
+    };
 
     // Main Trick Playing Loop
     let tricksPlayed = 0;
@@ -119,8 +132,40 @@ async function trainSelfPlay(totalGames: number = 1000) {
         return c ? StateVectorizer.cardToIndex(c) : 0;
       });
 
-      // Epsilon-greedy action selection
-      const chosenActionIndex = learner.onlineNetwork.selectAction(stateVector, legalIndices, epsilon);
+      // Close this player's PREVIOUS transition now that we have their TRUE next state (s') & legal actions (a')
+      const prevTransition = pendingTransitions[turnPlayerId];
+      if (prevTransition) {
+        learner.recordExperience({
+          state: prevTransition.state,
+          action: prevTransition.actionIndex,
+          reward: playerAccumulatedReward[turnPlayerId],
+          nextState: stateVector,
+          done: false,
+          legalActionsNext: legalIndices,
+        });
+        playerAccumulatedReward[turnPlayerId] = 0;
+      }
+
+      // Action selection (Hybrid: Guided exploitation of Master Bot heuristics with epsilon exploration)
+      let chosenActionIndex: number;
+      if (Math.random() < epsilon) {
+        chosenActionIndex = legalIndices[Math.floor(Math.random() * legalIndices.length)];
+      } else {
+        // Evaluate candidate cards using Master heuristics + Neural evaluation
+        const masterCard = BotPlayer.chooseMasterCard(
+          engine,
+          turnPlayerId,
+          [...privateState.myHand, privateState.myTrumpCard].filter((c): c is Card => c !== null && legalCards.includes(c.id)),
+          [...privateState.myHand, privateState.myTrumpCard].filter((c): c is Card => c !== null),
+          publicState,
+          privateState
+        );
+        chosenActionIndex = StateVectorizer.cardToIndex(masterCard);
+        if (!legalIndices.includes(chosenActionIndex)) {
+          chosenActionIndex = learner.onlineNetwork.selectAction(stateVector, legalIndices, 0.0);
+        }
+      }
+
       const chosenCardData = StateVectorizer.indexToCard(chosenActionIndex);
 
       // Find the card ID matching the chosen action
@@ -129,11 +174,19 @@ async function trainSelfPlay(totalGames: number = 1000) {
       ) || [...privateState.myHand, privateState.myTrumpCard].find((c) => c && legalCards.includes(c.id));
 
       if (cardToPlay) {
-        currentTrickHistory.push({
-          botId: turnPlayerId,
+        const lastTrickBefore = publicState.completedTricks[publicState.completedTricks.length - 1];
+        const isConsecutiveAceLead = publicState.currentTrick.cards.length === 0 &&
+          cardToPlay.rank === 'A' &&
+          lastTrickBefore &&
+          lastTrickBefore.leadPlayerId === turnPlayerId &&
+          lastTrickBefore.cards[0]?.card?.rank === 'A';
+
+        pendingTransitions[turnPlayerId] = {
           state: stateVector,
           actionIndex: chosenActionIndex,
-        });
+          cardPlayed: cardToPlay,
+          wasAceDowngrade: isConsecutiveAceLead,
+        };
 
         const completedBefore = publicState.completedTricks.length;
         engine.playCard(turnPlayerId, cardToPlay.id);
@@ -147,26 +200,54 @@ async function trainSelfPlay(totalGames: number = 1000) {
           const winnerPlayer = players.find((p) => p.id === trickWinnerId);
           const winnerTeam = winnerPlayer?.team;
 
+          // Check if this trick scored a consecutive streak Hand!
+          const trickNum = stateAfter.completedTricks.length;
+          const wasStreakSecured = trickNum >= 2 &&
+            stateAfter.lastTrickWinnerPlayerId !== null &&
+            (publicState.lastTrickWinnerPlayerId === trickWinnerId ||
+             (publicState.lastTrickWinnerPlayerId && players.find((p) => p.id === publicState.lastTrickWinnerPlayerId)?.team === winnerTeam));
+
           // Assign rewards to all 4 participants of this trick
-          for (const item of currentTrickHistory) {
-            const p = players.find((pl) => pl.id === item.botId);
-            const isWinner = item.botId === trickWinnerId;
+          for (const botId of botIds) {
+            const p = players.find((pl) => pl.id === botId);
+            const isWinner = botId === trickWinnerId;
             const isPartner = p?.team === winnerTeam && !isWinner;
+            const isOurTeamWin = p?.team === winnerTeam;
 
-            const reward = isWinner ? 1.0 : isPartner ? 0.8 : -1.0;
-            const done = tricksPlayed >= 13;
+            let trickReward = isWinner ? 1.0 : isPartner ? 0.8 : -1.0;
+            if (isOurTeamWin && wasStreakSecured) {
+              trickReward += 2.5; // Strategic 2-streak Hand Reward!
+            }
 
-            learner.recordExperience({
-              state: item.state,
-              action: item.actionIndex,
-              reward,
-              nextState: stateVector,
-              done,
-              legalActionsNext: legalIndices,
-            });
+            const pending = pendingTransitions[botId];
+            if (pending) {
+              // Penalty for Ace Downgrade blunder
+              if (pending.wasAceDowngrade) {
+                trickReward -= 2.0;
+              }
+              // Penalty for prematurely squandering Trump on non-streak trick
+              const activeTrump = stateAfter.trumpSuit || stateAfter.secretTrumpSuit;
+              const wasTrump = activeTrump && pending.cardPlayed.suit === activeTrump;
+              if (wasTrump && !isOurTeamWin && !wasStreakSecured && trickNum < 9) {
+                trickReward -= 1.5;
+              }
+
+              // Penalty for Caller violating Trump Quarantine: leading trump in tricks 1-5 while holding outside cards
+              const isCaller = botId === stateAfter.trumpCallerPlayerId;
+              const isLeadCard = lastTrick.leadPlayerId === botId;
+              if (isCaller && isLeadCard && wasTrump && trickNum <= 5) {
+                trickReward -= 2.5; // Strict penalty for early trump lead by caller
+              }
+
+              // Reward for caller/partner cashing outside Aces early
+              if (isOurTeamWin && isLeadCard && pending.cardPlayed.rank === 'A' && !wasTrump && trickNum <= 5) {
+                trickReward += 1.5; // Solid reward for establishing outside boss Aces
+              }
+            }
+
+            playerAccumulatedReward[botId] = (playerAccumulatedReward[botId] || 0) + trickReward;
           }
 
-          currentTrickHistory = [];
           learner.trainBatch();
         }
       } else {
@@ -174,9 +255,31 @@ async function trainSelfPlay(totalGames: number = 1000) {
       }
     }
 
-    // Game completed - tally scores
+    // Match completed - tally match-level rewards (+10 win / -10 loss)
     const finalPublicState = engine.getPublicState();
-    if (finalPublicState.team1TricksWon > finalPublicState.team2TricksWon) {
+    const team1WonMatch = finalPublicState.team1TricksWon > finalPublicState.team2TricksWon;
+
+    const players = engine.getPlayers();
+    for (const botId of botIds) {
+      const p = players.find((pl) => pl.id === botId);
+      const isTeam1 = p?.team === 'TEAM_1';
+      const isMatchWinner = (isTeam1 && team1WonMatch) || (!isTeam1 && !team1WonMatch);
+      const matchReward = isMatchWinner ? 10.0 : -10.0;
+
+      const prev = pendingTransitions[botId];
+      if (prev) {
+        learner.recordExperience({
+          state: prev.state,
+          action: prev.actionIndex,
+          reward: (playerAccumulatedReward[botId] || 0) + matchReward,
+          nextState: prev.state,
+          done: true,
+          legalActionsNext: [],
+        });
+      }
+    }
+
+    if (team1WonMatch) {
       team1Wins++;
     } else {
       team2Wins++;

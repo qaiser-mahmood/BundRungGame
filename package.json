@@ -10,7 +10,8 @@
     "build": "tsc && vite build",
     "start": "tsx server/server.ts",
     "test": "vitest run",
-    "train:ai": "tsx scripts/train_ai.ts"
+    "train:ai": "tsx scripts/train_ai.ts",
+    "train:imitate": "tsx scripts/train_expert_imitation.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

@@ -182,6 +182,8 @@ export interface PublicGameState {
   losingTeamKhoti: TeamId | null;
   matchWinnerTeam: TeamId | null;
   lastGameWinningTeam: TeamId | null;
+  isPostKhoti?: boolean;
+  hasSwappedSeats?: boolean;
 
   // Status message & Dynamic Team Names
   teamNames: { TEAM_1: string; TEAM_2: string };
@@ -239,8 +241,8 @@ export interface ClientToServerEvents {
   startNewMatch: () => void;
   toggleShowHand: () => void;
   voteSurrender: () => void;
-  voiceStreamSend: (data: { roomId?: string; playerId: string; audioChunk: string | ArrayBuffer; sampleRate?: number }) => void;
-  voiceMuteStatusChanged: (data: { roomId?: string; playerId: string; isMuted: boolean }) => void;
+  voiceStreamSend: (data: { roomId?: string; playerId?: string; socketId?: string; audioChunk: string | ArrayBuffer; sampleRate?: number }) => void;
+  voiceMuteStatusChanged: (data: { roomId?: string; playerId?: string; isMuted: boolean }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -249,6 +251,6 @@ export interface ServerToClientEvents {
   cardPlayedAnimation: (data: { playerId: string; card: Card }) => void;
   trickWonAnimation: (data: { winnerPlayerId: string; team: TeamId }) => void;
   khotiAnimation: (data: { losingTeam: TeamId }) => void;
-  voiceStreamReceive: (data: { playerId: string; audioChunk: string | ArrayBuffer; sampleRate?: number }) => void;
+  voiceStreamReceive: (data: { playerId: string; socketId?: string; audioChunk: string | ArrayBuffer; sampleRate?: number }) => void;
   voiceMuteStatusUpdated: (data: { playerId: string; isMuted: boolean }) => void;
 }

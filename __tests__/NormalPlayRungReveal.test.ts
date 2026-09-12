@@ -216,8 +216,9 @@ describe('Normal Play (Close Rung) & Rung Reveal Game Mechanics', () => {
 
     // Caller plays their chosen Rung card into trick 3
     engine.playCard('p1', p1RungCard.id);
-    // Even after playing, revealedTrumpCard stays persistent for the whole game!
-    expect(engine.getPublicState().revealedTrumpCard?.id).toBe(p1RungCard.id);
+    // Once played, revealedTrumpCard becomes null so placeholder displays the Rung suit instead!
+    expect(engine.getPublicState().revealedTrumpCard).toBe(null);
+    expect(engine.getPublicState().trumpSuit).toBe(p1RungCard.suit);
   });
 
   it('restricts Rung reveal requests to the opponent team only (caller teammate cannot ask)', () => {

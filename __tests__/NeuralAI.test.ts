@@ -48,7 +48,7 @@ describe('Neural AI & Reinforcement Learning Architecture', () => {
 
     const vector = StateVectorizer.vectorize(publicState, privateState, 'p1', players);
     expect(vector.length).toBe(StateVectorizer.FEATURE_COUNT);
-    expect(vector.length).toBe(229);
+    expect(vector.length).toBe(245);
 
     // All values must be finite and within reasonable bounds
     for (let i = 0; i < vector.length; i++) {

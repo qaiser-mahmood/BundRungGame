@@ -138,20 +138,10 @@ function checkAndRunBotTurns(room: GameRoom): void {
       }
     }
 
-    // Game Resolved phase (Bot Dealer distributes next game after 3.5s delay if not match over)
+    // Game Resolved phase: Do NOT automatically advance. Await human player clicking 'Play Next Game'!
     else if (phase === 'GAME_RESOLVED' && !publicState.isMatchOver) {
-      const dealer = players[publicState.dealerPlayerIndex];
-      if (dealer && dealer.isBot) {
-        setTimeout(() => {
-          try {
-            if (room.engine.getPhase() === 'GAME_RESOLVED') {
-              room.engine.dealerDistributeNextGame(dealer.id);
-              broadcastRoomState(room);
-            }
-          } catch (e) {}
-        }, 3500);
-        return;
-      }
+      // Intentionally idle. User requirement: page must not change automatically.
+      return;
     }
 
     // Dealer Prepare / Shuffle (Bot Dealer)
@@ -357,8 +347,15 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('startMatchToss', () => {
     try {
-      room.engine.startInitialToss();
-      broadcastRoomState(room);
+      if (room.engine.getPublicState().isPostKhoti && !room.engine.hasSwappedSeats()) {
+        room.engine.startWithoutToss();
+        broadcastRoomState(room);
+        checkAndRunBotTurns(room);
+      } else {
+        room.engine.startInitialToss();
+        broadcastRoomState(room);
+        checkAndRunBotTurns(room);
+      }
     } catch (err: any) {
       socket.emit('notification', { message: err.message, type: 'error' });
     }
@@ -586,7 +583,10 @@ io.on('connection', (socket: Socket) => {
     const playerId = room.socketMap[socket.id];
     if (playerId) {
       try {
-        room.engine.dealerDistributeNextGame(playerId);
+        const dealerIndex = room.engine.getPublicState().dealerPlayerIndex;
+        const dealer = room.engine.getPlayers()[dealerIndex];
+        const actingPlayerId = (dealer && dealer.isBot) ? dealer.id : playerId;
+        room.engine.dealerDistributeNextGame(actingPlayerId);
         broadcastRoomState(room);
         checkAndRunBotTurns(room);
       } catch (err: any) {
@@ -621,6 +621,7 @@ io.on('connection', (socket: Socket) => {
     try {
       room.engine.startNewMatch();
       broadcastRoomState(room);
+      checkAndRunBotTurns(room);
     } catch (err: any) {
       socket.emit('notification', { message: err.message, type: 'error' });
     }
@@ -651,14 +652,21 @@ io.on('connection', (socket: Socket) => {
   });
 
   // --- Voice Chat Streaming Handlers ---
-  socket.on('voiceStreamSend', ({ playerId, audioChunk, sampleRate }) => {
-    // Relay audio chunk to all other sockets in this room
-    socket.broadcast.emit('voiceStreamReceive', { playerId, audioChunk, sampleRate });
+  socket.on('voiceStreamSend', ({ playerId, socketId, audioChunk, sampleRate }) => {
+    // Relay audio chunk to all other sockets, resolving sender identity reliably
+    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
+    socket.broadcast.emit('voiceStreamReceive', {
+      playerId: effectivePlayerId,
+      socketId: socketId || socket.id,
+      audioChunk,
+      sampleRate,
+    });
   });
 
   socket.on('voiceMuteStatusChanged', ({ playerId, isMuted }) => {
     // Broadcast mute status to all clients
-    io.emit('voiceMuteStatusUpdated', { playerId, isMuted });
+    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
+    io.emit('voiceMuteStatusUpdated', { playerId: effectivePlayerId, isMuted });
   });
 
   socket.on('disconnect', () => {

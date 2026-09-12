@@ -441,21 +441,23 @@ describe('Bund Rung Engine Full State Flow', () => {
     (engine as any).losingTeamKhoti = 'TEAM_1'; // Dealer's team lost!
     (engine as any).matchWinnerTeam = 'TEAM_2';
 
-    // Start New Match
+    // Start New Match -> transitions to TEAM_FORMATION so players can swap seats if desired
     engine.startNewMatch();
 
     let state = engine.getPublicState();
-    expect(state.phase).toBe('GAME_RESOLVED'); // Prompt ready, NOT auto-dealt!
+    expect(state.phase).toBe('TEAM_FORMATION');
+    expect(state.isPostKhoti).toBe(true);
+    expect(state.hasSwappedSeats).toBe(false);
     expect(state.gameIndex).toBe(1);
     expect(state.isMatchOver).toBe(false);
     // Dealership transferred to partner Charlie (idx 2): (0 + 2) % 4 = 2
     expect(state.dealerPlayerIndex).toBe(2);
     expect(state.players[2].name).toBe('Charlie');
-    expect(state.statusMessage).toContain('Charlie is the new dealer');
 
-    // New dealer Charlie distributes cards for Game 1 and offers cut to Diana
-    engine.dealerDistributeNextGame('p3');
-    expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
+    // Case 1: Without swapping seats, starts without toss using Charlie as dealer
+    engine.startWithoutToss();
+    expect(engine.getPhase()).toBe('PRE_DEAL_SHUFFLE');
+    expect(engine.getPublicState().dealerPlayerIndex).toBe(2);
     engine.dealerOfferCut('p3');
     engine.performCut('p4', 20);
     expect(engine.getPublicState().phase).toBe('PRE_DEAL_SHUFFLE');
@@ -468,16 +470,22 @@ describe('Bund Rung Engine Full State Flow', () => {
     (engine as any).losingTeamKhoti = 'TEAM_2'; // Opponents lost!
     (engine as any).matchWinnerTeam = 'TEAM_1';
 
-    // Start New Match
+    // Start New Match -> transitions to TEAM_FORMATION
     engine.startNewMatch();
 
     state = engine.getPublicState();
-    expect(state.phase).toBe('GAME_RESOLVED');
-    expect(state.gameIndex).toBe(1);
+    expect(state.phase).toBe('TEAM_FORMATION');
+    expect(state.isPostKhoti).toBe(true);
+    expect(state.hasSwappedSeats).toBe(false);
     // Dealership transferred to next player on right (idx 3, Diana): (2 + 1) % 4 = 3
     expect(state.dealerPlayerIndex).toBe(3);
     expect(state.players[3].name).toBe('Diana');
-    expect(state.statusMessage).toContain('Diana is the new dealer');
+
+    // Case 2: Players ARE swapped -> hasSwappedSeats becomes true and game starts with toss
+    engine.swapPlayerSeats('p1', 'p2');
+    expect(engine.getPublicState().hasSwappedSeats).toBe(true);
+    engine.startInitialToss();
+    expect(engine.getPhase()).toBe('INITIAL_TOSS');
   });
 
   it('supports dynamic default team names and custom team names', () => {

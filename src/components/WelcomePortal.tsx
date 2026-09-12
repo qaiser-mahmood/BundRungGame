@@ -23,6 +23,7 @@ interface WelcomePortalProps {
   onToggleMic: () => void;
   onSelectGameAndJoin: (playerName: string, gameType: GameType) => void;
   activePlayerCount?: number;
+  micAudioLevel?: number;
 }
 
 export const WelcomePortal: React.FC<WelcomePortalProps> = ({
@@ -31,78 +32,16 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({
   onToggleMic,
   onSelectGameAndJoin,
   activePlayerCount = 0,
+  micAudioLevel = 0,
 }) => {
   const [name, setName] = useState<string>(() => {
     return localStorage.getItem('bund_rung_player_name') || initialPlayerName || '';
   });
   const [selectedRulesModal, setSelectedRulesModal] = useState<GameType | null>(null);
-  const [hasMicPermission, setHasMicPermission] = useState<boolean>(!isMicMuted);
-  const [audioLevel, setAudioLevel] = useState<number>(0);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
-  const audioStreamRef = useRef<MediaStream | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-
-  // Monitor live microphone volume level if mic is enabled
-  useEffect(() => {
-    if (isMicMuted) {
-      setHasMicPermission(false);
-      setAudioLevel(0);
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach((t) => t.stop());
-        audioStreamRef.current = null;
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      return;
-    }
-
-    let isSubscribed = true;
-    navigator.mediaDevices
-      ?.getUserMedia({ audio: true, video: false })
-      .then((stream) => {
-        if (!isSubscribed) return;
-        audioStreamRef.current = stream;
-        setHasMicPermission(true);
-
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(stream);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-        source.connect(analyser);
-        analyserRef.current = analyser;
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const updateLevel = () => {
-          if (!isSubscribed) return;
-          analyser.getByteFrequencyData(dataArray);
-          let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i];
-          }
-          const average = sum / dataArray.length;
-          setAudioLevel(Math.min(100, Math.round((average / 128) * 100)));
-          animationFrameRef.current = requestAnimationFrame(updateLevel);
-        };
-        updateLevel();
-      })
-      .catch((err) => {
-        console.warn('Microphone permission request error:', err);
-        setHasMicPermission(false);
-      });
-
-    return () => {
-      isSubscribed = false;
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach((t) => t.stop());
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isMicMuted]);
+  const hasMicPermission = !isMicMuted;
+  const audioLevel = !isMicMuted ? micAudioLevel : 0;
 
   const handleGrantMic = () => {
     sound.playCardSlide();
@@ -144,7 +83,7 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({
             BUND RUNG & COURT PIECE
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto mt-1">
-            Choose your game variant, set up your microphone for real-time table talk, and enjoy authentic 2v2 card battles with friends and smart AI bots.
+            Choose your game variant, set up your microphone for real-time table talk, and enjoy authentic 2v2 card battles with friends and smart bots.
           </p>
         </div>
 

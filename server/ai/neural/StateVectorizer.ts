@@ -6,7 +6,13 @@ export const ALL_RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 
 export class StateVectorizer {
   public static readonly BASE_FEATURE_COUNT = 52 + 52 + 52 + 4 + 5 + 16 + 2; // 183 base features
   public static readonly TACTICAL_FEATURE_COUNT = 9 + 10 + 9 + 2 + 3 + 5 + 4 + 4; // 46 concept-rich features
-  public static readonly FEATURE_COUNT = StateVectorizer.BASE_FEATURE_COUNT + StateVectorizer.TACTICAL_FEATURE_COUNT; // 229 features
+  public static readonly PLANNING_TEAMWORK_FEATURE_COUNT = 4 + 4 + 4; // 12 whole-game planning & teamwork features
+  public static readonly TRUMP_CONTROL_FEATURE_COUNT = 4; // 4 Trump Control & Opening Lead features
+  public static readonly FEATURE_COUNT =
+    StateVectorizer.BASE_FEATURE_COUNT +
+    StateVectorizer.TACTICAL_FEATURE_COUNT +
+    StateVectorizer.PLANNING_TEAMWORK_FEATURE_COUNT +
+    StateVectorizer.TRUMP_CONTROL_FEATURE_COUNT; // 245 features
 
   /**
    * Maps a card to a unique index from 0 to 51
@@ -193,10 +199,13 @@ export class StateVectorizer {
       if (currentTrickCards[0].playerId === partnerId) {
         const partnerCard = currentTrickCards[0].card;
         partnerLeadCardRankPower = partnerCard.playValue / 14.0;
-        if (partnerCard.playValue <= 9) {
+        const callerId = publicState.trumpCallerPlayerId;
+        const isCallerTeam = botPlayerId === callerId || partnerId === callerId;
+        // Void fishing only applies when Rung is unrevealed AND our team is trying to OPEN it (!isCallerTeam)!
+        if (!publicState.isTrumpRevealed && !isCallerTeam && partnerCard.playValue <= 9) {
           partnerLeadIsSmallOrMid = 1.0; // Fishing attempt! Overtake and return!
         } else {
-          partnerLeadIsHighHonor = 1.0; // Partner holding strength! Let them win!
+          partnerLeadIsHighHonor = 1.0; // Partner holding strength or protecting Rung! Let them win!
         }
       }
     }
@@ -329,13 +338,17 @@ export class StateVectorizer {
       publicState.trumpMode === 'OPEN_TRUMP'
     ) ? 1.0 : 0.0;
     features[offset++] = partnerIsOpenTrumpCaller;
-
+    const isCallerTeam = botPlayerId === callerId || partnerId === callerId;
     for (const suit of ALL_SUITS) {
       let partnerLed = 0;
-      for (const trick of publicState.completedTricks) {
-        if (trick.leadPlayerId === partnerId && trick.leadSuit === suit) {
-          partnerLed = 1.0;
-          break;
+      // Only signal partnerLed if Trump is revealed or if defending team trying to open trump.
+      // When stopping the Rung from opening, do NOT encourage returning partner's suit!
+      if (publicState.isTrumpRevealed || !isCallerTeam) {
+        for (const trick of publicState.completedTricks) {
+          if (trick.leadPlayerId === partnerId && trick.leadSuit === suit) {
+            partnerLed = 1.0;
+            break;
+          }
         }
       }
       features[offset++] = partnerLed;
@@ -373,6 +386,145 @@ export class StateVectorizer {
     features[offset++] = trickNum >= 5 && trickNum <= 8 ? 1.0 : 0.0;
     features[offset++] = trickNum >= 9 ? 1.0 : 0.0;
     features[offset++] = Math.min(1.0, trickNum / 13.0);
+
+    // 16. Whole-Game Planning & Endgame Horizon (4 features)
+    const endgameUrgency = trickNum >= 9 ? 1.0 : 0.0;
+    const tricksRemainingRatio = Math.max(0, 14 - trickNum) / 13.0;
+    const myTeamTricksCount = myTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+    const oppTeamTricksCount = myTeam === 'TEAM_1' ? publicState.team2TricksWon : publicState.team1TricksWon;
+    const myTeamHandsNeeded = Math.max(0, 7 - myTeamTricksCount) / 7.0;
+    const oppTeamHandsNeeded = Math.max(0, 7 - oppTeamTricksCount) / 7.0;
+    features[offset++] = endgameUrgency;
+    features[offset++] = tricksRemainingRatio;
+    features[offset++] = myTeamHandsNeeded;
+    features[offset++] = oppTeamHandsNeeded;
+
+    // 17. Strategic Trump Economy & Dominance (4 features)
+    let myTrumpRatio = 0;
+    let isTrumpDominant = 0;
+    let estimatedOpponentTrumps = 0;
+    let estimatedPartnerTrumps = 0;
+
+    if (trumpSuit) {
+      const myTrumpCount = myHand.filter((c) => c.suit === trumpSuit).length;
+      const playedTrumpCount = playedCards.filter((c) => c.suit === trumpSuit).length;
+      const remainingTrumps = Math.max(0, 13 - playedTrumpCount);
+      if (remainingTrumps > 0) {
+        myTrumpRatio = myTrumpCount / remainingTrumps;
+        const othersTrumps = remainingTrumps - myTrumpCount;
+        const partnerVoidSuit = partnerId ? publicState.completedTricks.some((t) => {
+          if (!t.leadSuit) return false;
+          const pc = t.cards.find((c) => c.playerId === partnerId);
+          return pc && pc.card && pc.card.suit !== t.leadSuit && t.leadSuit === trumpSuit;
+        }) : false;
+
+        const activeNonVoidOthers = Math.max(1, (partnerVoidSuit ? 0 : 1) + 2);
+        if (!partnerVoidSuit) {
+          estimatedPartnerTrumps = (othersTrumps / activeNonVoidOthers) / 13.0;
+        }
+        estimatedOpponentTrumps = Math.max(0, othersTrumps - (estimatedPartnerTrumps * 13.0)) / 13.0;
+
+        // Check if bot holds boss trump
+        const playedInTrump = playedCards.filter((c) => c.suit === trumpSuit);
+        let holdsBossTrump = false;
+        for (let pv = 14; pv >= 2; pv--) {
+          const wasPlayed = playedInTrump.some((c) => c.playValue === pv);
+          if (!wasPlayed) {
+            holdsBossTrump = myHand.some((c) => c.suit === trumpSuit && c.playValue === pv);
+            break;
+          }
+        }
+        if (holdsBossTrump && myTrumpCount >= 3) {
+          isTrumpDominant = 1.0;
+        }
+      }
+    }
+    features[offset++] = myTrumpRatio;
+    features[offset++] = isTrumpDominant;
+    features[offset++] = estimatedOpponentTrumps;
+    features[offset++] = estimatedPartnerTrumps;
+
+    // 18. Teamwork & Seat Strategy (4 features)
+    let isPartnerInFourthSeat = 0;
+    let partnerVoidInLead = 0;
+    let crossRuffAvailable = 0;
+    let partnerHoldsBossInSideSuit = 0;
+
+    if (currentTrickCards.length === 1 && partnerId) {
+      isPartnerInFourthSeat = 1.0; // Signals Second-Hand-Low opportunity
+    }
+
+    if (trick.leadSuit && partnerId) {
+      const partnerHasLeadVoid = publicState.completedTricks.some((t) => {
+        if (!t.leadSuit) return false;
+        const pc = t.cards.find((c) => c.playerId === partnerId);
+        return pc && pc.card && pc.card.suit !== t.leadSuit && t.leadSuit === trick.leadSuit;
+      });
+      if (partnerHasLeadVoid) partnerVoidInLead = 1.0;
+    }
+
+    if (activeTrumpSuit && partnerId) {
+      for (const suit of ALL_SUITS) {
+        if (suit !== activeTrumpSuit && myHand.some((c) => c.suit === suit)) {
+          const partnerVoidInSuit = publicState.completedTricks.some((t) => {
+            if (!t.leadSuit) return false;
+            const pc = t.cards.find((c) => c.playerId === partnerId);
+            return pc && pc.card && pc.card.suit !== t.leadSuit && t.leadSuit === suit;
+          });
+          if (partnerVoidInSuit) {
+            crossRuffAvailable = 1.0;
+            break;
+          }
+        }
+      }
+    }
+
+    for (const suit of ALL_SUITS) {
+      if (suit !== activeTrumpSuit) {
+        const partnerLedThis = publicState.completedTricks.some((t) => t.leadPlayerId === partnerId && t.leadSuit === suit);
+        if (partnerLedThis) partnerHoldsBossInSideSuit = 1.0;
+      }
+    }
+
+    features[offset++] = isPartnerInFourthSeat;
+    features[offset++] = partnerVoidInLead;
+    features[offset++] = crossRuffAvailable;
+    features[offset++] = partnerHoldsBossInSideSuit;
+
+    // 19. Trump Control & Opening Lead Invariants (4 features)
+    // - callerHoldsTrumpAce: 1.0 if this player is caller and holds Ace of Trump
+    // - isEarlyLeadTrick: 1.0 if trick <= 4 and bot is leading (encourages outside Aces)
+    // - holdsOutsideBossAce: 1.0 if player holds non-trump Ace
+    // - trumpQuarantineActive: 1.0 if player is caller and holds both trump and outside cards (should preserve trump)
+    let callerHoldsTrumpAce = 0;
+    let isEarlyLeadTrick = 0;
+    let holdsOutsideBossAce = 0;
+    let trumpQuarantineActive = 0;
+
+    const callerSuit = activeTrumpSuit || privateState.secretTrumpSuit;
+    if (callerSuit) {
+      const trumpsInHand = myHand.filter((c) => c.suit === callerSuit);
+      const outsideInHand = myHand.filter((c) => c.suit !== callerSuit);
+
+      if (botPlayerId === publicState.trumpCallerPlayerId && trumpsInHand.some((c) => c.rank === 'A')) {
+        callerHoldsTrumpAce = 1.0;
+      }
+      if (outsideInHand.some((c) => c.rank === 'A')) {
+        holdsOutsideBossAce = 1.0;
+      }
+      if (botPlayerId === publicState.trumpCallerPlayerId && trumpsInHand.length > 0 && outsideInHand.length > 0) {
+        trumpQuarantineActive = 1.0;
+      }
+    }
+    const currentTrickNum = publicState.completedTricks.length + 1;
+    if (currentTrickNum <= 4 && (currentTrickCards.length === 0 || !trick.leadSuit)) {
+      isEarlyLeadTrick = 1.0;
+    }
+
+    features[offset++] = callerHoldsTrumpAce;
+    features[offset++] = isEarlyLeadTrick;
+    features[offset++] = holdsOutsideBossAce;
+    features[offset++] = trumpQuarantineActive;
 
     return features;
   }
