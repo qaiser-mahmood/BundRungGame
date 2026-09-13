@@ -1,5 +1,6 @@
 import { Card, Suit, Player, PublicGameState } from '../../../shared/types';
 import { CardTracker } from './CardTracker';
+import { DynamicSuitEvaluator } from './DynamicSuitEvaluator';
 
 interface SimulatedPlayer {
   id: string;
@@ -211,9 +212,8 @@ export class MonteCarloPlanner {
         }
       }
 
-      // Discard lowest off-suit
-      hand.sort((a, b) => a.playValue - b.playValue);
-      return hand[0];
+      // Discard weakest card to optimize hand strength and create voids via Dynamic Hand Optimization
+      return DynamicSuitEvaluator.pickBestCardToShed(hand, hand, []);
     };
 
     // Forward simulation loop

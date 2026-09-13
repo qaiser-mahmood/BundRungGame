@@ -5,6 +5,7 @@ import { StateVectorizer } from './neural/StateVectorizer';
 import { LiveLearningEngine } from './neural/LiveLearningEngine';
 import { CardTracker } from './planning/CardTracker';
 import { MonteCarloPlanner } from './planning/MonteCarloPlanner';
+import { DynamicSuitEvaluator } from './planning/DynamicSuitEvaluator';
 
 export class BotPlayer {
   /**
@@ -214,59 +215,18 @@ export class BotPlayer {
       return;
     }
 
-    // 4. Bidding phase (5 cards) — Master Evaluation with Multi-Ace Synergy
+    // 4. Bidding phase (5 cards) — Dynamic 13-Weight Rank Scaling & Threshold Optimization
     if (phase === 'BIDDING_PHASE' && publicState.biddingTurnPlayerId === botPlayerId) {
       const hand = privateState.myHand;
-      const suitCounts: Record<Suit, Card[]> = {
-        HEARTS: [],
-        DIAMONDS: [],
-        CLUBS: [],
-        SPADES: [],
-      };
-
-      for (const card of hand) {
-        suitCounts[card.suit].push(card);
-      }
-
-      let bestSuit: Suit = 'SPADES';
-      let highestSuitScore = -1;
-
-      for (const [s, cards] of Object.entries(suitCounts)) {
-        const suit = s as Suit;
-        const hcp = BotPlayer.calculateHCP(cards);
-        const count = cards.length;
-        const score = count * 3 + hcp * 2.5;
-        if (score > highestSuitScore) {
-          highestSuitScore = score;
-          bestSuit = suit;
-        }
-      }
-
-      const bestSuitCards = suitCounts[bestSuit];
-      bestSuitCards.sort((a, b) => b.playValue - a.playValue);
-      const chosenCard = bestSuitCards[0] || hand[0];
-      const bestCount = bestSuitCards.length;
-      const bestHCP = BotPlayer.calculateHCP(bestSuitCards);
-      const totalAces = hand.filter((c) => c.rank === 'A').length;
-
       const isLastBidder = publicState.biddingPassCount === 3;
       const isRungAlreadyChosen = publicState.trumpMode === 'CLOSE_TRUMP';
 
-      if (isRungAlreadyChosen) {
-        // Multi-Ace partnership gamble or strong 4+ cards with top honors
-        if ((bestCount >= 4 && bestHCP >= 5) || (bestCount >= 4 && totalAces >= 2)) {
-          engine.submitBid(botPlayerId, 'BWINJI', chosenCard?.id || bestSuit);
-        } else {
-          engine.submitBid(botPlayerId, 'PASS');
-        }
-        return;
-      }
+      const decision = DynamicSuitEvaluator.evaluateBidding(hand, isLastBidder, isRungAlreadyChosen);
 
-      // No Rung chosen yet:
-      if ((bestCount >= 4 && bestHCP >= 4) || bestCount >= 5 || (bestCount >= 4 && totalAces >= 2)) {
-        engine.submitBid(botPlayerId, 'BWINJI', chosenCard?.id || bestSuit);
-      } else if (bestCount >= 3 || bestHCP >= 6 || totalAces >= 2 || isLastBidder) {
-        engine.submitBid(botPlayerId, 'SELECT_CARD_TRUMP', chosenCard?.id || bestSuit);
+      if (decision.action === 'BWINJI') {
+        engine.submitBid(botPlayerId, 'BWINJI', decision.chosenCard?.id || decision.bestSuit);
+      } else if (decision.action === 'SELECT_CARD_TRUMP') {
+        engine.submitBid(botPlayerId, 'SELECT_CARD_TRUMP', decision.chosenCard?.id || decision.bestSuit);
       } else {
         engine.submitBid(botPlayerId, 'PASS');
       }
@@ -734,19 +694,15 @@ export class BotPlayer {
             }
           }
 
-          // E. Discard Non-Trump Losers from Shortest Suit!
-          // Establish voids so protected Ace and trumps can cut opponent tricks later!
-          const nonTrumpSuitLengths: Record<Suit, number> = { HEARTS: 0, DIAMONDS: 0, CLUBS: 0, SPADES: 0 };
-          for (const c of myHand) {
-            if (c.suit !== activeTrumpSuit) nonTrumpSuitLengths[c.suit] += 1;
-          }
-
-          nonTrumpLeadCards.sort((a, b) => {
-            const lenDiff = nonTrumpSuitLengths[a.suit] - nonTrumpSuitLengths[b.suit]; // Shortest suit first
-            if (lenDiff !== 0) return lenDiff;
-            return a.playValue - b.playValue; // Lowest card first
-          });
-          return BotPlayer.pickBestFromCandidates(nonTrumpLeadCards, publicState, privateState, botPlayerId, players);
+          // E. Mathematically shed low-weight cards from weak suits to strengthen hand & create voids
+          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(nonTrumpLeadCards, myHand, playedCards);
+          return BotPlayer.pickBestFromCandidates(
+            [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
+            publicState,
+            privateState,
+            botPlayerId,
+            players
+          );
         }
 
         // -----------------------------------------------------------------------
@@ -907,21 +863,16 @@ export class BotPlayer {
           return BotPlayer.pickBestFromCandidates(nonTrumpBossCards, publicState, privateState, botPlayerId, players);
         }
 
-        // 8. TACTICAL MASTER POINT: Discard Non-Trump Losers & Preserve Rung Cards!
-        // "because rung cards are more powerful... the ai should use them wisely and discard their non rung card also and as soon as appropriate"
-        // Lead from shortest non-trump suit (singletons/doubletons) to discard weak off-suits and establish voids!
+        // 8. TACTICAL MASTER POINT: Mathematically shed low-weight cards from weak suits to purify hand strength!
         if (nonTrumpLeadCards.length > 0) {
-          const nonTrumpSuitLengths: Record<Suit, number> = { HEARTS: 0, DIAMONDS: 0, CLUBS: 0, SPADES: 0 };
-          for (const c of myHand) {
-            if (c.suit !== activeTrumpSuit) nonTrumpSuitLengths[c.suit] += 1;
-          }
-
-          nonTrumpLeadCards.sort((a, b) => {
-            const lenDiff = nonTrumpSuitLengths[a.suit] - nonTrumpSuitLengths[b.suit]; // Shortest suit first!
-            if (lenDiff !== 0) return lenDiff;
-            return a.playValue - b.playValue; // Lowest card first (dump loser)!
-          });
-          return BotPlayer.pickBestFromCandidates(nonTrumpLeadCards, publicState, privateState, botPlayerId, players);
+          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(nonTrumpLeadCards, myHand, playedCards);
+          return BotPlayer.pickBestFromCandidates(
+            [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
+            publicState,
+            privateState,
+            botPlayerId,
+            players
+          );
         }
 
         // 9. If ONLY Trump cards remain in hand:
@@ -1117,19 +1068,10 @@ export class BotPlayer {
           evalResult.winningCard.card.suit === activeTrumpSuit ||
           BotPlayer.isBossCard(evalResult.winningCard.card, playedCards, myHand);
 
-        // DISCARD LOSER: When partner is winning, slough lowest card from shortest non-trump suit to establish void!
+        // DISCARD LOSER: When partner is winning, slough lowest weight card from weakest suit via Dynamic Hand Optimization!
         if (nonTrumpCards.length > 0) {
           if (isPartnerSecure || trumpCards.length === 0) {
-            const nonTrumpSuitLengths: Record<Suit, number> = { HEARTS: 0, DIAMONDS: 0, CLUBS: 0, SPADES: 0 };
-            for (const c of myHand) {
-              if (c.suit !== activeTrumpSuit) nonTrumpSuitLengths[c.suit] += 1;
-            }
-            nonTrumpCards.sort((a, b) => {
-              const lenDiff = nonTrumpSuitLengths[a.suit] - nonTrumpSuitLengths[b.suit]; // Shortest suit first
-              if (lenDiff !== 0) return lenDiff;
-              return a.playValue - b.playValue; // Lowest card first
-            });
-            return nonTrumpCards[0];
+            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
           }
         }
 
@@ -1185,18 +1127,9 @@ export class BotPlayer {
             return trumpCards[0];
           }
 
-          // Otherwise, PRESERVE TRUMPS! Slough off-suit loser from shortest suit to establish a void:
+          // Otherwise, PRESERVE TRUMPS! Slough off-suit loser via Dynamic Hand Optimization to establish a void:
           if (nonTrumpCards.length > 0) {
-            const nonTrumpSuitLengths: Record<Suit, number> = { HEARTS: 0, DIAMONDS: 0, CLUBS: 0, SPADES: 0 };
-            for (const c of myHand) {
-              if (c.suit !== activeTrumpSuit) nonTrumpSuitLengths[c.suit] += 1;
-            }
-            nonTrumpCards.sort((a, b) => {
-              const lenDiff = nonTrumpSuitLengths[a.suit] - nonTrumpSuitLengths[b.suit]; // Shortest suit first
-              if (lenDiff !== 0) return lenDiff;
-              return a.playValue - b.playValue; // Lowest card first
-            });
-            return nonTrumpCards[0];
+            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
           }
 
           if (trumpCards.length > 0) {
@@ -1205,16 +1138,14 @@ export class BotPlayer {
           }
         }
 
-        // Cannot win: discard lowest non-trump junk card
+        // Cannot win: discard lowest weight card from weakest suit
         if (nonTrumpCards.length > 0) {
-          nonTrumpCards.sort((a, b) => a.playValue - b.playValue);
-          return nonTrumpCards[0];
+          return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
         }
       }
     }
 
-    // Default fallback: play lowest card in legalCards
-    legalCards.sort((a, b) => a.playValue - b.playValue);
-    return legalCards[0];
+    // Default fallback: play optimal card via Dynamic Suit Evaluation
+    return DynamicSuitEvaluator.pickBestCardToShed(legalCards, myHand, playedCards);
   }
 }
