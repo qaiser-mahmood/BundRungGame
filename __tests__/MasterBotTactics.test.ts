@@ -12,6 +12,15 @@ describe('Bund Rung Master Tactical Invariants & Strategy', () => {
     tossValue: playValue === 14 ? 1 : playValue,
   });
 
+  const setupGame = (): BundRungEngine => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice', true);
+    engine.addPlayer('p2', 'Bob', true);
+    engine.addPlayer('p3', 'Charlie', true);
+    engine.addPlayer('p4', 'David', true);
+    return engine;
+  };
+
   it('Opponent Trump: Bot with void immediately calls for Trump Reveal', () => {
     const engine = new BundRungEngine();
     engine.addPlayer('p1', 'Alice');         // Team 1
@@ -1203,5 +1212,131 @@ describe('Bund Rung Master Tactical Invariants & Strategy', () => {
     // and dump Clubs 4. It MUST play the King of Spades to RUFF and kill the opponent trick!
     expect(chosen.suit).toBe('SPADES');
     expect(chosen.rank).toBe('K');
+  });
+
+  it('Close Rung: Caller holding unsupported Trump Ace avoids leading trump as long as holding off-suits', () => {
+    const engine = setupGame();
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).trumpMode = 'CLOSE_TRUMP';
+    (engine as any).trumpSuit = 'SPADES';
+    (engine as any).trumpCallerPlayerId = 'p2'; // Bob called Rung
+    (engine as any).isTrumpRevealed = false;
+    (engine as any).currentTurnPlayerIndex = 1;
+
+    // Bob holds Ace of Spades + small Spades (unsupported, no K/Q/J), and off-suits
+    const bobHand = [
+      createCard('SPADES', 'A', 14),
+      createCard('SPADES', '4', 4),
+      createCard('SPADES', '3', 3),
+      createCard('DIAMONDS', '5', 5),
+      createCard('CLUBS', '6', 6),
+    ];
+    (engine as any).hands['p2'] = bobHand;
+
+    const chosen = BotPlayer.chooseMasterCard(
+      engine,
+      'p2',
+      bobHand,
+      bobHand,
+      engine.getPublicState(),
+      engine.getPrivateState('p2')
+    );
+
+    // Caller Bob MUST NOT lead the secret Rung suit when holding the Ace without K/Q/J support!
+    expect(chosen.suit).not.toBe('SPADES');
+  });
+
+  it('Close Rung: Avoids leading opponent-asked suits to prevent losing tricks and premature reveal', () => {
+    const engine = setupGame();
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).trumpMode = 'CLOSE_TRUMP';
+    (engine as any).trumpSuit = 'SPADES';
+    (engine as any).trumpCallerPlayerId = 'p1'; // Alice (Team 1) called Rung
+    (engine as any).isTrumpRevealed = false;
+    (engine as any).currentTurnPlayerIndex = 1; // Bob's turn to lead
+
+    // Trick 1 was won by opponent Alice (Team 1) who led HEARTS (so HEARTS is an opponent-asked suit)
+    (engine as any).completedTricks = [
+      {
+        trickNumber: 1,
+        leadPlayerId: 'p1',
+        leadSuit: 'HEARTS',
+        cards: [
+          { playerId: 'p1', card: createCard('HEARTS', 'A', 14) },
+          { playerId: 'p2', card: createCard('HEARTS', '2', 2) },
+          { playerId: 'p3', card: createCard('HEARTS', '3', 3) },
+          { playerId: 'p4', card: createCard('HEARTS', '4', 4) },
+        ],
+        winnerPlayerId: 'p1',
+        winningCard: { playerId: 'p1', card: createCard('HEARTS', 'A', 14) },
+        winningTeam: 'TEAM_1',
+      },
+    ];
+
+    // Bob (Team 2) now leads. Holds HEARTS (opponent asked) and CLUBS (unasked safe suit)
+    const bobHand = [
+      createCard('HEARTS', '6', 6),
+      createCard('HEARTS', '7', 7),
+      createCard('CLUBS', '5', 5),
+      createCard('CLUBS', '8', 8),
+    ];
+    (engine as any).hands['p2'] = bobHand;
+
+    const chosen = BotPlayer.chooseMasterCard(
+      engine,
+      'p2',
+      bobHand,
+      bobHand,
+      engine.getPublicState(),
+      engine.getPrivateState('p2')
+    );
+
+    // Bob should avoid leading HEARTS (opponent asked suit) and prefer CLUBS!
+    expect(chosen.suit).toBe('CLUBS');
+  });
+
+  it('Following Lead: Wins decisively with Boss card when opponent threatens game and opponent is left to play', () => {
+    const engine = setupGame();
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).isTrumpRevealed = true;
+    (engine as any).trumpSuit = 'SPADES';
+    (engine as any).trumpCallerPlayerId = 'p1';
+    (engine as any).team1TricksWon = 5; // Opponent Team 1 is at 5 tricks (threatening game!)
+    (engine as any).team2TricksWon = 1;
+    (engine as any).currentTurnPlayerIndex = 1; // Bob (p2, Team 2) is 2nd or 3rd to play
+
+    // Alice (p1, opponent) led 8 of Diamonds
+    (engine as any).currentTrick = {
+      trickNumber: 7,
+      leadPlayerId: 'p1',
+      leadSuit: 'DIAMONDS',
+      cards: [
+        { playerId: 'p1', card: createCard('DIAMONDS', '8', 8) },
+      ],
+      winnerPlayerId: null,
+      winningCard: null,
+      winningTeam: null,
+    };
+
+    // Bob holds 10 of Diamonds and Ace of Diamonds (Boss card).
+    // Opponent Charlie (p3) and Partner David (p4) are still to play.
+    const bobHand = [
+      createCard('DIAMONDS', '10', 10),
+      createCard('DIAMONDS', 'A', 14),
+    ];
+    (engine as any).hands['p2'] = bobHand;
+
+    const chosen = BotPlayer.chooseMasterCard(
+      engine,
+      'p2',
+      bobHand,
+      bobHand,
+      engine.getPublicState(),
+      engine.getPrivateState('p2')
+    );
+
+    // Opponent is threatening the game (5 tricks) and opponents are left to play behind Bob.
+    // Bot MUST play Ace to decisively prevent the trick from being stolen!
+    expect(chosen.rank).toBe('A');
   });
 });

@@ -208,11 +208,16 @@ export class DynamicSuitEvaluator {
    *
    * High (positive or less negative) ΔH means the hand retains maximum strength
    * and sheds minimum equity, while rewarding the creation of new voids!
+   *
+   * Also integrates opponent-asked suit risks and winning prioritization dynamically.
    */
   public static evaluateDiscardUtilities(
     candidates: Card[],
     myHand: Card[],
-    playedCards: Card[]
+    playedCards: Card[],
+    opponentAskedSuits: Suit[] = [],
+    isWinningGameContext: boolean = false,
+    trumpSuit?: Suit | null
   ): Map<string, number> {
     const currentStrength = this.calculateHandStrength(myHand, playedCards).totalStrength;
     const utilityMap = new Map<string, number>();
@@ -240,6 +245,32 @@ export class DynamicSuitEvaluator {
         }
       }
 
+      // Opponent-Asked Suit Penalty:
+      // If an opponent has asked for this suit (won a trick and led it), leading or shedding into it
+      // carries elevated risk of trick loss and premature Rung reveal.
+      if (opponentAskedSuits.includes(card.suit)) {
+        deltaH -= 7.5; // Dynamic penalty against opponent strength
+      }
+
+      // Game-Winning Prioritization:
+      // When defending against an opponent streak or game victory, shedding low cards in weak suits
+      // is secondary to tactical control.
+      if (isWinningGameContext && card.playValue >= 11) {
+        deltaH += 5.0; // Boost high honors to actively contest the game
+      }
+
+      // Trump Ace Protection Utility:
+      // If player holds the Ace of Trump without secondary honors (K, Q, J), running or shedding
+      // trump cards exhausts trump control and risks dropping the Ace prematurely.
+      if (trumpSuit && card.suit === trumpSuit) {
+        const trumpsInHand = myHand.filter((c) => c.suit === trumpSuit);
+        const hasTrumpAce = trumpsInHand.some((c) => c.rank === 'A');
+        const hasTrumpHonors = trumpsInHand.some((c) => c.rank === 'K' || c.rank === 'Q' || c.rank === 'J');
+        if (hasTrumpAce && !hasTrumpHonors && card.rank !== 'A') {
+          deltaH -= 15.0; // Dynamic preservation penalty for unsupported trumps
+        }
+      }
+
       utilityMap.set(card.id, deltaH);
     }
 
@@ -253,11 +284,21 @@ export class DynamicSuitEvaluator {
   public static pickBestCardToShed(
     candidates: Card[],
     myHand: Card[],
-    playedCards: Card[]
+    playedCards: Card[],
+    opponentAskedSuits: Suit[] = [],
+    isWinningGameContext: boolean = false,
+    trumpSuit?: Suit | null
   ): Card {
     if (candidates.length <= 1) return candidates[0];
 
-    const utilities = this.evaluateDiscardUtilities(candidates, myHand, playedCards);
+    const utilities = this.evaluateDiscardUtilities(
+      candidates,
+      myHand,
+      playedCards,
+      opponentAskedSuits,
+      isWinningGameContext,
+      trumpSuit
+    );
 
     let bestCard = candidates[0];
     let bestUtility = -Infinity;
@@ -280,9 +321,19 @@ export class DynamicSuitEvaluator {
     candidates: Card[],
     myHand: Card[],
     playedCards: Card[],
-    temperature: number = 1.0
+    temperature: number = 1.0,
+    opponentAskedSuits: Suit[] = [],
+    isWinningGameContext: boolean = false,
+    trumpSuit?: Suit | null
   ): Map<string, number> {
-    const utilities = this.evaluateDiscardUtilities(candidates, myHand, playedCards);
+    const utilities = this.evaluateDiscardUtilities(
+      candidates,
+      myHand,
+      playedCards,
+      opponentAskedSuits,
+      isWinningGameContext,
+      trumpSuit
+    );
     const temp = Math.max(0.01, temperature);
 
     let maxU = -Infinity;
@@ -317,6 +368,7 @@ export class DynamicSuitEvaluator {
    * - If the bot does not have strong enough cards, it PASSES.
    * - Only if forced by game rules (isLastBidder === true, i.e. 4th bidder after 3 passes),
    *   does it pick the best available suit even with a weak hand.
+   * - BWINJI requires genuine, overwhelming powerhouse dominance (Ace + high secondary honor K/Q, length >= 4, score >= 90.0).
    */
   public static evaluateBidding(
     hand: Card[],
@@ -336,6 +388,8 @@ export class DynamicSuitEvaluator {
 
     let bestSuit: Suit = 'SPADES';
     let highestScore = -1;
+    let bestSuitHasAce = false;
+    let bestSuitHasSecondaryHonor = false;
 
     for (const suit of ALL_SUITS) {
       const cards = suitCards[suit];
@@ -387,12 +441,13 @@ export class DynamicSuitEvaluator {
       if (score > highestScore) {
         highestScore = score;
         bestSuit = suit;
+        bestSuitHasAce = hasAce;
+        bestSuitHasSecondaryHonor = hasKing || hasQueen;
       }
     }
 
     const bestCards = suitCards[bestSuit].length > 0 ? suitCards[bestSuit] : hand;
     const bestCount = bestCards.length;
-    const totalAces = hand.filter((c) => c.rank === 'A').length;
 
     // Pick card to lock as secret trump:
     // Preserving boss honors: Place the Ace face down so it cannot be forced into play
@@ -402,11 +457,13 @@ export class DynamicSuitEvaluator {
     const aceCard = sortedDesc.find((c) => c.rank === 'A');
     const chosenCard = aceCard || sortedDesc[0] || hand[0];
 
-    // BWINJI threshold: Extraordinary dominance
+    // BWINJI threshold: Genuine powerhouse dominance
+    // Must have the Ace and strong secondary honor (King or Queen), length >= 4, and high score >= 90.0,
+    // or full 5 of a suit containing the Ace.
     const isBwinji =
-      (bestCount >= 5) ||
-      (bestCount >= 4 && highestScore >= 90.0) ||
-      (bestCount >= 4 && highestScore >= 65.0 && totalAces >= 2);
+      bestSuitHasAce &&
+      ((bestCount >= 5) ||
+       (bestCount >= 4 && bestSuitHasSecondaryHonor && highestScore >= 90.0));
 
     if (isRungAlreadyChosen) {
       if (isBwinji) {

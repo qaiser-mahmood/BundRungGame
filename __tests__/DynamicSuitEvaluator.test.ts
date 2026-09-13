@@ -196,7 +196,7 @@ describe('DynamicSuitEvaluator', () => {
       expect(forcedDecision.isForcedByRules).toBe(true);
     });
 
-    it('declares BWINJI when holding an overwhelmingly dominant suit (e.g. 5 of a suit or 4 high honors)', () => {
+    it('declares BWINJI when holding an overwhelmingly dominant suit (e.g. 5 of a suit or 4 high honors with Ace)', () => {
       const bwinjiHand = [
         makeCard('SPADES', 'A'),
         makeCard('SPADES', 'K'),
@@ -209,6 +209,88 @@ describe('DynamicSuitEvaluator', () => {
       expect(decision.action).toBe('BWINJI');
       expect(decision.bestSuit).toBe('SPADES');
       expect(decision.chosenCard.rank).toBe('A');
+    });
+
+    it('does NOT call Bwinji recklessly with 4 cards when lacking secondary honors or when lacking Ace', () => {
+      // Case 1: 4 cards with Ace but only low cards (A, 9, 7, 2 of Hearts)
+      const fourCardsNoSecondary = [
+        makeCard('HEARTS', 'A'),
+        makeCard('HEARTS', '9'),
+        makeCard('HEARTS', '7'),
+        makeCard('HEARTS', '2'),
+        makeCard('SPADES', '3'),
+      ];
+      const decision1 = DynamicSuitEvaluator.evaluateBidding(fourCardsNoSecondary, false, false);
+      expect(decision1.action).toBe('SELECT_CARD_TRUMP'); // Safe Close Rung, not reckless Bwinji!
+
+      // Case 2: 4 cards with honors but NO Ace (K, Q, J, 10 of Clubs)
+      const fourCardsNoAce = [
+        makeCard('CLUBS', 'K'),
+        makeCard('CLUBS', 'Q'),
+        makeCard('CLUBS', 'J'),
+        makeCard('CLUBS', '10'),
+        makeCard('DIAMONDS', '2'),
+      ];
+      const decision2 = DynamicSuitEvaluator.evaluateBidding(fourCardsNoAce, false, false);
+      expect(decision2.action).not.toBe('BWINJI');
+    });
+
+    it('calls Bwinji with 4 cards if holding Ace AND secondary honors with dominant score (>=90)', () => {
+      const dominantFour = [
+        makeCard('SPADES', 'A'),
+        makeCard('SPADES', 'K'),
+        makeCard('SPADES', 'Q'),
+        makeCard('SPADES', 'J'),
+        makeCard('HEARTS', '2'),
+      ];
+      const decision = DynamicSuitEvaluator.evaluateBidding(dominantFour, false, false);
+      expect(decision.action).toBe('BWINJI');
+      expect(decision.bestSuit).toBe('SPADES');
+    });
+  });
+
+  describe('Opponent-Asked Suits and Unsupported Trump Ace Discard Utilities', () => {
+    it('penalizes discarding or leading into opponent-asked suits', () => {
+      const spadeTwo = makeCard('SPADES', '2');
+      const heartTwo = makeCard('HEARTS', '2');
+      const hand = [spadeTwo, heartTwo];
+      const candidates = [spadeTwo, heartTwo];
+
+      // If opponents asked for SPADES, shedding SPADES is penalized
+      const utilities = DynamicSuitEvaluator.evaluateDiscardUtilities(
+        candidates,
+        hand,
+        [],
+        ['SPADES'], // opponentAskedSuits
+        false
+      );
+
+      expect(utilities.get(spadeTwo.id)!).toBeLessThan(utilities.get(heartTwo.id)!);
+      const best = DynamicSuitEvaluator.pickBestCardToShed(candidates, hand, [], ['SPADES'], false);
+      expect(best.id).toBe(heartTwo.id);
+    });
+
+    it('penalizes discarding trumps when holding unsupported trump Ace', () => {
+      const trumpAce = makeCard('SPADES', 'A');
+      const trumpFour = makeCard('SPADES', '4');
+      const offHeartTwo = makeCard('HEARTS', '2');
+
+      const hand = [trumpAce, trumpFour, offHeartTwo];
+      const candidates = [trumpFour, offHeartTwo];
+
+      // With SPADES as trump and holding Ace without K/Q/J, shedding trumpFour has a dynamic penalty
+      const utilities = DynamicSuitEvaluator.evaluateDiscardUtilities(
+        candidates,
+        hand,
+        [],
+        [],
+        false,
+        'SPADES'
+      );
+
+      expect(utilities.get(trumpFour.id)!).toBeLessThan(utilities.get(offHeartTwo.id)!);
+      const best = DynamicSuitEvaluator.pickBestCardToShed(candidates, hand, [], [], false, 'SPADES');
+      expect(best.id).toBe(offHeartTwo.id);
     });
   });
 });

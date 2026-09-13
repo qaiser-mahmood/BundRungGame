@@ -47,6 +47,31 @@ export class BotPlayer {
   }
 
   /**
+   * Returns a list of suits that an opponent has asked for:
+   * (an opponent won a previous trick and led that suit, establishing opponent suit strength).
+   */
+  public static getOpponentAskedSuits(publicState: PublicGameState, myTeam: TeamId, players: Player[]): Suit[] {
+    const suits: Suit[] = [];
+    for (let i = 0; i < publicState.completedTricks.length; i++) {
+      const trick = publicState.completedTricks[i];
+      if (!trick.leadSuit) continue;
+      const leader = players.find((p) => p.id === trick.leadPlayerId);
+      if (leader && leader.team !== myTeam) {
+        // Was this lead after winning a previous trick or leading to ask for the suit?
+        const prevTrick = i > 0 ? publicState.completedTricks[i - 1] : null;
+        const wonPrevTrick = prevTrick && prevTrick.winnerPlayerId === trick.leadPlayerId;
+        const wonThisTrick = trick.winnerPlayerId === trick.leadPlayerId;
+        if (wonPrevTrick || wonThisTrick) {
+          if (!suits.includes(trick.leadSuit)) {
+            suits.push(trick.leadSuit);
+          }
+        }
+      }
+    }
+    return suits;
+  }
+
+  /**
    * Checks if a card is currently the "Boss" card of its suit (highest remaining unplayed card in the game).
    */
   public static isBossCard(card: Card, playedCards: Card[], myHand: Card[]): boolean {
@@ -380,29 +405,38 @@ export class BotPlayer {
     const voids = BotPlayer.inferPlayerVoids(publicState);
     const activeTrumpSuit = publicState.isTrumpRevealed ? publicState.trumpSuit : null;
     const partnerLedSuits = BotPlayer.getPartnerLedSuits(publicState, partnerId);
+    const opponentAskedSuits = BotPlayer.getOpponentAskedSuits(publicState, me.team, players);
     const isPartnerOpenRungCaller = Boolean(
       partnerId &&
       publicState.trumpCallerPlayerId === partnerId &&
       publicState.trumpMode === 'OPEN_TRUMP'
     );
 
+    const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
+    const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+    const myTeamTricksWon = me.team === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+    const isDefendingOpponentStreak =
+      publicState.isTrumpRevealed &&
+      publicState.currentTrick.trickNumber >= 2 &&
+      publicState.lastTrickWinnerPlayerId !== null &&
+      publicState.lastTrickWinnerPlayerId !== botPlayerId &&
+      publicState.lastTrickWinnerPlayerId !== partnerId;
+    const isOpponentThreatening = isDefendingOpponentStreak || opponentTricksWon >= 5 || opponentTricksWon > myTeamTricksWon;
+    const isWinningGameContext = isOpponentThreatening;
+
     // --- CASE 1: Bot is LEADING the trick (0 cards played) ---
     if (trick.cards.length === 0 || !trick.leadSuit) {
       const isCaller = me.id === publicState.trumpCallerPlayerId;
       const isCallerTeam = isCaller || (partnerId === publicState.trumpCallerPlayerId);
-      const secretTrumpSuit = privateState.secretTrumpSuit || (isCaller ? ((engine as any).trumpSuit || publicState.trumpSuit) : null);
+      const secretTrumpSuit =
+        privateState.secretTrumpSuit ||
+        privateState.myTrumpCard?.suit ||
+        (isCaller ? ((engine as any).trumpSuit || publicState.trumpSuit) : null);
 
       const isHunting2Streak =
         publicState.isTrumpRevealed &&
         publicState.currentTrick.trickNumber >= 2 &&
         (publicState.lastTrickWinnerPlayerId === botPlayerId || publicState.lastTrickWinnerPlayerId === partnerId);
-
-      const isDefendingOpponentStreak =
-        publicState.isTrumpRevealed &&
-        publicState.currentTrick.trickNumber >= 2 &&
-        publicState.lastTrickWinnerPlayerId !== null &&
-        publicState.lastTrickWinnerPlayerId !== botPlayerId &&
-        publicState.lastTrickWinnerPlayerId !== partnerId;
 
       const didIWinLastTrickWithAce =
         publicState.lastTrickWinnerPlayerId === botPlayerId &&
@@ -473,12 +507,18 @@ export class BotPlayer {
           // In Close Rung, if caller holds an outside Ace with small cards (e.g. Ace + 4 + 2),
           // under-lead a small card (<=9) to clear weak cards and preserve the Ace stopper!
           // If holding a singleton Ace or Ace with only high honors, cash the Ace directly.
-          // Lead suits where others have plenty of unseen cards, strictly avoiding partner's suits AND secret trump suit
+          // Lead suits where others have plenty of unseen cards, strictly avoiding partner's suits,
+          // secret trump suit, and suits asked by opponents.
           const safeOffSuits = (['HEARTS', 'DIAMONDS', 'CLUBS', 'SPADES'] as Suit[]).filter(
-            (s) => s !== secretTrumpSuit && !partnerLedSuits.includes(s)
+            (s) => s !== secretTrumpSuit && !partnerLedSuits.includes(s) && !opponentAskedSuits.includes(s)
+          );
+          const fallbackOffSuits = (['HEARTS', 'DIAMONDS', 'CLUBS', 'SPADES'] as Suit[]).filter(
+            (s) => s !== secretTrumpSuit && !opponentAskedSuits.includes(s)
           );
           const candidateSuits = safeOffSuits.some((s) => eligibleLeadCards.some((c) => c.suit === s))
             ? safeOffSuits
+            : fallbackOffSuits.some((s) => eligibleLeadCards.some((c) => c.suit === s))
+            ? fallbackOffSuits
             : (['HEARTS', 'DIAMONDS', 'CLUBS', 'SPADES'] as Suit[]).filter((s) => s !== secretTrumpSuit);
 
           const suitStats = candidateSuits
@@ -503,6 +543,9 @@ export class BotPlayer {
 
           if (suitStats.length > 0) {
             suitStats.sort((a, b) => {
+              const aOpp = opponentAskedSuits.includes(a.suit) ? 1 : 0;
+              const bOpp = opponentAskedSuits.includes(b.suit) ? 1 : 0;
+              if (aOpp !== bOpp) return aOpp - bOpp;
               const aRisk = a.myCount >= 4 ? 1 : 0;
               const bRisk = b.myCount >= 4 ? 1 : 0;
               if (aRisk !== bRisk) return aRisk - bRisk;
@@ -580,7 +623,12 @@ export class BotPlayer {
               return { suit, inHand, length: inHand.length, unseenInOthers };
             })
             .filter((s) => s.length >= 4 && s.inHand.length > 0)
-            .sort((a, b) => b.length - a.length || a.unseenInOthers - b.unseenInOthers);
+            .sort((a, b) => {
+              const aOpp = opponentAskedSuits.includes(a.suit) ? 1 : 0;
+              const bOpp = opponentAskedSuits.includes(b.suit) ? 1 : 0;
+              if (aOpp !== bOpp) return aOpp - bOpp;
+              return b.length - a.length || a.unseenInOthers - b.unseenInOthers;
+            });
 
           if (longSuits.length > 0) {
             const targetSuit = longSuits[0];
@@ -619,7 +667,12 @@ export class BotPlayer {
             .filter((s) => s.myCards.length > 0);
 
           if (suitStats.length > 0) {
-            suitStats.sort((a, b) => b.myCount - a.myCount || a.unseenInOtherHands - b.unseenInOtherHands);
+            suitStats.sort((a, b) => {
+              const aOpp = opponentAskedSuits.includes(a.suit) ? 1 : 0;
+              const bOpp = opponentAskedSuits.includes(b.suit) ? 1 : 0;
+              if (aOpp !== bOpp) return aOpp - bOpp;
+              return b.myCount - a.myCount || a.unseenInOtherHands - b.unseenInOtherHands;
+            });
             const chosenSuitStat = suitStats[0];
             if (chosenSuitStat) {
               const aces = chosenSuitStat.myCards.filter((c) => c.rank === 'A');
@@ -695,7 +748,14 @@ export class BotPlayer {
           }
 
           // E. Mathematically shed low-weight cards from weak suits to strengthen hand & create voids
-          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(nonTrumpLeadCards, myHand, playedCards);
+          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(
+            nonTrumpLeadCards,
+            myHand,
+            playedCards,
+            opponentAskedSuits,
+            isWinningGameContext,
+            activeTrumpSuit
+          );
           return BotPlayer.pickBestFromCandidates(
             [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
             publicState,
@@ -859,28 +919,35 @@ export class BotPlayer {
         // 7. Non-Trump Boss Honors:
         const nonTrumpBossCards = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
         if (nonTrumpBossCards.length > 0) {
-          nonTrumpBossCards.sort((a, b) => b.playValue - b.playValue);
+          nonTrumpBossCards.sort((a, b) => {
+            const aOpp = opponentAskedSuits.includes(a.suit) ? 1 : 0;
+            const bOpp = opponentAskedSuits.includes(b.suit) ? 1 : 0;
+            if (aOpp !== bOpp) return aOpp - bOpp;
+            return b.playValue - a.playValue;
+          });
           return BotPlayer.pickBestFromCandidates(nonTrumpBossCards, publicState, privateState, botPlayerId, players);
         }
 
         // 8. CRITICAL GAME CHECK: If opponent team is winning the game (streak or >= 5 tricks) and bot holds Boss Trumps:
         // Cash Boss Trump to regain the lead and stop opponents, rather than passively shedding weak cards!
-        const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
-        const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
-        const myTeamTricksWon = me.team === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
-        const isOpponentThreatening = isDefendingOpponentStreak || opponentTricksWon >= 5 || opponentTricksWon > myTeamTricksWon;
-
         if (isOpponentThreatening && myTrumpCards.length > 0 && (!hasTrumpAce || nonTrumpLeadCards.length === 0)) {
           const bossTrumps = myTrumpCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (bossTrumps.length > 0) {
-            bossTrumps.sort((a, b) => b.playValue - b.playValue);
+            bossTrumps.sort((a, b) => b.playValue - a.playValue);
             return BotPlayer.pickBestFromCandidates(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
         }
 
         // 9. TACTICAL MASTER POINT: Mathematically shed low-weight cards from weak suits to purify hand strength!
         if (nonTrumpLeadCards.length > 0) {
-          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(nonTrumpLeadCards, myHand, playedCards);
+          const bestShed = DynamicSuitEvaluator.pickBestCardToShed(
+            nonTrumpLeadCards,
+            myHand,
+            playedCards,
+            opponentAskedSuits,
+            isWinningGameContext,
+            activeTrumpSuit
+          );
           return BotPlayer.pickBestFromCandidates(
             [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
             publicState,
@@ -1041,7 +1108,7 @@ export class BotPlayer {
           const opponentCardIsSmall = winningPower <= 9;
           const holdsBoss = matchingSuitCards.some((c) => c.rank === 'A' || BotPlayer.isBossCard(c, playedCards, myHand));
 
-          if (!isOpponentCritical && isSecondSeat && partnerPlaysFourth && opponentCardIsSmall && !holdsBoss && matchingSuitCards.length >= 2) {
+          if (!isOpponentThreatening && isSecondSeat && partnerPlaysFourth && opponentCardIsSmall && !holdsBoss && matchingSuitCards.length >= 2) {
             matchingSuitCards.sort((a, b) => a.playValue - b.playValue);
             return matchingSuitCards[0]; // Second hand low!
           }
@@ -1049,6 +1116,12 @@ export class BotPlayer {
           // Opponent winning with lead suit card: find all cards that beat it
           const winningCandidates = matchingSuitCards.filter((c) => c.playValue > winningPower);
           if (winningCandidates.length > 0) {
+            // DECISIVE WINNING: If opponents are threatening the game and opponents are still to play behind us,
+            // play the highest winning card to prevent trick robbery; otherwise win cheaply!
+            if (isOpponentThreatening && evalResult.opponentsLeftToPlay > 0) {
+              winningCandidates.sort((a, b) => b.playValue - a.playValue);
+              return winningCandidates[0];
+            }
             // WIN CHEAPLY: Play the lowest card that beats opponent's card!
             winningCandidates.sort((a, b) => a.playValue - b.playValue);
             return winningCandidates[0];
@@ -1096,7 +1169,14 @@ export class BotPlayer {
         // DISCARD LOSER: When partner is winning, slough lowest weight card from weakest suit via Dynamic Hand Optimization!
         if (nonTrumpCards.length > 0) {
           if (isPartnerSecure || trumpCards.length === 0) {
-            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
+            return DynamicSuitEvaluator.pickBestCardToShed(
+              nonTrumpCards,
+              myHand,
+              playedCards,
+              opponentAskedSuits,
+              isWinningGameContext,
+              activeTrumpSuit
+            );
           }
         }
 
@@ -1126,7 +1206,14 @@ export class BotPlayer {
           }
           // Cannot over-trump: discard lowest weight card from weakest suit
           if (nonTrumpCards.length > 0) {
-            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
+            return DynamicSuitEvaluator.pickBestCardToShed(
+              nonTrumpCards,
+              myHand,
+              playedCards,
+              opponentAskedSuits,
+              isWinningGameContext,
+              activeTrumpSuit
+            );
           }
           if (trumpCards.length > 0) {
             trumpCards.sort((a, b) => a.playValue - b.playValue);
@@ -1146,9 +1233,6 @@ export class BotPlayer {
           const isHighHonor = winningPower >= 11; // Deny Jack, Queen, King, Ace
           const isEndgame = trickNum >= 8;
 
-          const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
-          const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
-          const myTeamTricksWon = me.team === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
           // CRITICAL: If opponent team is winning the game (streak, ahead in tricks, or >= 5 tricks),
           // AI must NEVER passively keep high cards in hand; it MUST ruff to take the trick!
           const isOpponentWinningGame = isDefendingStreak || opponentTricksWon >= 5 || opponentTricksWon > myTeamTricksWon;
@@ -1168,7 +1252,14 @@ export class BotPlayer {
           // In early low-stakes play when opponents are not winning the game, preserve trumps
           // and slough off-suit loser via Dynamic Hand Optimization:
           if (nonTrumpCards.length > 0) {
-            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
+            return DynamicSuitEvaluator.pickBestCardToShed(
+              nonTrumpCards,
+              myHand,
+              playedCards,
+              opponentAskedSuits,
+              isWinningGameContext,
+              activeTrumpSuit
+            );
           }
 
           if (trumpCards.length > 0) {
@@ -1180,6 +1271,13 @@ export class BotPlayer {
     }
 
     // Default fallback: play optimal card via Dynamic Suit Evaluation
-    return DynamicSuitEvaluator.pickBestCardToShed(legalCards, myHand, playedCards);
+    return DynamicSuitEvaluator.pickBestCardToShed(
+      legalCards,
+      myHand,
+      playedCards,
+      opponentAskedSuits,
+      isWinningGameContext,
+      activeTrumpSuit
+    );
   }
 }

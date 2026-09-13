@@ -191,7 +191,14 @@ export class MonteCarloPlanner {
 
       // If leading:
       if (!lSuit || currentCards.length === 0) {
-        // Prefer cashing boss card or lowest card in shortest suit
+        if (tSuit) {
+          const hasTrumpAce = hand.some((c) => c.suit === tSuit && c.rank === 'A');
+          const nonTrumps = hand.filter((c) => c.suit !== tSuit);
+          // If holding the Trump Ace, avoid leading trump while holding non-trump cards!
+          if (hasTrumpAce && nonTrumps.length > 0) {
+            return nonTrumps[0];
+          }
+        }
         return hand[0];
       }
 
@@ -213,7 +220,7 @@ export class MonteCarloPlanner {
       }
 
       // Discard weakest card to optimize hand strength and create voids via Dynamic Hand Optimization
-      return DynamicSuitEvaluator.pickBestCardToShed(hand, hand, []);
+      return DynamicSuitEvaluator.pickBestCardToShed(hand, hand, [], [], false, tSuit);
     };
 
     // Forward simulation loop
