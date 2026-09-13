@@ -1,4 +1,4 @@
-import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedCard } from '../../shared/types';
+import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedCard, TeamId } from '../../shared/types';
 import { BundRungEngine } from '../engine/BundRungEngine';
 import { ModelManager } from './neural/ModelManager';
 import { StateVectorizer } from './neural/StateVectorizer';
@@ -859,11 +859,26 @@ export class BotPlayer {
         // 7. Non-Trump Boss Honors:
         const nonTrumpBossCards = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
         if (nonTrumpBossCards.length > 0) {
-          nonTrumpBossCards.sort((a, b) => b.playValue - a.playValue);
+          nonTrumpBossCards.sort((a, b) => b.playValue - b.playValue);
           return BotPlayer.pickBestFromCandidates(nonTrumpBossCards, publicState, privateState, botPlayerId, players);
         }
 
-        // 8. TACTICAL MASTER POINT: Mathematically shed low-weight cards from weak suits to purify hand strength!
+        // 8. CRITICAL GAME CHECK: If opponent team is winning the game (streak or >= 5 tricks) and bot holds Boss Trumps:
+        // Cash Boss Trump to regain the lead and stop opponents, rather than passively shedding weak cards!
+        const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
+        const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+        const myTeamTricksWon = me.team === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+        const isOpponentThreatening = isDefendingOpponentStreak || opponentTricksWon >= 5 || opponentTricksWon > myTeamTricksWon;
+
+        if (isOpponentThreatening && myTrumpCards.length > 0 && (!hasTrumpAce || nonTrumpLeadCards.length === 0)) {
+          const bossTrumps = myTrumpCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
+          if (bossTrumps.length > 0) {
+            bossTrumps.sort((a, b) => b.playValue - b.playValue);
+            return BotPlayer.pickBestFromCandidates(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+          }
+        }
+
+        // 9. TACTICAL MASTER POINT: Mathematically shed low-weight cards from weak suits to purify hand strength!
         if (nonTrumpLeadCards.length > 0) {
           const bestShed = DynamicSuitEvaluator.pickBestCardToShed(nonTrumpLeadCards, myHand, playedCards);
           return BotPlayer.pickBestFromCandidates(
@@ -875,9 +890,9 @@ export class BotPlayer {
           );
         }
 
-        // 9. If ONLY Trump cards remain in hand:
+        // 10. If ONLY Trump cards remain in hand:
         if (myTrumpCards.length > 0) {
-          myTrumpCards.sort((a, b) => b.playValue - a.playValue);
+          myTrumpCards.sort((a, b) => b.playValue - b.playValue);
           return BotPlayer.pickBestFromCandidates(myTrumpCards, publicState, privateState, botPlayerId, players);
         }
       }
@@ -890,7 +905,7 @@ export class BotPlayer {
         (c) => c.suit !== activeTrumpSuit && BotPlayer.isBossCard(c, playedCards, myHand)
       );
       if (nonTrumpBossCards.length > 0) {
-        nonTrumpBossCards.sort((a, b) => b.playValue - a.playValue);
+        nonTrumpBossCards.sort((a, b) => b.playValue - b.playValue);
         return nonTrumpBossCards[0];
       }
 
@@ -937,7 +952,7 @@ export class BotPlayer {
                 (c) => c.playValue > partnerCard.playValue && (c.playValue >= 11 || BotPlayer.isBossCard(c, playedCards, myHand))
               );
               if (bigWinningCards.length > 0) {
-                bigWinningCards.sort((a, b) => b.playValue - a.playValue);
+                bigWinningCards.sort((a, b) => b.playValue - b.playValue);
                 return BotPlayer.pickBestFromCandidates(bigWinningCards, publicState, privateState, botPlayerId, players);
               }
             } else if (partnerCard.playValue >= 10) {
@@ -1011,12 +1026,22 @@ export class BotPlayer {
           // TEAMWORK: "Second Hand Low"
           // If bot is playing 2nd (cards.length === 1) and partner plays 4th (last to play):
           // Duck with a low card on low/mid leads (<= 9) unless bot holds a boss Ace, allowing partner to win cheaply!
+          // EXCEPTION: Never duck second-hand low if opponent is on a streak or winning the game!
+          const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
+          const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+          const isOpponentStreak =
+            publicState.currentTrick.trickNumber >= 2 &&
+            publicState.lastTrickWinnerPlayerId !== null &&
+            publicState.lastTrickWinnerPlayerId !== botPlayerId &&
+            publicState.lastTrickWinnerPlayerId !== partnerId;
+          const isOpponentCritical = isOpponentStreak || opponentTricksWon >= 5;
+
           const isSecondSeat = trick.cards.length === 1;
           const partnerPlaysFourth = isSecondSeat && players.length === 4;
           const opponentCardIsSmall = winningPower <= 9;
           const holdsBoss = matchingSuitCards.some((c) => c.rank === 'A' || BotPlayer.isBossCard(c, playedCards, myHand));
 
-          if (isSecondSeat && partnerPlaysFourth && opponentCardIsSmall && !holdsBoss && matchingSuitCards.length >= 2) {
+          if (!isOpponentCritical && isSecondSeat && partnerPlaysFourth && opponentCardIsSmall && !holdsBoss && matchingSuitCards.length >= 2) {
             matchingSuitCards.sort((a, b) => a.playValue - b.playValue);
             return matchingSuitCards[0]; // Second hand low!
           }
@@ -1099,10 +1124,16 @@ export class BotPlayer {
             overTrumps.sort((a, b) => a.playValue - b.playValue); // cheap over-trump
             return overTrumps[0];
           }
+          // Cannot over-trump: discard lowest weight card from weakest suit
+          if (nonTrumpCards.length > 0) {
+            return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
+          }
+          if (trumpCards.length > 0) {
+            trumpCards.sort((a, b) => a.playValue - b.playValue);
+            return trumpCards[0];
+          }
         } else {
           // Opponent has non-trump:
-          // STRATEGIC TRUMP PRESERVATION & WHOLE-GAME PLANNING:
-          // Do NOT blindly dump trumps on isolated low-value tricks when holding off-suit losers!
           const trickNum = publicState.completedTricks.length + 1;
           const isDefendingStreak =
             publicState.currentTrick.trickNumber >= 2 &&
@@ -1112,13 +1143,20 @@ export class BotPlayer {
           const isConvertingStreak =
             publicState.currentTrick.trickNumber >= 2 &&
             (publicState.lastTrickWinnerPlayerId === botPlayerId || publicState.lastTrickWinnerPlayerId === partnerId);
-          const isHighHonor = winningPower >= 13; // Ace or King
-          const isEndgame = trickNum >= 9;
+          const isHighHonor = winningPower >= 11; // Deny Jack, Queen, King, Ace
+          const isEndgame = trickNum >= 8;
+
+          const opponentTeam: TeamId = me.team === 'TEAM_1' ? 'TEAM_2' : 'TEAM_1';
+          const opponentTricksWon = opponentTeam === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+          const myTeamTricksWon = me.team === 'TEAM_1' ? publicState.team1TricksWon : publicState.team2TricksWon;
+          // CRITICAL: If opponent team is winning the game (streak, ahead in tricks, or >= 5 tricks),
+          // AI must NEVER passively keep high cards in hand; it MUST ruff to take the trick!
+          const isOpponentWinningGame = isDefendingStreak || opponentTricksWon >= 5 || opponentTricksWon > myTeamTricksWon;
 
           const shouldRuff =
-            isDefendingStreak || // MUST break opponent streak!
+            isOpponentWinningGame || // MUST not let opponents win when they are ahead or on a streak!
             isConvertingStreak || // MUST lock in our team's 2-streak Hand!
-            isHighHonor || // Deny high Ace/King
+            isHighHonor || // Deny high honors (J, Q, K, A)
             isEndgame || // Late game accumulation
             nonTrumpCards.length === 0; // No off-suit losers left to dump
 
@@ -1127,7 +1165,8 @@ export class BotPlayer {
             return trumpCards[0];
           }
 
-          // Otherwise, PRESERVE TRUMPS! Slough off-suit loser via Dynamic Hand Optimization to establish a void:
+          // In early low-stakes play when opponents are not winning the game, preserve trumps
+          // and slough off-suit loser via Dynamic Hand Optimization:
           if (nonTrumpCards.length > 0) {
             return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
           }
@@ -1136,11 +1175,6 @@ export class BotPlayer {
             trumpCards.sort((a, b) => a.playValue - b.playValue);
             return trumpCards[0];
           }
-        }
-
-        // Cannot win: discard lowest weight card from weakest suit
-        if (nonTrumpCards.length > 0) {
-          return DynamicSuitEvaluator.pickBestCardToShed(nonTrumpCards, myHand, playedCards);
         }
       }
     }

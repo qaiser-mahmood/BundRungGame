@@ -59,11 +59,11 @@ export const CutModal: React.FC<CutModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-black/35 pointer-events-auto overflow-y-auto">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-xl bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-2xl text-center relative overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-xl bg-gradient-to-b from-slate-900/95 via-slate-900/95 to-felt-dark/95 border-2 border-amber-500/50 rounded-2xl p-4 sm:p-6 shadow-2xl text-center relative overflow-hidden backdrop-blur-md my-auto"
       >
         {/* Header */}
         <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-2">

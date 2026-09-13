@@ -566,5 +566,41 @@ describe('Normal Play (Close Rung) & Rung Reveal Game Mechanics', () => {
     // Verify that the card on the table is flipped to face-up!
     expect(engine.getPublicState().currentTrick.cards[0].isFaceDown).toBe(false);
   });
+
+  it('locks Open Rung for remaining players if Rung is revealed in Trick 1 due to void of suit', () => {
+    const { engine, createCard } = setupGameWithFixedHands();
+
+    // Trick 1 has started: firstRoundOpenTrumpAvailable is initially true before reveal
+    expect(engine.getPublicState().firstRoundOpenTrumpAvailable).toBe(true);
+    expect(engine.getPublicState().isTrumpRevealed).toBe(false);
+
+    // Set up hands so P2 (opponent) is void in Hearts
+    (engine as any).hands['p1'] = [createCard('HEARTS', '2', 2), createCard('SPADES', '10', 10)];
+    (engine as any).hands['p2'] = [createCard('SPADES', 'K', 13), createCard('CLUBS', '2', 2)]; // Void in Hearts!
+    (engine as any).hands['p3'] = [createCard('HEARTS', '10', 10)];
+    (engine as any).hands['p4'] = [createCard('HEARTS', '4', 4)];
+
+    // P1 leads Hearts (H_2)
+    engine.playCard('p1', 'H_2');
+
+    // P2 has no Hearts! P2 is void and requests Rung reveal
+    expect(engine.getPrivateState('p2').canRequestRungReveal).toBe(true);
+    engine.requestTrumpReveal('p2');
+
+    // P1 shows the trump card (reveals Rung as SPADES)
+    engine.showTrumpCard('p1');
+
+    const stateAfterReveal = engine.getPublicState();
+    expect(stateAfterReveal.isTrumpRevealed).toBe(true);
+
+    // CRITICAL REQUIREMENT: Remaining players in Trick 1 CANNOT declare Open Rung!
+    expect(stateAfterReveal.firstRoundOpenTrumpAvailable).toBe(false);
+
+    // P2 attempting to select open rung or declare open rung must throw
+    const p2Hand = engine.getPrivateState('p2').myHand;
+    expect(() => engine.selectOpenRungSuit('p2', 'CLUBS')).toThrow();
+    expect(() => engine.declareOpenRung('p2', 'CLUBS', p2Hand[0].id, false)).toThrow();
+    expect(() => engine.declareOpenTrump('p2', 'CLUBS', 'FACE_UP')).toThrow();
+  });
 });
 

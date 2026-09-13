@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PublicGameState,
@@ -178,7 +178,21 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   const trumpRequester = players.find((p) => p.id === trumpRevealRequesterId);
 
   const isMyTurn = currentTurnPlayerId === myPlayerId;
-  const canAnnounceOpenRung = firstRoundOpenTrumpAvailable && trumpMode !== 'BWINJI' && isMyTurn && !faceDownLeadPending;
+  const canAnnounceOpenRung =
+    firstRoundOpenTrumpAvailable &&
+    !isTrumpRevealed &&
+    trumpMode !== 'BWINJI' &&
+    isMyTurn &&
+    !faceDownLeadPending;
+
+  // If Rung is revealed or first-round open trump is no longer available, clear any pending Open Rung selection
+  useEffect(() => {
+    if (!firstRoundOpenTrumpAvailable || isTrumpRevealed) {
+      setSelectedOpenRungSuit(null);
+      setSelectedLeadCardId(null);
+    }
+  }, [firstRoundOpenTrumpAvailable, isTrumpRevealed]);
+
   const isBwinjiCallerLead =
     trumpMode === 'BWINJI' &&
     currentTrick.trickNumber === 1 &&
@@ -216,7 +230,22 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
 
   const getPlayedCardForPlayer = (playerId?: string) => {
     if (!playerId) return null;
-    return displayTrickCards.find((c) => c.playerId === playerId);
+    const cardInTrick = displayTrickCards.find((c) => c.playerId === playerId);
+    if (cardInTrick) return cardInTrick;
+
+    // During Toss phases, display each player's drawn toss card in front of their seat on the table
+    if (
+      (phase === 'INITIAL_TOSS' || phase === 'TOSS_TIE_BREAKER' || phase === 'TOSS_COMPLETE') &&
+      publicState.tossDraws &&
+      publicState.tossDraws[playerId]
+    ) {
+      return {
+        playerId,
+        card: publicState.tossDraws[playerId],
+        playedAt: 0,
+      };
+    }
+    return null;
   };
 
   const playedBottom = getPlayedCardForPlayer(bottomPlayer?.id);

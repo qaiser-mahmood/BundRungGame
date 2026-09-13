@@ -72,11 +72,11 @@ export const BiddingModal: React.FC<BiddingModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-black/35 pointer-events-auto overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-xl bg-gradient-to-b from-slate-900 via-slate-900 to-felt-dark border-2 border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden"
+        className="w-full max-w-xl bg-gradient-to-b from-slate-900/95 via-slate-900/95 to-felt-dark/95 border-2 border-amber-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-md my-auto"
       >
         {/* Header */}
         <div className="text-center mb-3">

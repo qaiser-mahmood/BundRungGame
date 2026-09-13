@@ -757,6 +757,9 @@ export class BundRungEngine extends BaseRungEngine {
     if (this.openTrumpDeclaredInRound1) {
       throw new Error('A Rung has already been announced for this game');
     }
+    if (this.isTrumpRevealed) {
+      throw new Error('Cannot declare Open Rung: Rung has already been revealed');
+    }
     const player = this.players[this.currentTurnPlayerIndex];
     if (player.id !== playerId) {
       throw new Error('Not your turn to announce Open Rung');
@@ -860,8 +863,13 @@ export class BundRungEngine extends BaseRungEngine {
   }
 
   public selectOpenRungSuit(playerId: string, suit: Suit | null): void {
-    if (this.phase !== 'TRICK_PLAYING' || this.currentTrick.trickNumber !== 1 || this.openTrumpDeclaredInRound1) {
-      throw new Error('Cannot select open rung suit at this time');
+    if (
+      this.phase !== 'TRICK_PLAYING' ||
+      this.currentTrick.trickNumber !== 1 ||
+      this.openTrumpDeclaredInRound1 ||
+      this.isTrumpRevealed
+    ) {
+      throw new Error('Cannot select open rung suit at this time: Rung is already revealed or locked');
     }
     const currentTurnPlayer = this.players[this.currentTurnPlayerIndex];
     if (currentTurnPlayer && currentTurnPlayer.id !== playerId) {
@@ -875,6 +883,9 @@ export class BundRungEngine extends BaseRungEngine {
   }
 
   public declareOpenTrump(playerId: string, suit: Suit, modifier: OpenTrumpModifier = 'FACE_UP'): void {
+    if (this.isTrumpRevealed) {
+      throw new Error('Cannot declare Open Rung: Rung has already been revealed');
+    }
     const hand = this.hands[playerId] || [];
     const firstCard = hand[0];
     if (firstCard) {
@@ -1219,6 +1230,8 @@ export class BundRungEngine extends BaseRungEngine {
 
     this.isTrumpRevealPending = false;
     this.isTrumpRevealed = true;
+    this.pendingOpenRungSuit = null;
+    this.pendingOpenRungPlayerId = null;
 
     // Flip all accumulated face-down caller cards in side panel to face-up
     this.faceDownCallerCards.forEach((c) => {
@@ -1714,6 +1727,7 @@ export class BundRungEngine extends BaseRungEngine {
         this.phase === 'TRICK_PLAYING' &&
         this.currentTrick.trickNumber === 1 &&
         !this.openTrumpDeclaredInRound1 &&
+        !this.isTrumpRevealed &&
         this.trumpMode !== 'BWINJI',
       pendingOpenRungSuit: this.pendingOpenRungSuit,
       pendingOpenRungPlayerId: this.pendingOpenRungPlayerId,

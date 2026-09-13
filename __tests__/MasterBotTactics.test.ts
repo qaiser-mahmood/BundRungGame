@@ -1150,4 +1150,58 @@ describe('Bund Rung Master Tactical Invariants & Strategy', () => {
     expect(chosen.suit).toBe('DIAMONDS');
     expect(chosen.rank).toBe('5');
   });
+
+  it('Opponent Winning Game: Bot ruffs with Trump instead of holding high card in hand when opponent team is ahead', () => {
+    const engine = new BundRungEngine();
+    engine.addPlayer('p1', 'Alice');        // Team 1 (Opponent)
+    engine.addPlayer('p2', 'Bob', true);    // Team 2 (Bot)
+    engine.addPlayer('p3', 'Charlie');      // Team 1 (Opponent)
+    engine.addPlayer('p4', 'Diana');        // Team 2 (Partner)
+
+    (engine as any).phase = 'TRICK_PLAYING';
+    (engine as any).trumpSuit = 'SPADES';
+    (engine as any).isTrumpRevealed = true;
+
+    // Opponents (Team 1) are winning the game: they have 5 tricks won!
+    (engine as any).team1TricksWon = 5;
+    (engine as any).team2TricksWon = 2;
+
+    // Current Trick: P1 (Opponent) leads HEARTS 8. P3 (Opponent) plays HEARTS 9.
+    // Opponent is winning the trick with a mid-card (HEARTS 9).
+    (engine as any).currentTrick = {
+      trickNumber: 8,
+      leadPlayerId: 'p1',
+      leadSuit: 'HEARTS',
+      cards: [
+        { playerId: 'p1', card: createCard('HEARTS', '8', 8), playedAt: 1 },
+        { playerId: 'p3', card: createCard('HEARTS', '9', 9), playedAt: 2 },
+      ],
+      winnerPlayerId: null,
+      winningTeam: null,
+    };
+
+    // Bot Bob is void in Hearts. It holds:
+    // Trump: SPADES King (13)
+    // Non-trump cards: CLUBS 4 (4), CLUBS 6 (6)
+    const bobHand = [
+      createCard('SPADES', 'K', 13), // High trump card!
+      createCard('CLUBS', '4', 4),   // Weak off-suit card
+      createCard('CLUBS', '6', 6),   // Weak off-suit card
+    ];
+    (engine as any).hands['p2'] = bobHand;
+
+    const chosen = BotPlayer.chooseMasterCard(
+      engine,
+      'p2',
+      bobHand,
+      bobHand,
+      engine.getPublicState(),
+      engine.getPrivateState('p2')
+    );
+
+    // Because opponent team is winning the game, Bot MUST NOT preserve King of Spades in hand
+    // and dump Clubs 4. It MUST play the King of Spades to RUFF and kill the opponent trick!
+    expect(chosen.suit).toBe('SPADES');
+    expect(chosen.rank).toBe('K');
+  });
 });
