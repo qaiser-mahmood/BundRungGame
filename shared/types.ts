@@ -157,6 +157,7 @@ export interface PublicGameState {
   // Bidding
   biddingTurnPlayerId: string | null;
   biddingPassCount: number;
+  biddingStatus?: { [playerId: string]: 'WAITING' | 'SELECTING' | 'PASSED' | 'SELECTED_RUNG' | 'DECLARED_BWINJI' };
 
   // Trick play
   gameIndex: number;

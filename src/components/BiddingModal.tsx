@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, Player, Suit, TrumpMode } from '../../shared/types';
 import { PlayingCard, SuitIcon, suitColors } from './PlayingCard';
-import { Crown, Megaphone, SkipForward, AlertCircle, Sparkles, CheckCircle2, Lock } from 'lucide-react';
+import { Crown, Megaphone, SkipForward, AlertCircle, Sparkles, CheckCircle2, Lock, X, Clock } from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface BiddingModalProps {
   myPlayerId: string;
   biddingTurnPlayerId: string | null;
   biddingPassCount: number;
+  biddingStatus?: { [playerId: string]: 'WAITING' | 'SELECTING' | 'PASSED' | 'SELECTED_RUNG' | 'DECLARED_BWINJI' };
   my5Cards: Card[];
   players: Player[];
   trumpMode?: TrumpMode | null;
@@ -21,6 +22,7 @@ export const BiddingModal: React.FC<BiddingModalProps> = ({
   myPlayerId,
   biddingTurnPlayerId,
   biddingPassCount,
+  biddingStatus,
   my5Cards,
   players,
   trumpMode,
@@ -79,7 +81,7 @@ export const BiddingModal: React.FC<BiddingModalProps> = ({
         className="w-full max-w-xl bg-gradient-to-b from-slate-900/95 via-slate-900/95 to-felt-dark/95 border-2 border-amber-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden backdrop-blur-md my-auto"
       >
         {/* Header */}
-        <div className="text-center mb-3">
+        <div className="text-center mb-2">
           <h2 className="text-xl sm:text-2xl font-cinzel font-black gold-gradient-text mt-1">
             {isRungAlreadyChosen
               ? isMyTurn
@@ -89,6 +91,63 @@ export const BiddingModal: React.FC<BiddingModalProps> = ({
               ? 'SELECT YOUR RUNG CARD OR BWINJI'
               : 'RUNG DECLARATION'}
           </h2>
+        </div>
+
+        {/* 4-Player Bidding Visual Status Track */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-3 px-0.5">
+          {players.map((p) => {
+            const status = biddingStatus?.[p.id] || (p.id === biddingTurnPlayerId ? 'SELECTING' : 'WAITING');
+            const isMe = p.id === myPlayerId;
+            const isSelecting = status === 'SELECTING';
+            const isPassed = status === 'PASSED';
+            const isLocked = status === 'SELECTED_RUNG';
+            const isBwinji = status === 'DECLARED_BWINJI';
+
+            return (
+              <div
+                key={p.id}
+                className={`p-1.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
+                  isSelecting
+                    ? 'bg-amber-950/80 border-amber-400 ring-2 ring-amber-400 shadow-glow-gold animate-pulse'
+                    : isPassed
+                    ? 'bg-slate-950/80 border-rose-500/50'
+                    : isLocked
+                    ? 'bg-amber-900/60 border-amber-400'
+                    : isBwinji
+                    ? 'bg-purple-950/80 border-purple-400'
+                    : 'bg-slate-950/40 border-slate-800 opacity-60'
+                }`}
+              >
+                <div className="text-[10px] sm:text-xs font-bold text-white truncate max-w-full flex items-center gap-0.5">
+                  <span>{p.name.split(' ')[0]}</span>
+                  {isMe && <span className="text-amber-400 text-[8px] sm:text-[9px]">(You)</span>}
+                </div>
+                <div className="mt-0.5">
+                  {isSelecting ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-amber-400 text-slate-950 font-black text-[8px] sm:text-[9px] rounded-full shadow">
+                      <Crown className="w-2.5 h-2.5 fill-current" /> Choosing
+                    </span>
+                  ) : isPassed ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-rose-950 border border-rose-500/60 text-rose-300 font-bold text-[8px] sm:text-[9px] rounded-full">
+                      <X className="w-2.5 h-2.5 text-rose-400" /> Passed
+                    </span>
+                  ) : isLocked ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] rounded-full">
+                      👑 Locked
+                    </span>
+                  ) : isBwinji ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-purple-600 text-white font-bold text-[8px] sm:text-[9px] rounded-full">
+                      ⚡ Bwinji
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] text-slate-400">
+                      <Clock className="w-2.5 h-2.5 text-slate-500" /> Waiting
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* 5 Cards Rack */}

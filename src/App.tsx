@@ -333,6 +333,7 @@ export const App: React.FC = () => {
           myPlayerId={myPlayerId}
           biddingTurnPlayerId={publicState.biddingTurnPlayerId}
           biddingPassCount={publicState.biddingPassCount}
+          biddingStatus={publicState.biddingStatus}
           my5Cards={privateState.myHand}
           players={publicState.players}
           trumpMode={publicState.trumpMode}

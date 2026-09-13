@@ -49,6 +49,7 @@ export class BundRungEngine extends BaseRungEngine {
   private biddingPassCount: number = 0;
   private bwinjiChallengePassedCount: number = 0;
   private biddingTurnPlayerIndex: number = 0;
+  private biddingStatus: { [playerId: string]: 'WAITING' | 'SELECTING' | 'PASSED' | 'SELECTED_RUNG' | 'DECLARED_BWINJI' } = {};
   private openTrumpDeclaredInRound1: boolean = false;
 
   // Face-down Rung Lead & Inspection State (Section 5.3)
@@ -134,6 +135,7 @@ export class BundRungEngine extends BaseRungEngine {
     this.openTrumpModifier = null;
     this.bwinjiModifier = null;
     this.biddingPassCount = 0;
+    this.biddingStatus = {};
     this.bwinjiChallengePassedCount = 0;
     this.openTrumpDeclaredInRound1 = false;
     this.pendingOpenRungSuit = null;
@@ -512,7 +514,14 @@ export class BundRungEngine extends BaseRungEngine {
     this.biddingTurnPlayerIndex = (this.dealerIndex + 1) % 4;
     this.biddingPassCount = 0;
     this.bwinjiChallengePassedCount = 0;
+    this.biddingStatus = {};
+    for (const p of this.players) {
+      this.biddingStatus[p.id] = 'WAITING';
+    }
     const firstBidder = this.players[this.biddingTurnPlayerIndex];
+    if (firstBidder) {
+      this.biddingStatus[firstBidder.id] = 'SELECTING';
+    }
     this.statusMessage = `5 cards dealt. ${firstBidder.name}'s turn to declare Rung (Close Rung, Bwinji, or Pass).`;
   }
 
@@ -533,6 +542,7 @@ export class BundRungEngine extends BaseRungEngine {
     }
 
     if (action === 'PASS') {
+      this.biddingStatus[currentBidder.id] = 'PASSED';
       if (this.trumpMode === 'CLOSE_TRUMP') {
         // A Rung card was already selected by a previous player; this pass declines to call Bwinji!
         this.bwinjiChallengePassedCount += 1;
@@ -547,6 +557,9 @@ export class BundRungEngine extends BaseRungEngine {
         }
         this.biddingTurnPlayerIndex = (this.biddingTurnPlayerIndex + 1) % 4;
         const nextBidder = this.players[this.biddingTurnPlayerIndex];
+        if (nextBidder) {
+          this.biddingStatus[nextBidder.id] = 'SELECTING';
+        }
         this.statusMessage = `${currentBidder.name} passed on Bwinji. ${nextBidder.name} can Call BWINJI or Pass.`;
         return;
       }
@@ -559,6 +572,9 @@ export class BundRungEngine extends BaseRungEngine {
       this.biddingPassCount += 1;
       this.biddingTurnPlayerIndex = (this.biddingTurnPlayerIndex + 1) % 4;
       const nextBidder = this.players[this.biddingTurnPlayerIndex];
+      if (nextBidder) {
+        this.biddingStatus[nextBidder.id] = 'SELECTING';
+      }
       const mustDeclareText = this.biddingPassCount === 3 ? ' (MUST declare rung)' : '';
       this.statusMessage = `${currentBidder.name} passed. ${nextBidder.name}'s turn${mustDeclareText}.`;
       return;
@@ -598,6 +614,7 @@ export class BundRungEngine extends BaseRungEngine {
       this.isTrumpRevealed = true; // Bwinji is public immediately to everyone
       this.openTrumpDeclaredInRound1 = true; // Lock further open rung announcements in Round 1
       this.trumpCallerPlayerId = playerId;
+      this.biddingStatus[playerId] = 'DECLARED_BWINJI';
       this.bwinjiModifier = 'FACE_UP';
       this.statusMessage = `${currentBidder.name} declared BWINJI with Rung: ${bwinjiSuit}! Dealing remaining cards...`;
 
@@ -635,6 +652,7 @@ export class BundRungEngine extends BaseRungEngine {
     this.chosenTrumpCard = { ...selectedCard };
     this.trumpSuit = selectedCard.suit;
     this.trumpCallerPlayerId = playerId;
+    this.biddingStatus[playerId] = 'SELECTED_RUNG';
     this.trumpMode = 'CLOSE_TRUMP';
     this.isTrumpRevealed = false; // Hidden until uncovered
 
@@ -649,6 +667,9 @@ export class BundRungEngine extends BaseRungEngine {
       this.bwinjiChallengePassedCount = 0;
       this.biddingTurnPlayerIndex = (this.biddingTurnPlayerIndex + 1) % 4;
       const nextBidder = this.players[this.biddingTurnPlayerIndex];
+      if (nextBidder) {
+        this.biddingStatus[nextBidder.id] = 'SELECTING';
+      }
       this.statusMessage = `${currentBidder.name} selected a Secret Rung Card! ${nextBidder.name} can Call BWINJI to override or Pass.`;
     }
   }
@@ -1610,6 +1631,7 @@ export class BundRungEngine extends BaseRungEngine {
     this.openTrumpModifier = null;
     this.bwinjiModifier = null;
     this.biddingPassCount = 0;
+    this.biddingStatus = {};
     this.openTrumpDeclaredInRound1 = false;
     this.faceDownLeadPending = false;
     this.faceDownLeadPlayerId = null;
@@ -1745,6 +1767,7 @@ export class BundRungEngine extends BaseRungEngine {
           ? this.players[this.biddingTurnPlayerIndex]?.id || null
           : null,
       biddingPassCount: this.biddingPassCount,
+      biddingStatus: { ...this.biddingStatus },
       gameIndex: this.gameIndex,
       currentTrick: { ...this.currentTrick, cards: [...this.currentTrick.cards] },
       previousTrickCards: this.previousTrickCards ? this.previousTrickCards.map((c) => ({ ...c })) : null,

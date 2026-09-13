@@ -32,6 +32,7 @@ import {
   MicOff,
   Volume2,
   VolumeX,
+  Clock,
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 
@@ -252,6 +253,100 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
   const playedRight = getPlayedCardForPlayer(rightPlayer?.id);
   const playedTop = getPlayedCardForPlayer(topPlayer?.id);
   const playedLeft = getPlayedCardForPlayer(leftPlayer?.id);
+
+  const isBiddingPhase = phase === 'BIDDING_PHASE';
+  const getBiddingPlayerStatus = (playerId?: string): 'WAITING' | 'SELECTING' | 'PASSED' | 'SELECTED_RUNG' | 'DECLARED_BWINJI' => {
+    if (!playerId) return 'WAITING';
+    if (publicState.biddingStatus && publicState.biddingStatus[playerId]) {
+      return publicState.biddingStatus[playerId];
+    }
+    if (isBiddingPhase && publicState.biddingTurnPlayerId === playerId) return 'SELECTING';
+    if (publicState.trumpCallerPlayerId === playerId) {
+      return publicState.trumpMode === 'BWINJI' ? 'DECLARED_BWINJI' : 'SELECTED_RUNG';
+    }
+    return 'WAITING';
+  };
+
+  const renderBiddingFeltTile = (player?: Player) => {
+    if (!player) return null;
+    const status = getBiddingPlayerStatus(player.id);
+    const isMe = player.id === myPlayerId;
+
+    if (status === 'SELECTING') {
+      return (
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-16 sm:w-20 h-14 sm:h-18 rounded-xl bg-gradient-to-b from-amber-950/95 via-yellow-900/90 to-slate-950/95 border-2 border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.85)] flex flex-col items-center justify-center p-1 text-center animate-pulse z-20"
+        >
+          <Crown className="w-4 h-4 text-amber-300 fill-amber-300 mb-0.5 animate-bounce" />
+          <span className="text-[9px] sm:text-[10px] font-cinzel font-black text-amber-300 uppercase leading-tight">
+            {isMe ? 'Your Turn' : 'Choosing'}
+          </span>
+          <span className="text-[7px] sm:text-[8px] font-semibold text-amber-200/80">
+            Rung Card
+          </span>
+        </motion.div>
+      );
+    }
+
+    if (status === 'PASSED') {
+      return (
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-16 sm:w-20 h-14 sm:h-18 rounded-xl bg-slate-950/90 border border-rose-500/70 shadow-md flex flex-col items-center justify-center p-1 text-center z-10"
+        >
+          <div className="w-5 h-5 rounded-full bg-rose-950/90 border border-rose-500/80 flex items-center justify-center mb-0.5">
+            <X className="w-3.5 h-3.5 text-rose-400" />
+          </div>
+          <span className="text-[9px] sm:text-[10px] font-black text-rose-300 uppercase tracking-wide">
+            Passed
+          </span>
+        </motion.div>
+      );
+    }
+
+    if (status === 'SELECTED_RUNG') {
+      return (
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-16 sm:w-20 h-14 sm:h-18 rounded-xl bg-amber-950/95 border-2 border-amber-400 shadow-glow-gold flex flex-col items-center justify-center p-1 text-center z-15"
+        >
+          <Crown className="w-4 h-4 text-amber-300 fill-amber-300 mb-0.5" />
+          <span className="text-[8px] sm:text-[9px] font-cinzel font-black text-amber-200 uppercase leading-tight">
+            Rung Locked
+          </span>
+        </motion.div>
+      );
+    }
+
+    if (status === 'DECLARED_BWINJI') {
+      return (
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-16 sm:w-20 h-14 sm:h-18 rounded-xl bg-purple-950/95 border-2 border-purple-400 shadow-lg flex flex-col items-center justify-center p-1 text-center z-15"
+        >
+          <Sparkles className="w-4 h-4 text-purple-300 mb-0.5" />
+          <span className="text-[9px] sm:text-[10px] font-cinzel font-black text-purple-200 uppercase leading-tight">
+            Bwinji
+          </span>
+        </motion.div>
+      );
+    }
+
+    // WAITING
+    return (
+      <div className="w-16 sm:w-20 h-14 sm:h-18 rounded-xl bg-slate-950/50 border border-dashed border-slate-700/70 flex flex-col items-center justify-center p-1 text-center opacity-60">
+        <Clock className="w-3.5 h-3.5 text-slate-500 mb-0.5" />
+        <span className="text-[8px] sm:text-[9px] font-medium text-slate-400">
+          In Queue
+        </span>
+      </div>
+    );
+  };
 
   const isCardFaceDownForViewer = (playedItem?: { playerId: string; card: Card; isFaceDown?: boolean } | null) => {
     if (!playedItem) return false;
@@ -523,6 +618,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isSpeaking={speakingPlayerIds?.has(topPlayer.id)}
               isMuted={mutedPlayerIds?.has(topPlayer.id)}
               position="top"
+              biddingStatus={getBiddingPlayerStatus(topPlayer.id)}
+              isBiddingPhase={isBiddingPhase}
             />
             <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
               {revealedHands[topPlayer.id] && revealedHands[topPlayer.id].length > 0 ? (
@@ -622,6 +719,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isSpeaking={speakingPlayerIds?.has(leftPlayer.id)}
               isMuted={mutedPlayerIds?.has(leftPlayer.id)}
               position="left"
+              biddingStatus={getBiddingPlayerStatus(leftPlayer.id)}
+              isBiddingPhase={isBiddingPhase}
             />
           </div>
         )}
@@ -681,131 +780,163 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
               isSpeaking={speakingPlayerIds?.has(rightPlayer.id)}
               isMuted={mutedPlayerIds?.has(rightPlayer.id)}
               position="right"
+              biddingStatus={getBiddingPlayerStatus(rightPlayer.id)}
+              isBiddingPhase={isBiddingPhase}
             />
           </div>
         )}
 
-        {/* --- Center: 4-Way Trick Play Field --- */}
+        {/* --- Center: 4-Way Trick / Bidding Play Field --- */}
         <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-felt-border/60 bg-felt-dark/40 flex items-center justify-center shadow-inner mt-6 sm:mt-10 mb-1">
-          {/* Game Name on Table Felt */}
-          <div className="absolute text-center pointer-events-none select-none flex flex-col items-center justify-center opacity-20">
-            <div className="text-xl sm:text-3xl font-cinzel font-black tracking-widest text-amber-200 uppercase">
-              {trumpMode === 'BWINJI' ? 'BWINJI' : 'BUND RUNG'}
+          {/* Game Name or Bidding Status on Table Felt */}
+          {isBiddingPhase ? (
+            <div className="absolute text-center pointer-events-none select-none flex flex-col items-center justify-center z-5">
+              <div className="px-3 py-1 bg-slate-950/80 border border-amber-500/40 rounded-full shadow-lg flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+                <span className="text-[10px] sm:text-xs font-cinzel font-black text-amber-300 tracking-wider uppercase">
+                  Rung Selection
+                </span>
+                <span className="px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded text-[9px] font-bold">
+                  Passes: {publicState.biddingPassCount}/3
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute text-center pointer-events-none select-none flex flex-col items-center justify-center opacity-20">
+              <div className="text-xl sm:text-3xl font-cinzel font-black tracking-widest text-amber-200 uppercase">
+                {trumpMode === 'BWINJI' ? 'BWINJI' : 'BUND RUNG'}
+              </div>
+            </div>
+          )}
 
           {/* Played cards container with 4 designated cardinal positions */}
           <div className="relative w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 flex items-center justify-center">
-            {/* Top played card */}
+            {/* Top played card or Bidding Felt Tile */}
             <div className="absolute top-1 sm:top-2">
-              <AnimatePresence mode="popLayout">
-                {playedTop && (
-                  <motion.div
-                    key={`played_top_${playedTop.card.id}_${playedTop.playedAt || ''}`}
-                    initial={{ y: -20, opacity: 0, scale: 0.9 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.2 }}
-                    className={
-                      (isShowingPreviousTrick || isGameResolved) && playedTop.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
-                        : ''
-                    }
-                  >
-                    <PlayingCard
-                      card={getPlayedCardData(playedTop) || playedTop.card}
-                      faceDown={isCardFaceDownForViewer(playedTop)}
-                      badge={getPlayedCardBadge(playedTop)}
-                      onClick={() => handlePlayedCardClick(playedTop)}
-                      size="sm"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isBiddingPhase ? (
+                renderBiddingFeltTile(topPlayer)
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {playedTop && (
+                    <motion.div
+                      key={`played_top_${playedTop.card.id}_${playedTop.playedAt || ''}`}
+                      initial={{ y: -20, opacity: 0, scale: 0.9 }}
+                      animate={{ y: 0, opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.2 }}
+                      className={
+                        (isShowingPreviousTrick || isGameResolved) && playedTop.playerId === lastTrickWinnerPlayerId
+                          ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                          : ''
+                      }
+                    >
+                      <PlayingCard
+                        card={getPlayedCardData(playedTop) || playedTop.card}
+                        faceDown={isCardFaceDownForViewer(playedTop)}
+                        badge={getPlayedCardBadge(playedTop)}
+                        onClick={() => handlePlayedCardClick(playedTop)}
+                        size="sm"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
 
-            {/* Bottom played card */}
+            {/* Bottom played card or Bidding Felt Tile */}
             <div className="absolute bottom-1 sm:bottom-2">
-              <AnimatePresence mode="popLayout">
-                {playedBottom && (
-                  <motion.div
-                    key={`played_bottom_${playedBottom.card.id}_${playedBottom.playedAt || ''}`}
-                    initial={{ y: 20, opacity: 0, scale: 0.9 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.2 }}
-                    className={
-                      (isShowingPreviousTrick || isGameResolved) && playedBottom.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
-                        : ''
-                    }
-                  >
-                    <PlayingCard
-                      card={getPlayedCardData(playedBottom) || playedBottom.card}
-                      faceDown={isCardFaceDownForViewer(playedBottom)}
-                      badge={getPlayedCardBadge(playedBottom)}
-                      onClick={() => handlePlayedCardClick(playedBottom)}
-                      size="sm"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isBiddingPhase ? (
+                renderBiddingFeltTile(bottomPlayer)
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {playedBottom && (
+                    <motion.div
+                      key={`played_bottom_${playedBottom.card.id}_${playedBottom.playedAt || ''}`}
+                      initial={{ y: 20, opacity: 0, scale: 0.9 }}
+                      animate={{ y: 0, opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.2 }}
+                      className={
+                        (isShowingPreviousTrick || isGameResolved) && playedBottom.playerId === lastTrickWinnerPlayerId
+                          ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                          : ''
+                      }
+                    >
+                      <PlayingCard
+                        card={getPlayedCardData(playedBottom) || playedBottom.card}
+                        faceDown={isCardFaceDownForViewer(playedBottom)}
+                        badge={getPlayedCardBadge(playedBottom)}
+                        onClick={() => handlePlayedCardClick(playedBottom)}
+                        size="sm"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
 
-            {/* Left played card */}
+            {/* Left played card or Bidding Felt Tile */}
             <div className="absolute left-1 sm:left-2">
-              <AnimatePresence mode="popLayout">
-                {playedLeft && (
-                  <motion.div
-                    key={`played_left_${playedLeft.card.id}_${playedLeft.playedAt || ''}`}
-                    initial={{ x: -20, opacity: 0, scale: 0.9 }}
-                    animate={{ x: 0, opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.2 }}
-                    className={
-                      (isShowingPreviousTrick || isGameResolved) && playedLeft.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
-                        : ''
-                    }
-                  >
-                    <PlayingCard
-                      card={getPlayedCardData(playedLeft) || playedLeft.card}
-                      faceDown={isCardFaceDownForViewer(playedLeft)}
-                      badge={getPlayedCardBadge(playedLeft)}
-                      onClick={() => handlePlayedCardClick(playedLeft)}
-                      size="sm"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isBiddingPhase ? (
+                renderBiddingFeltTile(leftPlayer)
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {playedLeft && (
+                    <motion.div
+                      key={`played_left_${playedLeft.card.id}_${playedLeft.playedAt || ''}`}
+                      initial={{ x: -20, opacity: 0, scale: 0.9 }}
+                      animate={{ x: 0, opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.2 }}
+                      className={
+                        (isShowingPreviousTrick || isGameResolved) && playedLeft.playerId === lastTrickWinnerPlayerId
+                          ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                          : ''
+                      }
+                    >
+                      <PlayingCard
+                        card={getPlayedCardData(playedLeft) || playedLeft.card}
+                        faceDown={isCardFaceDownForViewer(playedLeft)}
+                        badge={getPlayedCardBadge(playedLeft)}
+                        onClick={() => handlePlayedCardClick(playedLeft)}
+                        size="sm"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
 
-            {/* Right played card */}
+            {/* Right played card or Bidding Felt Tile */}
             <div className="absolute right-1 sm:right-2">
-              <AnimatePresence mode="popLayout">
-                {playedRight && (
-                  <motion.div
-                    key={`played_right_${playedRight.card.id}_${playedRight.playedAt || ''}`}
-                    initial={{ x: 20, opacity: 0, scale: 0.9 }}
-                    animate={{ x: 0, opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.2 }}
-                    className={
-                      (isShowingPreviousTrick || isGameResolved) && playedRight.playerId === lastTrickWinnerPlayerId
-                        ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
-                        : ''
-                    }
-                  >
-                    <PlayingCard
-                      card={getPlayedCardData(playedRight) || playedRight.card}
-                      faceDown={isCardFaceDownForViewer(playedRight)}
-                      badge={getPlayedCardBadge(playedRight)}
-                      onClick={() => handlePlayedCardClick(playedRight)}
-                      size="sm"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isBiddingPhase ? (
+                renderBiddingFeltTile(rightPlayer)
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {playedRight && (
+                    <motion.div
+                      key={`played_right_${playedRight.card.id}_${playedRight.playedAt || ''}`}
+                      initial={{ x: 20, opacity: 0, scale: 0.9 }}
+                      animate={{ x: 0, opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.2 }}
+                      className={
+                        (isShowingPreviousTrick || isGameResolved) && playedRight.playerId === lastTrickWinnerPlayerId
+                          ? 'ring-3 ring-amber-400 rounded-lg shadow-glow-gold scale-105 z-10'
+                          : ''
+                      }
+                    >
+                      <PlayingCard
+                        card={getPlayedCardData(playedRight) || playedRight.card}
+                        faceDown={isCardFaceDownForViewer(playedRight)}
+                        badge={getPlayedCardBadge(playedRight)}
+                        onClick={() => handlePlayedCardClick(playedRight)}
+                        size="sm"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
           </div>
         </div>
@@ -1331,6 +1462,8 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 isSpeaking={speakingPlayerIds?.has(bottomPlayer.id)}
                 isMuted={mutedPlayerIds?.has(bottomPlayer.id) || (isMicMuted && bottomPlayer.id === myPlayerId)}
                 position="bottom"
+                biddingStatus={getBiddingPlayerStatus(bottomPlayer.id)}
+                isBiddingPhase={isBiddingPhase}
               />
             </div>
           )}
@@ -1562,6 +1695,8 @@ interface PlayerBadgeProps {
   isSpeaking?: boolean;
   isMuted?: boolean;
   position: 'top' | 'bottom' | 'left' | 'right';
+  biddingStatus?: 'WAITING' | 'SELECTING' | 'PASSED' | 'SELECTED_RUNG' | 'DECLARED_BWINJI';
+  isBiddingPhase?: boolean;
 }
 
 const PlayerBadge: React.FC<PlayerBadgeProps> = ({
@@ -1573,15 +1708,21 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
   isSpeaking,
   isMuted,
   position,
+  biddingStatus = 'WAITING',
+  isBiddingPhase = false,
 }) => {
   const isSide = position === 'left' || position === 'right';
   const firstName = player.name.trim().split(' ')[0] || player.name;
+  const isSelecting = isBiddingPhase && biddingStatus === 'SELECTING';
+  const isPassed = isBiddingPhase && biddingStatus === 'PASSED';
+  const isLocked = isBiddingPhase && biddingStatus === 'SELECTED_RUNG';
+  const isBwinji = isBiddingPhase && biddingStatus === 'DECLARED_BWINJI';
 
   if (isSide) {
     return (
       <div className="relative flex flex-col items-center">
-        {/* Active Turn Floating Directional Arrow Indicator */}
-        {isCurrentTurn && (
+        {/* Active Turn Floating Directional Arrow Indicator (during Trick play) */}
+        {!isBiddingPhase && isCurrentTurn && (
           <div
             className={`absolute ${
               position === 'left' ? '-right-14 sm:-right-16' : '-left-14 sm:-left-16'
@@ -1591,10 +1732,59 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
           </div>
         )}
 
+        {/* Bidding Phase Floating Status Badges for Side Players */}
+        {isBiddingPhase && (
+          <>
+            {isSelecting && (
+              <div
+                className={`absolute ${
+                  position === 'left' ? '-right-24 sm:-right-28' : '-left-24 sm:-left-28'
+                } top-1/2 -translate-y-1/2 z-30 flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_20px_rgba(245,158,11,1)] animate-bounce whitespace-nowrap border-2 border-yellow-200`}
+              >
+                <Crown className="w-3.5 h-3.5 fill-current" />
+                <span>{position === 'left' ? '👉 CHOOSING' : 'CHOOSING 👈'}</span>
+              </div>
+            )}
+            {isPassed && (
+              <div
+                className={`absolute ${
+                  position === 'left' ? '-right-16 sm:-right-18' : '-left-16 sm:-left-18'
+                } top-1/2 -translate-y-1/2 z-25 flex items-center gap-0.5 px-2 py-0.5 bg-rose-950/95 text-rose-300 border border-rose-500/80 font-bold text-[9px] sm:text-[10px] rounded-md shadow-md whitespace-nowrap`}
+              >
+                <X className="w-3 h-3 text-rose-400" />
+                <span>PASSED</span>
+              </div>
+            )}
+            {isLocked && (
+              <div
+                className={`absolute ${
+                  position === 'left' ? '-right-20 sm:-right-24' : '-left-20 sm:-left-24'
+                } top-1/2 -translate-y-1/2 z-25 flex items-center gap-0.5 px-2 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-md shadow-glow-gold whitespace-nowrap`}
+              >
+                <Crown className="w-3 h-3 fill-current" />
+                <span>RUNG LOCKED</span>
+              </div>
+            )}
+            {isBwinji && (
+              <div
+                className={`absolute ${
+                  position === 'left' ? '-right-16 sm:-right-20' : '-left-16 sm:-left-20'
+                } top-1/2 -translate-y-1/2 z-25 flex items-center gap-0.5 px-2 py-0.5 bg-purple-600 text-white font-black text-[9px] sm:text-[10px] rounded-md shadow whitespace-nowrap`}
+              >
+                <span>⚡ BWINJI</span>
+              </div>
+            )}
+          </>
+        )}
+
         <div
           className={`px-1.5 py-2 rounded-xl border bg-slate-950/95 flex flex-col items-center justify-center min-w-[26px] sm:min-w-[30px] transition-all ${
             isSpeaking
               ? 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(52,211,153,0.9)] border-emerald-300 scale-105 z-25 animate-pulse'
+              : isSelecting
+              ? 'ring-4 ring-amber-400 bg-gradient-to-b from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
+              : isPassed
+              ? 'border-rose-500/60 opacity-80'
               : isCurrentTurn
               ? 'ring-4 ring-amber-400 bg-gradient-to-b from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
               : isPrevWinner
@@ -1612,6 +1802,16 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
             {isMuted && !player.isBot && !isSpeaking && (
               <span className="flex-shrink-0" title="Muted">
                 <MicOff className="w-3 h-3 text-red-400/80" />
+              </span>
+            )}
+            {isSelecting && (
+              <span className="px-1 py-0.2 bg-amber-400 text-slate-950 font-black text-[7px] rounded leading-tight text-center animate-pulse" title="Choosing Rung">
+                RUNG
+              </span>
+            )}
+            {isPassed && (
+              <span className="px-1 py-0.2 bg-rose-950 border border-rose-500/70 text-rose-300 font-bold text-[7px] rounded leading-tight text-center" title="Passed">
+                PASS
               </span>
             )}
             {isDealer && (
@@ -1645,6 +1845,10 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
                 className={`text-[10px] sm:text-[12px] font-black uppercase leading-[11px] sm:leading-[13px] tracking-normal ${
                   isSpeaking
                     ? 'text-emerald-200 font-extrabold'
+                    : isSelecting
+                    ? 'text-amber-200 font-extrabold'
+                    : isPassed
+                    ? 'text-rose-300/80'
                     : isCurrentTurn
                     ? 'text-amber-200'
                     : 'text-white'
@@ -1661,17 +1865,66 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
 
   return (
     <div className="relative flex flex-col items-center">
-      {/* Top Active Turn Bouncing Badge (for Partner) */}
-      {isCurrentTurn && position === 'top' && (
+      {/* Active Turn Bouncing Badge during Trick Play (for Partner) */}
+      {!isBiddingPhase && isCurrentTurn && position === 'top' && (
         <div className="absolute -bottom-5 sm:-bottom-6 z-30 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-full shadow-[0_0_15px_rgba(245,158,11,0.9)] animate-bounce flex items-center gap-1 whitespace-nowrap">
           <span>👇 ACTIVE TURN</span>
         </div>
+      )}
+
+      {/* Bidding Phase Floating Badges for Top & Bottom */}
+      {isBiddingPhase && (
+        <>
+          {isSelecting && (
+            <div
+              className={`absolute ${
+                position === 'top' ? '-bottom-6 sm:-bottom-7' : '-top-6 sm:-top-7'
+              } z-30 px-3 py-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-slate-950 font-black text-[10px] sm:text-[11px] rounded-full shadow-[0_0_20px_rgba(245,158,11,1)] animate-bounce flex items-center gap-1.5 whitespace-nowrap border-2 border-yellow-200`}
+            >
+              <Crown className="w-3.5 h-3.5 fill-current" />
+              <span>{position === 'bottom' ? '👆 YOUR TURN TO CHOOSE RUNG' : '👇 CHOOSING RUNG'}</span>
+            </div>
+          )}
+          {isPassed && (
+            <div
+              className={`absolute ${
+                position === 'top' ? '-bottom-5 sm:-bottom-6' : '-top-5 sm:-top-6'
+              } z-20 px-2.5 py-0.5 bg-rose-950/95 text-rose-300 border border-rose-500/80 font-bold text-[9px] sm:text-[10px] rounded-md shadow-md flex items-center gap-1 whitespace-nowrap`}
+            >
+              <X className="w-3 h-3 text-rose-400" />
+              <span>{position === 'bottom' ? 'YOU PASSED' : 'PASSED'}</span>
+            </div>
+          )}
+          {isLocked && (
+            <div
+              className={`absolute ${
+                position === 'top' ? '-bottom-5 sm:-bottom-6' : '-top-5 sm:-top-6'
+              } z-20 px-2.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] sm:text-[10px] rounded-md shadow-glow-gold flex items-center gap-1 whitespace-nowrap`}
+            >
+              <Crown className="w-3 h-3 fill-current" />
+              <span>{position === 'bottom' ? 'YOUR RUNG IS LOCKED' : 'RUNG LOCKED'}</span>
+            </div>
+          )}
+          {isBwinji && (
+            <div
+              className={`absolute ${
+                position === 'top' ? '-bottom-5 sm:-bottom-6' : '-top-5 sm:-top-6'
+              } z-20 px-2.5 py-0.5 bg-purple-600 text-white font-black text-[9px] sm:text-[10px] rounded-md shadow flex items-center gap-1 whitespace-nowrap`}
+            >
+              <span>⚡ BWINJI</span>
+            </div>
+          )}
+        </>
       )}
 
       <div
         className={`px-3 py-1 sm:py-1.5 rounded-xl border flex items-center gap-2 transition-all ${
           isSpeaking
             ? 'ring-4 ring-emerald-400 bg-gradient-to-r from-emerald-950 via-teal-900/90 to-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.9)] scale-105 z-25 animate-pulse border-emerald-300'
+            : isSelecting
+            ? 'ring-4 ring-amber-400 bg-gradient-to-b from-amber-950 via-yellow-900/90 to-amber-950 shadow-[0_0_30px_rgba(245,158,11,0.9)] scale-110 z-20 animate-pulse border-amber-300'
+            : isPassed
+            ? 'bg-slate-950/80 border-rose-500/50 opacity-80'
             : isCurrentTurn
             ? position === 'bottom'
               ? 'ring-4 ring-emerald-400 bg-gradient-to-r from-emerald-950 via-teal-900/90 to-emerald-950 shadow-[0_0_30px_rgba(52,211,153,0.9)] scale-110 z-20 animate-pulse border-emerald-300'
@@ -1691,6 +1944,10 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
           className={`text-[11px] sm:text-sm font-black truncate max-w-[90px] sm:max-w-[140px] ${
             isSpeaking
               ? 'text-emerald-200'
+              : isSelecting
+              ? 'text-amber-200 font-extrabold'
+              : isPassed
+              ? 'text-rose-300/90'
               : isCurrentTurn
               ? position === 'bottom'
                 ? 'text-emerald-200'
@@ -1700,6 +1957,16 @@ const PlayerBadge: React.FC<PlayerBadgeProps> = ({
         >
           {firstName}
         </span>
+        {isSelecting && (
+          <span className="px-1.5 py-0.2 bg-amber-400 text-slate-950 font-black text-[8px] sm:text-[9px] rounded flex items-center gap-0.5 animate-pulse flex-shrink-0">
+            👑 CHOOSE
+          </span>
+        )}
+        {isPassed && (
+          <span className="px-1.5 py-0.2 bg-rose-950 border border-rose-500/70 text-rose-300 font-bold text-[8px] sm:text-[9px] rounded flex items-center gap-0.5 flex-shrink-0">
+            ✕ PASS
+          </span>
+        )}
         {isDealer && (
           <span
             className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] flex items-center justify-center shadow flex-shrink-0"
