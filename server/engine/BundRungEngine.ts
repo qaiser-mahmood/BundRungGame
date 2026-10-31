@@ -13,6 +13,7 @@ import {
   PublicGameState,
   PrivatePlayerState,
   FullClientGameState,
+  VisiblePlayedCard,
   FaceDownCallerCard,
 } from '../../shared/types';
 import { Deck } from './Deck';
@@ -1707,6 +1708,12 @@ export class BundRungEngine extends BaseRungEngine {
   }
 
   // --- Client State Serialization ---
+  private visiblePlay(play: PlayedCard): VisiblePlayedCard {
+    const hidden = play.isFaceDown && !this.isTrumpRevealed ||
+      this.faceDownLeadPending && this.faceDownLeadCardFaceDown && play.card.id === this.faceDownLeadCard?.id;
+    return { ...play, card: hidden ? null : { ...play.card } };
+  }
+
   public getPublicState(): PublicGameState {
     return {
       gameType: this.gameType,
@@ -1758,7 +1765,10 @@ export class BundRungEngine extends BaseRungEngine {
       faceDownLeadCardFaceDown: this.faceDownLeadCardFaceDown,
       opponentsInspectingCards: this.opponentsInspectingCards,
       faceDownChallengeVotes: Object.fromEntries(this.faceDownChallengeVotes.entries()),
-      faceDownCallerCards: this.faceDownCallerCards.map((c) => ({ ...c })),
+      faceDownCallerCards: this.faceDownCallerCards.map((c) => ({ ...c,
+        id: `concealed-${c.trickNumber}-${this.trumpCallerPlayerId}`,
+        card: c.isRevealed || this.isTrumpRevealed ? { ...c.card } : null,
+      })),
       isRungRevealPaused: this.isRungRevealPaused,
       isTrumpRevealPending: this.isTrumpRevealPending,
       trumpRevealRequesterId: this.trumpRevealRequesterId,
@@ -1769,9 +1779,9 @@ export class BundRungEngine extends BaseRungEngine {
       biddingPassCount: this.biddingPassCount,
       biddingStatus: { ...this.biddingStatus },
       gameIndex: this.gameIndex,
-      currentTrick: { ...this.currentTrick, cards: [...this.currentTrick.cards] },
-      previousTrickCards: this.previousTrickCards ? this.previousTrickCards.map((c) => ({ ...c })) : null,
-      completedTricks: [...this.completedTricks],
+      currentTrick: { ...this.currentTrick, cards: this.currentTrick.cards.map(c => this.visiblePlay(c)) },
+      previousTrickCards: this.previousTrickCards ? this.previousTrickCards.map(c => this.visiblePlay(c)) : null,
+      completedTricks: this.completedTricks.map(t => ({ ...t, cards: t.cards.map(c => this.visiblePlay(c)) })),
       team1TricksWon: this.team1TricksWon,
       team2TricksWon: this.team2TricksWon,
       consecutiveTricksCount: this.consecutiveTricksCount,
@@ -1855,6 +1865,9 @@ export class BundRungEngine extends BaseRungEngine {
     }
 
     return {
+      knownConcealedCards: Object.fromEntries([...this.completedTricks, this.currentTrick].flatMap(t =>
+        t.cards.filter(c => c.playerId === playerId && c.isFaceDown).map(c =>
+          [`${t.trickNumber}:${c.playerId}`, { ...c.card }]))),
       myPlayerId: playerId,
       myHand: sortedHand,
       myTrumpCard,

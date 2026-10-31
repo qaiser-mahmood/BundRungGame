@@ -84,6 +84,11 @@ export interface Trick {
   winningTeam: TeamId | null;
 }
 
+// Wire/AI observations never encode concealed identities as fabricated cards.
+export type VisiblePlayedCard = Omit<PlayedCard, 'card'> & { card: Card | null };
+export type VisibleTrick = Omit<Trick, 'cards'> & { cards: VisiblePlayedCard[] };
+export type VisibleCallerCard = Omit<FaceDownCallerCard, 'card'> & { card: Card | null };
+
 export interface ScorecardEntry {
   gameIndex: number;
   dealerPlayerId: string;
@@ -149,7 +154,7 @@ export interface PublicGameState {
   faceDownChallengeVotes?: { [playerId: string]: 'ACCEPT' | 'SURRENDER' };
 
   // Normal Play (Close Rung) Face-down Caller Cards & Pause
-  faceDownCallerCards: FaceDownCallerCard[];
+  faceDownCallerCards: VisibleCallerCard[];
   isRungRevealPaused: boolean;
   isTrumpRevealPending: boolean;
   trumpRevealRequesterId: string | null;
@@ -161,9 +166,9 @@ export interface PublicGameState {
 
   // Trick play
   gameIndex: number;
-  currentTrick: Trick;
-  previousTrickCards: PlayedCard[] | null;
-  completedTricks: Trick[];
+  currentTrick: VisibleTrick;
+  previousTrickCards: VisiblePlayedCard[] | null;
+  completedTricks: VisibleTrick[];
   team1TricksWon: number;
   team2TricksWon: number;
   consecutiveTricksCount: number;
@@ -192,6 +197,8 @@ export interface PublicGameState {
 }
 
 export interface PrivatePlayerState {
+  // Only the owner receives their remembered concealed plays, keyed by opaque slot.
+  knownConcealedCards?: Record<string, Card>;
   myPlayerId: string;
   myHand: Card[];
   myTrumpCard: Card | null; // The separate rung card if this player is the rung caller

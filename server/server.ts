@@ -72,25 +72,7 @@ function broadcastRoomState(room: GameRoom): void {
   for (const [sId, pId] of Object.entries(room.socketMap)) {
     if (!pId) {
       // Spectator view
-      const publicState = room.engine.getPublicState();
-      io.to(sId).emit('gameStateUpdated', {
-        publicState,
-        privateState: {
-          myPlayerId: '',
-          myHand: [],
-          myTrumpCard: null,
-          isMyTrumpCardPlayable: false,
-          secretTrumpSuit: null,
-          legalPlayableCardIds: [],
-          canRequestRungReveal: false,
-          canShowTrump: false,
-          teammateFaceDownCard: null,
-          partnerHand: null,
-          isInspectingPartnerCards: false,
-          isMyHandRevealed: false,
-          hasVotedSurrender: false,
-        },
-      });
+      io.to(sId).emit('gameStateUpdated', room.engine.getClientGameState(''));
     }
   }
 
@@ -274,25 +256,7 @@ io.on('connection', (socket: Socket) => {
   room.socketMap[socket.id] = '';
 
   // Immediately send initial state to new connection
-  const publicState = room.engine.getPublicState();
-  socket.emit('gameStateUpdated', {
-    publicState,
-    privateState: {
-      myPlayerId: '',
-      myHand: [],
-      myTrumpCard: null,
-      isMyTrumpCardPlayable: false,
-      secretTrumpSuit: null,
-      legalPlayableCardIds: [],
-      canRequestRungReveal: false,
-      canShowTrump: false,
-      teammateFaceDownCard: null,
-      partnerHand: null,
-      isInspectingPartnerCards: false,
-      isMyHandRevealed: false,
-      hasVotedSurrender: false,
-    },
-  });
+  socket.emit('gameStateUpdated', room.engine.getClientGameState(''));
 
   socket.on('joinLobby', ({ playerName, roomId, gameType }) => {
     const targetRoomId = roomId || 'main_room';

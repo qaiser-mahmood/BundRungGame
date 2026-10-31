@@ -180,7 +180,7 @@ describe('AI audit: confirmed unresolved defects',()=>{
     for(let i=0;i<2;i++){const {engine}=fixture();BotPlayer.handleBotTurn(engine,'p0');}
     expect(new Set(before.mock.calls.map(call=>call[1])).size).toBe(2);
   });
-  it.fails('INFO-01: opponents must not see unrevealed face-down caller identities',()=>{
+  it('INFO-01: opponents must not see unrevealed face-down caller identities',()=>{
     const {engine,internal}=fixture();
     internal.currentTrick.cards=[{playerId:'p0',card:card('D_5'),isFaceDown:true,playedAt:0}];
     internal.faceDownCallerCards=[{id:'D_5',card:card('D_5'),trickNumber:1,isRevealed:false}];

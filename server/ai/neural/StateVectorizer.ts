@@ -1,3 +1,4 @@
+import { isVisiblePlay } from '../../../shared/visibility';
 import { Card, Suit, Rank, PublicGameState, PrivatePlayerState, Player } from '../../../shared/types';
 
 export const ALL_SUITS: Suit[] = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
@@ -72,7 +73,7 @@ export class StateVectorizer {
     offset += 52;
 
     // 3. Current Trick Cards on Table (52 binary)
-    const currentTrickCards = publicState.currentTrick?.cards || [];
+    const currentTrickCards = (publicState.currentTrick?.cards || []).filter(isVisiblePlay);
     for (const tc of currentTrickCards) {
       if (tc.card) {
         features[offset + this.cardToIndex(tc.card)] = 1.0;
@@ -81,7 +82,7 @@ export class StateVectorizer {
     offset += 52;
 
     // 4. Turn Position in Current Trick (4 one-hot: 0=Lead, 1=Second, 2=Third, 3=Fourth)
-    const cardsPlayedInTrick = currentTrickCards.length;
+    const cardsPlayedInTrick = publicState.currentTrick.cards.length;
     if (cardsPlayedInTrick >= 0 && cardsPlayedInTrick < 4) {
       features[offset + cardsPlayedInTrick] = 1.0;
     }
@@ -369,7 +370,7 @@ export class StateVectorizer {
     // Ace Downgrade Hazard: Did this bot lead an Ace in immediately preceding trick?
     let consecutiveAceHazard = 0;
     if (lastTrick && lastTrick.leadPlayerId === botPlayerId && lastTrick.cards.length > 0) {
-      if (lastTrick.cards[0].card.rank === 'A') {
+      if (lastTrick.cards[0].card?.rank === 'A') {
         consecutiveAceHazard = 1.0;
       }
     }

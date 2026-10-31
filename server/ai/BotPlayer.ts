@@ -1,4 +1,5 @@
-import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedCard, TeamId } from '../../shared/types';
+import { isVisiblePlay } from '../../shared/visibility';
+import { Card, Suit, Player, PublicGameState, PrivatePlayerState, VisibleTrick, PlayedCard, TeamId } from '../../shared/types';
 import { BundRungEngine } from '../engine/BundRungEngine';
 import { ModelManager } from './neural/ModelManager';
 import { StateVectorizer } from './neural/StateVectorizer';
@@ -102,7 +103,7 @@ export class BotPlayer {
       if (!trick.leadSuit) continue;
       const leadSuit = trick.leadSuit;
       for (const pc of trick.cards) {
-        if (pc.card && pc.card.suit !== leadSuit && !pc.isFaceDown) {
+        if (pc.card && pc.card?.suit !== leadSuit && !pc.isFaceDown) {
           voids.get(pc.playerId)?.add(leadSuit);
         }
       }
@@ -114,7 +115,7 @@ export class BotPlayer {
    * Evaluates who is currently winning the trick, whether teammate is winning, and how many opponents are yet to play.
    */
   public static evaluateCurrentTrick(
-    trick: Trick,
+    trick: VisibleTrick,
     activeTrumpSuit: Suit | null,
     myPlayerId: string,
     players: Player[]
@@ -125,7 +126,8 @@ export class BotPlayer {
     isOpponentWinning: boolean;
     opponentsLeftToPlay: number;
   } {
-    if (trick.cards.length === 0 || !trick.leadSuit) {
+    const visibleCards = trick.cards.filter(isVisiblePlay);
+    if (visibleCards.length === 0 || !trick.leadSuit) {
       return {
         winningCard: null,
         winningPlayer: null,
@@ -138,11 +140,11 @@ export class BotPlayer {
     const leadSuit = trick.leadSuit;
     const getCardPower = (pc: PlayedCard) => (pc.isAceDowngraded ? 2 : pc.card.playValue);
 
-    let winningCard: PlayedCard = trick.cards[0];
+    let winningCard: PlayedCard = visibleCards[0];
     let highestPower = getCardPower(winningCard);
 
-    for (let i = 1; i < trick.cards.length; i++) {
-      const cand = trick.cards[i];
+    for (let i = 1; i < visibleCards.length; i++) {
+      const cand = visibleCards[i];
       const candPower = getCardPower(cand);
 
       const winIsTrump = activeTrumpSuit && winningCard.card.suit === activeTrumpSuit;
@@ -296,7 +298,7 @@ export class BotPlayer {
           // MISSION 2: Our team called Trump! PROTECT IT!
           // Only reveal if opponent is about to win trick with an unchallengeable Ace or high honor
           const trick = publicState.currentTrick;
-          const isOpponentWinningWithAce = trick.cards.some((c) => c.card.rank === 'A' && c.playerId !== botPlayerId);
+          const isOpponentWinningWithAce = trick.cards.some((c) => c.card?.rank === 'A' && c.playerId !== botPlayerId);
           if (isOpponentWinningWithAce) {
             console.log(`🛡️ [Strategic Intent] ${player.name} (${player.team}): Opponent winning with Ace, revealing trump to cut!`);
             engine.requestTrumpReveal(botPlayerId);
@@ -431,7 +433,7 @@ export class BotPlayer {
       const secretTrumpSuit =
         privateState.secretTrumpSuit ||
         privateState.myTrumpCard?.suit ||
-        (isCaller ? ((engine as any).trumpSuit || publicState.trumpSuit) : null);
+        (isCaller ? publicState.trumpSuit : null);
 
       const isHunting2Streak =
         publicState.isTrumpRevealed &&
@@ -637,7 +639,7 @@ export class BotPlayer {
             if (callerId) {
               for (const t of publicState.completedTricks) {
                 const callerC = t.cards.find((c) => c.playerId === callerId);
-                if (callerC && t.leadSuit === targetSuit.suit && callerC.card.suit !== targetSuit.suit) {
+                if (callerC && t.leadSuit === targetSuit.suit && callerC.card?.suit !== targetSuit.suit) {
                   callerSloughedInSuit++;
                 }
               }
@@ -897,7 +899,7 @@ export class BotPlayer {
         for (const suit of allSuits) {
           if (suit !== activeTrumpSuit) {
             const isAcePlayedByMe = publicState.completedTricks.some((t) =>
-              t.cards.some((c) => c.playerId === botPlayerId && c.card.suit === suit && c.card.rank === 'A')
+              t.cards.some((c) => c.playerId === botPlayerId && c.card?.suit === suit && c.card?.rank === 'A')
             );
             if (isAcePlayedByMe) {
               const honorsStillUnseen = [13, 12, 11].some(
