@@ -76,9 +76,12 @@ describe('advanced observation-only policy',()=>{
   it('adversarial hidden-engine changes cannot affect identical observations',()=>{
     const f=fixture(),options=()=>({timeMs:Infinity,random:seededRandom(89)});
     const expected=advancedSearch(f.state,f.priv,f.legal,options(),{worlds:1});
-    const hidden=f.engine.getPrivateState(f.state.players.find(p=>p.id!==f.priv.myPlayerId)!.id);
-    hidden.myHand.reverse();
-    expect(advancedSearch(f.state,f.priv,f.legal,options(),{worlds:1}).id).toBe(expected.id);
+    // Test referee changes real hidden storage, not just a returned DTO.
+    const others=f.state.players.filter(p=>p.id!==f.priv.myPlayerId),hands=f.engine.getHands();
+    [hands[others[0].id][0],hands[others[1].id][0]]=[hands[others[1].id][0],hands[others[0].id][0]];
+    const state=f.engine.getPublicState(),priv=f.engine.getPrivateState(f.priv.myPlayerId);
+    expect(state).toEqual(f.state);expect(priv).toEqual(f.priv);
+    expect(advancedSearch(state,priv,f.legal,options(),{worlds:1}).id).toBe(expected.id);
   });
   it('rejects partial endgame values on node exhaustion',()=>{
     const f=fixture();f.state.players.forEach(p=>p.cardsInHandCount=1);

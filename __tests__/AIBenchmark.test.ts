@@ -17,6 +17,13 @@ describe('seeded AI benchmark',()=>{
     expect(a.winner).not.toBeNull();expect(a.error).toBeNull();expect(a.invalidMoves).toBe(0);
     expect(Math.random).toBe(random);expect(BotPlayer.pickBestFromCandidates).toBe(pick);expect(BotPlayer.useNeuralPolicy).toBe(neural);
   });
+  it('replays advanced-search with fixed work independently of previous games',()=>{
+    const options={iterations:16,timeMs:Infinity};
+    const a=runGame(27,'TEAM_1','advanced-search','corrected-search',options,{worlds:1});
+    const b=runGame(27,'TEAM_1','advanced-search','corrected-search',options,{worlds:1});
+    expect(a.error).toBeNull();expect(a.winner).not.toBeNull();expect(a.invalidMoves).toBe(0);
+    expect(withoutTiming(a)).toEqual(withoutTiming(b));
+  });
   it('swaps candidate teams on identical setup and gives symmetric self-play results',()=>{
     const result=runTournament(1,2,'heuristic');
     expect(result.summary.completed).toBe(4);expect(result.summary.aborted).toBe(0);

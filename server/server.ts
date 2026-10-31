@@ -27,8 +27,7 @@ app.use(cors());
 app.use(express.json());
 
 const livePolicy=livePolicyFromEnvironment(process.env.BOT_DECISION_POLICY);
-// Enable autonomous neural network AI policy for live games
-// Corrected search is the default; neural-direct is evaluation-only.
+// Server-local experimental opt-in; corrected search stays the default.
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
