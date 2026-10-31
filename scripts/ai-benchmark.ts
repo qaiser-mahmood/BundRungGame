@@ -1,3 +1,5 @@
+import { searchStats, SearchOptions } from '../server/ai/planning/MonteCarloPlanner';
+import type { PolicyName } from '../server/ai/DecisionPolicy';
 import { performance } from 'node:perf_hooks';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -9,7 +11,8 @@ import { ModelManager } from '../server/ai/neural/ModelManager';
 import { StateVectorizer } from '../server/ai/neural/StateVectorizer';
 import type { TeamId } from '../shared/types';
 
-export type Policy = 'heuristic' | 'production' | 'neural';
+export type Policy = PolicyName | 'production' | 'neural';
+const policyName = (p:Policy):PolicyName => p === 'production' ? 'production-legacy' : p === 'neural' ? 'neural-direct' : p;
 export function seededRandom(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -25,16 +28,8 @@ export function withRandom<T>(random: () => number, run: () => T): T {
   try { return run(); } finally { Math.random = previous; }
 }
 
-// Scoped, synchronous adapter: retain every tactical rule but use the first vetted
-// candidate for the heuristic baseline. Never use this adapter in a live server.
-export function withHeuristic<T>(run: () => T): T {
-  const previous = BotPlayer.pickBestFromCandidates;
-  BotPlayer.pickBestFromCandidates = candidates => candidates[0];
-  try { return run(); } finally { BotPlayer.pickBestFromCandidates = previous; }
-}
-
 export function setupGame(seed: number): BundRungEngine {
-  return withRandom(seededRandom(seed), () => withHeuristic(() => {
+  return withRandom(seededRandom(seed), () => {
     const engine = new BundRungEngine();
     for (let i = 0; i < 4; i++) engine.addPlayer(`p${i}`, `Seat ${i}`, true);
     engine.assignTeams(['p0', 'p2'], ['p1', 'p3']);
@@ -47,12 +42,12 @@ export function setupGame(seed: number): BundRungEngine {
       } else {
         for (const player of state.players) {
           if (engine.getPhase() === 'TRICK_PLAYING' || engine.getPhase() === 'GAME_RESOLVED' || engine.getPhase() === 'MATCH_OVER') break;
-          BotPlayer.handleBotTurn(engine, player.id);
+          BotPlayer.handleBotTurn(engine, player.id, {roomId:'benchmark-setup',policy:{name:'heuristic'}});
         }
       }
     }
     throw new Error('Setup exceeded 200 steps');
-  }));
+  });
 }
 
 export interface GameResult {
@@ -66,13 +61,17 @@ export interface GameResult {
   completedTricks: number;
   invalidMoves: number;
   error: string | null;
+  search: typeof searchStats;
+  revealActions: {type:string;milliseconds:number}[];
   decisions: { policy: Policy; playerId: string; milliseconds: number; cardId: string }[];
 }
 
-export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic'): GameResult {
+export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity}): GameResult {
   // Deserialize outside the seeded stream: loading allocates randomly initialized
   // tensors before replacing them with persisted weights.
   if (candidate !== 'heuristic' || baseline !== 'heuristic') ModelManager.getModel();
+  const initialStats={...searchStats};
+  const revealActions:GameResult['revealActions']=[];
   const oldNeural = BotPlayer.useNeuralPolicy;
   // No LiveLearning callbacks, training or saves in this process.
   BotPlayer.useNeuralPolicy = false;
@@ -93,9 +92,9 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const state = engine.getPublicState();
           if (state.phase === 'GAME_RESOLVED' || state.phase === 'MATCH_OVER') return;
           if (state.phase !== 'TRICK_PLAYING') throw new Error(`Unexpected phase ${state.phase}`);
-          if (state.isRungRevealPaused) { engine.resumeAfterTrumpReveal(); continue; }
+          if (state.isRungRevealPaused) { const started=performance.now();engine.resumeAfterTrumpReveal();revealActions.push({type:'resume',milliseconds:performance.now()-started}); continue; }
           const caller = state.trumpCallerPlayerId;
-          if (caller && engine.getPrivateState(caller).canShowTrump) { engine.showTrumpCard(caller); continue; }
+          if (caller && engine.getPrivateState(caller).canShowTrump) {const started=performance.now();engine.showTrumpCard(caller);revealActions.push({type:'show',milliseconds:performance.now()-started});continue;}
           if (state.faceDownLeadPending) {
             const callerTeam = state.players.find(p => p.id === state.faceDownLeadPlayerId)?.team;
             for (const p of state.players.filter(p => p.team !== callerTeam)) engine.respondToFaceDownRung(p.id, true);
@@ -104,7 +103,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const id = state.currentTurnPlayerId;
           if (!id) throw new Error('No current player');
           const priv = engine.getPrivateState(id);
-          if (priv.canRequestRungReveal) { engine.requestTrumpReveal(id); continue; }
+          if (priv.canRequestRungReveal) {const started=performance.now();engine.requestTrumpReveal(id);revealActions.push({type:'request',milliseconds:performance.now()-started});continue;}
           // Match handleBotTurn's production hand boundary, including its
           // exclusion of the caller's locked trump until playable.
           const all = priv.myTrumpCard && priv.isMyTrumpCardPlayable
@@ -113,21 +112,8 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           if (!legal.length) throw new Error(`No legal cards for ${id}`);
           const policy = state.players.find(p => p.id === id)!.team === candidateTeam ? candidate : baseline;
           const start = performance.now();
-          let chosen;
-          if (policy === 'neural') {
-            const network = ModelManager.getModel();
-            if (!network) throw new Error('No compatible neural model');
-            const vector = StateVectorizer.vectorize(state, priv, id, state.players);
-            const action = network.selectAction(vector, legal.map(c => StateVectorizer.cardToIndex(c)), 0);
-            chosen = legal.find(c => StateVectorizer.cardToIndex(c) === action);
-          } else {
-            const choose = () => BotPlayer.chooseMasterCard(engine, id, legal, all, state, priv);
-            if (policy === 'heuristic') chosen = withHeuristic(choose);
-            else {
-              BotPlayer.useNeuralPolicy = true;
-              try { chosen = choose(); } finally { BotPlayer.useNeuralPolicy = false; }
-            }
-          }
+          const chosen = BotPlayer.chooseMasterCard({getPlayers:()=>state.players},id,legal,all,state,priv,
+            {name:policyName(policy),search:searchOptions});
           const milliseconds = performance.now() - start;
           if (!chosen || !legal.some(c => c.id === chosen.id)) { invalidMoves++; throw new Error('Policy selected illegal card'); }
           decisions.push({ policy, playerId: id, milliseconds, cardId: chosen.id });
@@ -140,7 +126,9 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
     const entry = final.scorecard.history.at(-1);
     const winner = final.phase === 'GAME_RESOLVED' || final.phase === 'MATCH_OVER' ? final.lastGameWinningTeam : null;
     return {
-      seed, candidateTeam, dealHash, winner, candidateWon: winner ? winner === candidateTeam : null,
+      seed, candidateTeam, dealHash, winner,
+      search:{worlds:searchStats.worlds-initialStats.worlds,samplingFailures:searchStats.samplingFailures-initialStats.samplingFailures,fallbacks:searchStats.fallbacks-initialStats.fallbacks,neuralUses:searchStats.neuralUses-initialStats.neuralUses},
+      revealActions, candidateWon: winner ? winner === candidateTeam : null,
       signedScoreAdjustment: entry ? entry.scoreAdjustment * (entry.dealerTeam === candidateTeam ? -1 : 1) : null,
       trickDifferential: (final.team1TricksWon - final.team2TricksWon) * (candidateTeam === 'TEAM_1' ? 1 : -1),
       completedTricks: final.completedTricks.length, invalidMoves, error, decisions,
@@ -148,14 +136,24 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
   } finally { BotPlayer.useNeuralPolicy = oldNeural; }
 }
 
-export function runTournament(seed: number, pairs: number, candidate: Policy, baseline: Policy = 'heuristic') {
+export function pairedBootstrap(values:number[],seed:number):[number,number]|null {
+  if(!values.length)return null;
+  const random=seededRandom(seed^0xc1c1c1),means:number[]=[];
+  for(let sample=0;sample<5000;sample++){
+    let sum=0;for(let i=0;i<values.length;i++)sum+=values[Math.floor(random()*values.length)];
+    means.push(sum/values.length);
+  }
+  means.sort((a,b)=>a-b);return [means[124],means[4874]];
+}
+
+export function runTournament(seed: number, pairs: number, candidate: Policy, baseline: Policy = 'heuristic',searchOptions:SearchOptions={iterations:16,timeMs:Infinity}) {
   const modelPath = resolve('server/ai/models/bund_rung_brain.json');
   const modelSha256 = createHash('sha256').update(readFileSync(modelPath)).digest('hex');
   const results: GameResult[] = [];
   for (let i = 0; i < pairs; i++) {
     const dealSeed = (seed + i) >>> 0;
-    const a = runGame(dealSeed, 'TEAM_1', candidate, baseline);
-    const b = runGame(dealSeed, 'TEAM_2', candidate, baseline);
+    const a = runGame(dealSeed, 'TEAM_1', candidate, baseline,searchOptions);
+    const b = runGame(dealSeed, 'TEAM_2', candidate, baseline,searchOptions);
     if (a.dealHash !== b.dealHash) throw new Error(`Paired deal mismatch at seed ${dealSeed}`);
     results.push(a, b);
   }
@@ -165,11 +163,15 @@ export function runTournament(seed: number, pairs: number, candidate: Policy, ba
     return { count: values.length, meanMs: values.reduce((a,b) => a+b, 0) / (values.length || 1),
       p95Ms: values.length ? values[Math.ceil(values.length * .95)-1] : 0, maxMs: values.at(-1) ?? 0 };
   };
-  return { schemaVersion: 1, seed, pairs, candidate, baseline, nodeVersion: process.version, modelSha256,
-    summary: { completed: results.filter(r => r.winner).length, aborted: results.filter(r => !r.winner).length,
+  const pairRates:number[]=[];
+  for(let i=0;i<results.length;i+=2)if(results[i].candidateWon!==null&&results[i+1].candidateWon!==null)
+    pairRates.push((Number(results[i].candidateWon)+Number(results[i+1].candidateWon))/2);
+  return { schemaVersion: 2, seed, pairs, candidate, baseline, searchOptions:{iterations:searchOptions.iterations,legacyIterations:searchOptions.legacyIterations??100,timeMs:Number.isFinite(searchOptions.timeMs)?searchOptions.timeMs:null}, nodeVersion: process.version, modelSha256, modelSha256After:createHash('sha256').update(readFileSync(modelPath)).digest('hex'),
+    summary: { candidateWinRate95CI:pairedBootstrap(pairRates,seed), completed: results.filter(r => r.winner).length, aborted: results.filter(r => !r.winner).length,
       candidateWins: results.filter(r => r.candidateWon === true).length,
       baselineWins: results.filter(r => r.candidateWon === false).length,
       invalidMoves: results.reduce((n,r) => n+r.invalidMoves,0),
+      search: Object.fromEntries(Object.keys(searchStats).map(k=>[k,results.reduce((n,r)=>n+r.search[k as keyof typeof searchStats],0)])),
       signedScoreAdjustment: results.reduce((n,r) => n+(r.signedScoreAdjustment ?? 0),0),
       latency: Object.fromEntries([...new Set([candidate, baseline])].map(p => [p, latency(p)])) }, results };
 }
@@ -177,18 +179,20 @@ export function runTournament(seed: number, pairs: number, candidate: Policy, ba
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const args = process.argv.slice(2);
-    const allowed = ['--seed', '--pairs', '--candidate', '--baseline', '--output'];
+    const allowed = ['--seed', '--pairs', '--candidate', '--baseline', '--output','--iterations','--time-ms'];
     if (args.length % 2 || args.some((a,i) => i % 2 === 0 && !allowed.includes(a))) throw new Error('Usage: --seed N --pairs N --candidate heuristic|production|neural --baseline heuristic|production|neural --output FILE');
     const value = (key: string, fallback: string) => args.includes(key) ? args[args.indexOf(key)+1] : fallback;
     const seed = Number(value('--seed','1')), pairs = Number(value('--pairs','2'));
     const candidate = value('--candidate','production') as Policy, baseline = value('--baseline','heuristic') as Policy;
     if (!Number.isSafeInteger(seed) || seed < 0 || seed > 0xffffffff || !Number.isSafeInteger(pairs) || pairs < 1 || pairs > 100000) throw new Error('Invalid seed or pairs');
-    if (![candidate,baseline].every(p => ['heuristic','production','neural'].includes(p))) throw new Error('Unknown policy');
+    if (![candidate,baseline].every(p => ['heuristic','production','neural','production-legacy','corrected-search','neural-direct'].includes(p))) throw new Error('Unknown policy');
     // Keep stdout valid JSON even if existing bots/model loading emit diagnostic logs.
     const log = console.log;
     console.log = (...items) => console.error(...items);
+    const iterations=Number(value('--iterations','16')),timeMs=Number(value('--time-ms','Infinity'));
+    if(!Number.isSafeInteger(iterations)||iterations<1||iterations>1000||Number.isNaN(timeMs)||timeMs<=0)throw new Error('Invalid search budget');
     let result;
-    try { result = runTournament(seed,pairs,candidate,baseline); } finally { console.log = log; }
+    try { result = runTournament(seed,pairs,candidate,baseline,{iterations,timeMs}); } finally { console.log = log; }
     const json = JSON.stringify(result,null,2) + '\n';
     const output = value('--output','');
     if (output) {

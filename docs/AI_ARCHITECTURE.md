@@ -1,127 +1,140 @@
-# Bund Rung AI decision architecture
+# Bund Rung AI: corrected foundation
 
-Audited base: `b07dea61c43edb4b5390566361f4bb405c6414c9`, 31 October 2026.
-This audit adds tools, documentation and tests; it changes no engine, AI policy,
-frontend, Socket.IO event or model weights.
+Base: `audit/ai-foundation-and-benchmarks` at `10075a49ebfc65806a58c66f1644ff338b73db7d`.
+The original audit remains in that branch's history. This branch repairs its
+correctness findings without changing game win/scoring rules or the trained JSON.
 
-## Live decision path
+## Information boundary
 
-```mermaid
-flowchart TD
-  A[server checkAndRunBotTurns] --> B[BotPlayer.handleBotTurn]
-  B --> C[Toss / shuffle / cut: random actions]
-  B --> D[Bidding: DynamicSuitEvaluator.evaluateBidding]
-  B --> E[Reveal and face-down challenge: fixed rules]
-  B --> F[Legal cards from engine private state]
-  F --> G[chooseMasterCard: ordered tactical rules]
-  G --> H[Direct card / DynamicSuitEvaluator shed]
-  G --> I[pickBestFromCandidates]
-  I --> J[One candidate: return immediately]
-  I --> K[Multiple candidates: MonteCarloPlanner 100 worlds]
-  K --> L[Successful planner result: return immediately]
-  K --> M[Exception or no result]
-  M --> N[useNeuralPolicy and compatible model: masked DQN]
-  M --> O[Otherwise first candidate]
-  H --> P[engine.playCard]
-  J --> P
-  L --> P
-  N --> P
-  O --> P
-  P --> Q[Live learning callbacks when enabled]
-```
+`BundRungEngine` retains authoritative `PlayedCard`/`Trick` records with real
+cards. `getPublicState()` creates `VisiblePlayedCard`/`VisibleTrick` observations:
+concealed `card` is **null**, not a fabricated card or encoded card ID.
+Face-down side-panel identifiers are opaque turn/player slots. History remains
+concealed until reveal; challenge surrender does not disclose an unaccepted lead.
+Known false Ace-downgrade flags are retained; concealed rank-bearing flags are
+redacted. Observations clone card objects, so consumers cannot mutate live cards.
 
-`server/server.ts` sets `BotPlayer.useNeuralPolicy = true`. This does **not**
-make the neural network the main controller: in
-`BotPlayer.pickBestFromCandidates`, the unconditional successful planner return
-precedes the neural block. The test named “MC success bypasses neural selection”
-proves the ordering with spies, including the exception fallback.
+`getClientGameState(viewer)` combines that same public view with the viewer's
+private state. Spectators use an empty viewer ID. The caller retains their locked
+trump/suit and remembered own concealed plays. Existing rules permit a caller's
+team to peek at a challenge card and defenders to inspect their partner's hand
+while responding: these remain private, permitted information. All
+`gameStateUpdated` emissions use `transport/GameState.sendGameState`, including
+initial, player and spectator updates. No Socket.IO event names change.
 
-`chooseMasterCard` is a large ordered heuristic decision tree. It calculates
-boss cards, inferred voids, partner-led suits, caller/team roles, apparent streak
-threats and hand/suit strength. Many branches return a card directly, including
-much of follow-suit play, low-card conservation, overtakes and trump cutting.
-Other branches vet a small candidate set and call `pickBestFromCandidates`.
-`DynamicSuitEvaluator` supplies bidding, suit rankings and shedding. The planner
-cannot reconsider cards excluded by the tactical tree. One-candidate branches
-bypass both planning and neural inference. There is no tree expansion or UCT:
-`MonteCarloPlanner` is information-set sampling plus greedy rollout scoring,
-not Monte Carlo tree search despite local `Mcts` naming.
+Shared types intentionally change public played cards to nullable cards. The
+existing UI renders null as a card back; only null guards/keys/helper signatures
+changed. Trackers and neural features skip concealed identities while retaining
+public card counts and player positions. `trumpWasRevealed` records the public
+reveal state at the time of a play: later card flips cannot turn a caller's
+pre-reveal discard into false proof that their locked trump suit is absent.
 
-`handleBotTurn` requests reveal immediately when permitted against an opponent
-caller. Engine permissions only allow opponents to request reveal, so its
-caller-team “protect it / reveal against Ace” alternative is unreachable through
-normal private-state permissions. Showing trump and accepting face-down
-challenges are separate fixed actions, not neural actions. Toss, shuffle, cut,
-bidding, reveal, challenge and card selection are therefore distinct controllers.
-The server also handles timed phase transitions outside `handleBotTurn`.
+Card selection receives public/private observations and a player-list facade;
+it does not receive the live engine's hidden-hand storage. The turn handler uses
+the engine only to read its own observation and execute authoritative actions.
 
-## Information boundary and planner
+## Explicit decision policies
 
-The planner takes public state, the actor's hand, inferred voids and an optional
-secret suit. It does not read `engine.hands` or opponent private states. The
-caller-only fallback to `(engine as any).trumpSuit` in `chooseMasterCard` reads a
-secret that the caller already legitimately knows. However, the purported public
-state exposes actual face-down caller card identities; both `CardTracker` and
-`StateVectorizer` consume those identities. This is an upstream information leak,
-not a hidden-hand lookup in the planner. See INFO-01 in the audit.
+`DecisionPolicy` selects policies through arguments, without replacing static
+methods or global candidate-selection functions:
 
-Each iteration samples one world and passes that same map to every candidate.
-Rollouts copy hand arrays and do not splice live arrays. The focused tests verify
-shared worlds and no input mutation. They do not establish safety for arbitrary
-future code: card objects are shared references and public snapshots are shallow.
-
-World generation shuffles the unobserved deck and greedily fills other players
-up to public hand counts. On deadlock it explicitly relaxes voids. It ignores
-known owner cards, shown hands and the `secretTrumpSuit` argument. The caller's
-locked card can be missing from the supplied `myHand`, even though public hand
-counts include it. Rollouts implement their own incomplete rules and utility;
-they do not call the authoritative engine or `ScoringEngine`.
-
-## Neural representation and learner
-
-`StateVectorizer` produces 245 floats: 183 base, 46 tactical, 12 planning/teamwork,
-and 4 trump-control features. The 52 actions encode suit/rank, not card-ID
-strings. The vector contains the actor's hand, played/current cards, position,
-revealed trump, inferred voids and derived tactical signals. It does not contain
-opponent hands. It mixes absolute player positions in void features with relative
-team features, and does not encode the full scoring/modifier context. Locked
-trump is excluded from the hand feature until playable; some final caller-trump
-features consider only `myHand`, so a locked trump Ace is omitted there too.
-
-`NeuralNetwork` has two shared layers, layer normalization, leaky ReLU, value and
-advantage streams and `Q = V + A - mean(A)`. `selectAction` masks selection to the
-provided indices and supports epsilon exploration. `ReinforcementLearner` uses
-one-step target-network max-Q updates, a replay ring, batch size 32, gamma .95,
-learning rate .001 and soft target update .05. This is ordinary target-network
-DQN, not Double DQN (no online argmax followed by target evaluation).
-
-`ReplayBuffer` evicts in a ring and samples uniformly **with replacement**, up to
-min(batch size, size). It stores references; callers must treat transition arrays
-as immutable. This is internally consistent, but has no validation or prioritized
-sampling. The current trained JSON has input size 245 and output size 52. Fresh
-`NeuralNetwork()` and `ReinforcementLearner()` instead default to 241 inputs.
-`ModelManager` checks input size, caches by mtime, and returns the cached model on
-some read errors. It does not validate every tensor/finite value. Saves replace
-the tracked JSON synchronously, without atomic rename, schema/version metadata,
-checkpoint selection or benchmark promotion gating.
-
-## Production versus training
-
-| Path | Behavior controller | Data / writes |
+| Name | Card controller | Intended use |
 | --- | --- | --- |
-| Live bot | Tactical rules, then MC; DQN only on MC fallback | Before/after card hooks when neural flag enabled; learner saves on match over |
-| Live human | Socket event's engine-validated action | Server wraps play with the same learning hooks, with actual room ID |
-| `train_ai.ts` exploration | Uniform random legal action with epsilon | Per-player transitions, shaped rewards, replay and checkpoint writes |
-| `train_ai.ts` exploitation | `chooseMasterCard` (rules + MC) | Learner's online model only chooses if heuristic result maps outside legal mask |
-| `train_expert_imitation.ts` | `chooseMasterCard` teacher (rules + MC) | Fresh explicit 245-input network trained to imitate teacher; predictions do not control actions |
-| Benchmark `production` | Existing `chooseMasterCard`, MC and neural fallback enabled | No hooks, learning or writes |
-| Benchmark `heuristic` | Same tactical rules, first vetted candidate instead of MC/DQN | Scoped synchronous adapter only in CLI/tests |
-| Benchmark `neural` | Existing persisted DQN directly selects among engine-legal cards | Diagnostic ablation, not the current production pipeline |
+| `heuristic` | Existing tactical tree; first vetted candidate | Safe deterministic baseline/fallback |
+| `production-legacy` | Preserved original approximate MC, normally 100 worlds | Evaluation of the old algorithm only; known rule defects retained |
+| `corrected-search` | Existing tactical tree; constrained worlds and engine rollouts | Live default |
+| `neural-direct` | Validated network, masked to all legal cards | Evaluation/training only; not enabled in production |
 
-Both trainer processes leave the static neural flag at its default false.
-The self-play learner is not installed into `ModelManager` for ongoing action
-selection. Its epsilon therefore means random-versus-teacher, not
-random-versus-current-learner. Setup and reveal logic also differs from the live
-server: trainer loops act on current player, which can differ from the caller
-who must show a pending trump, and they do not cover every timed/challenge path.
-Neither training script is a reliable benchmark or a model-promotion gate.
+`chooseMasterCard` still supplies the existing tactical candidate pruning. Direct
+returns and one-candidate choices bypass search. Bidding remains
+`DynamicSuitEvaluator`; toss/cut/shuffle remain the existing setup controls.
+Reveal obligations and challenge votes are explicit engine actions. The obsolete
+`useNeuralPolicy` flag is retained only for source compatibility and no longer
+selects a controller. Learning uses an explicit internal room context.
+
+Corrected search never silently routes a search failure to the weaker neural
+controller. It logs a structured reason and returns the first legal tactical
+candidate. Neural inference/fallback/world counters are available to benchmarks.
+
+## Constraint-preserving worlds and authoritative rollouts
+
+`WorldSampler.sampleWorld` reserves own cards, own locked trump, visible played
+cards, revealed owner cards, legitimate partner inspections and remembered own
+plays. It allocates unknown cards to public hand capacities and concealed played
+slots. A randomized augmenting-path bipartite matching respects all forbidden
+suits without relaxation. Infeasible counts, duplicated/conflicting ownership,
+invalid cards and impossible voids produce explicit `SamplingError` reasons.
+The actor's full held-card count must be accounted for; omitting a known locked
+trump is an error rather than an opportunity to assign it elsewhere.
+
+A sampled caller locked card is reserved separately from playable hand cards.
+Unknown lock identity/suit is sampled from compatible held cards; this is a
+plausibility distribution, not knowledge of the actual opponent hand. Hidden
+lead slots respect their publicly known lead suit; hidden off-suit caller plays
+exclude the lead suit. Matching is bounded by the 52-card/slot graph. Its
+randomized distribution is not claimed uniform or a calibrated bidding posterior.
+
+`BundRungEngine.fromObservation` constructs an independent engine using **only**
+the sanitized observation and sampled world. It restores the current/history
+cards, individual eligible streak, previous winning card, locked card, reveal
+requester/obligations, challenge votes, scorecard and dealer state. Every action,
+future Ace downgrade, follow-suit restriction, reveal, early/final win, scoring
+modifier, transfer and KHOTI outcome then runs through the same engine methods
+used by live play. `ScoringEngine` accepts a cloned initial scorecard. There is
+no second corrected implementation of trick resolution.
+
+Rollout continuation is deterministic lowest-legal-card play, with compulsory
+reveals, caller show, resume and challenge acceptance. It ends at the actual
+hand boundary or throws an explicit error; no dummy cards or inferred majority
+winner are used. One sampled world is used for every candidate in an iteration;
+partial comparisons are discarded on failure. Inputs and live state are not
+mutated.
+
+Utility is the actual dealer-relative hand adjustment, plus +/-1000 for an
+actual terminal match win/loss. The bonus deliberately prioritizes KHOTI over
+any single-hand adjustment (maximum magnitude 208); it is an evaluation utility,
+not a scoring-rule change. Future hands after dealer transfer are not searched.
+
+Default search budgets: 16 worlds, 25 ms **soft** cooperative deadline, checked
+between complete common-world comparisons. Iterations are capped at 1,000 and
+rollouts at 160 transitions. A single comparison/GC pause can exceed the time
+budget: this is not hard preemption or a worker-thread implementation. Offline
+benchmarks use fixed world counts with `timeMs: Infinity` for reproducibility.
+
+## Learning and network
+
+`TurnLearning` owns one room's pending actions and identifies each hand by engine
+identity, game index and generation. Successful plays end at that actor's next
+**legal** decision, or a true GAME_RESOLVED/MATCH_OVER terminal observation.
+Between-turn empty masks do not close transitions. Rejected plays are validated
+before history changes. Departure, new match or engine replacement discards
+incomplete pending actions. New game indices cannot carry history forward.
+
+Rewards default to authoritative terminal hand win/loss (+1/-1). Configurable
+`RewardConfig` separates optional trick shaping and signed score shaping; both
+are zero by default. Humans receive no expert/winner bonus. Each room has its own
+learner and replay. Live minibatches of four run through `setImmediate`, only
+when new experiences exist, and update memory only. They never save or promote
+a production checkpoint. Closing/deleting a room cancels its queued learning.
+
+The network remains the dueling, layer-normalized MLP. Correct derivatives cover
+all advantage outputs through the mean term and both normalization layers.
+`trainStep` reports the actual sum of masked Huber losses (delta 1), whose clipped
+derivatives it applies. Fixed small-network tests check representative parameters
+in every tensor against finite differences, not merely decreasing loss.
+
+`FeatureSchema` defines all feature groups and the shared 245-input size. New
+checkpoints include format, architecture and feature-schema versions. Loading
+validates every dimension, tensor length and finite Float32 value. Production
+policy loaders require 245 inputs/52 outputs. The preserved baseline alone has a
+hash-pinned legacy metadata exception; malformed legacy files do not get it.
+Experimental writes require an explicit new path, use fsynced temporary files and
+atomic exclusive hard links, reject existing paths/aliases, and cannot target the
+canonical model. There is no automatic promotion path.
+
+Self-play exploits the learner's current online network with epsilon exploration;
+imitation separately labels legal heuristic-teacher actions. Both share current
+engine setup/forced-action lifecycle, reject incomplete episodes, use actual
+terminal winners, compile under `tsconfig.ai.json`, and save only an explicitly
+named experimental checkpoint after successful completion. Neither training
+progress nor repaired mathematics is evidence of stronger play.

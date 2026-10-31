@@ -1,154 +1,160 @@
-# Reproducible AI benchmarks
+# AI benchmarks and repair comparison
 
-## Commands
+## Reproduce
 
-Use the existing Node/npm installation and `npm ci` for locked dependencies.
-From the repository root:
+From the repository root, using locked dependencies:
 
 ```sh
-# Four games (two deals, policies exchange teams); default seed 1.
-npm run benchmark:ai
-
-# Persist complete machine-readable results (output must not already exist).
-npm run benchmark:ai -- --seed 1 --pairs 20 --candidate production --output /tmp/production.json
-npm run benchmark:ai -- --seed 1 --pairs 20 --candidate neural --output /tmp/neural.json
-
-# Larger tournament: 2,000 single-hand games, 1,000 paired deals.
-npm run benchmark:ai -- --seed 1000 --pairs 1000 --candidate production --output /tmp/tournament.json
-
-# Symmetric baseline control.
-npm run benchmark:ai -- --pairs 20 --candidate heuristic --baseline heuristic
-
+npm ci
 npx tsc --noEmit
 npm run typecheck:ai
-npx vitest run __tests__/AIFoundationAudit.test.ts __tests__/AIBenchmark.test.ts
+npm test
+
+# Small deterministic smoke: two deals, both team assignments.
+npm run benchmark:ai -- --candidate corrected-search --pairs 2
+
+# 200 paired deals / 400 hands for each comparison.
+npm run benchmark:ai -- --seed 1 --pairs 200 --candidate corrected-search --iterations 16 --output /tmp/corrected.json
+npm run benchmark:ai -- --seed 1 --pairs 200 --candidate production-legacy --output /tmp/legacy.json
+npm run benchmark:ai -- --seed 1 --pairs 200 --candidate corrected-search --baseline production-legacy --iterations 16 --output /tmp/head-to-head.json
+
+# Optional larger tournament (not executed in this repair).
+npm run benchmark:ai -- --seed 1000 --pairs 1000 --candidate corrected-search --baseline production-legacy --output /tmp/large.json
+
+# Only short smoke training was executed; outputs must be new experimental files.
+npm run train:ai -- --games 2 --seed 1 --batch-size 4 --output /tmp/selfplay-new.json
+npm run train:imitate -- --games 2 --seed 1 --output /tmp/imitation-new.json
+npm run train:ai -- --games 1 --seed 3 --epsilon 0 --batch-size 4 --resume /tmp/selfplay-new.json --output /tmp/resumed-new.json
 ```
 
-No new dependencies, browser, Socket.IO server, GPU or external service is needed.
-The command uses `node --import tsx`, avoiding the tsx CLI's extra IPC listener.
-The built-in `npm` banner precedes CLI stdout when invoked with `npm run`; for a
-JSON-only stream use `node --import tsx scripts/ai-benchmark.ts ...` directly.
-The explicit output file always contains only JSON. Existing policy diagnostic
-logs go to stderr. A failed/aborted game or invalid move makes the CLI exit
-nonzero; it never silently substitutes a different policy or counts an abort as
-a win. Invalid CLI arguments fail. `--output` uses exclusive creation, preventing
-replacement of existing files, including checkpoint symlinks. The canonical
-model path is also explicitly rejected.
+`tsconfig.ai.json` covers server, shared code, scripts and tests. Both trainers
+now pass it; no obsolete methods or suppressed trainer errors remain. Training
+requires `--output`; existing files and canonical aliases are rejected. SIGINT
+has no handler that overwrites the baseline. Resume validates the supplied file.
+There is no automatic model promotion or claim of stronger trained weights.
 
-## What is measured
+The CLI adds no dependencies, browser, service, GPU or heavyweight test runner.
+`node --import tsx scripts/ai-benchmark.ts ...` emits JSON-only stdout; `npm run`
+adds npm's own banner. Diagnostics go to stderr. `--output` exclusively creates a
+new JSON file. Nonzero exit means invalid arguments, invalid moves, aborted games
+or failed export; aborted hands never count as wins. Output cannot overwrite the
+canonical checkpoint. Model checksums are verified before/after tournaments.
 
-- `heuristic`: existing `chooseMasterCard` tactical tree with scoped
-  `pickBestFromCandidates` adapter returning the first vetted card. This retains
-  tactical logic and dynamic suit evaluation while disabling MC and DQN.
-- `production`: existing `chooseMasterCard` including 100-world MC and enabled
-  neural fallback. This isolates production **card selection**, not the whole
-  server's timed interactions or live-learning updates.
-- `neural`: persisted model directly chooses among engine-legal cards. This is
-  an explicit ablation; it is not a claim about current live neural control.
+## Policies and fairness
 
-The referee uses actual engine setup, toss, shuffle/cut, heuristic bidding,
-reveal actions and authoritative `playCard`/scoring. It terminates a **single
-hand/game** at GAME_RESOLVED or MATCH_OVER, not a multi-hand match to KHOTI.
-Setup policy is identical regardless of candidate. Reveal requests are automatic
-whenever permitted, pending caller reveals and pauses are resolved, and defenders
-accept face-down challenges. All policies therefore share non-card decisions.
-Bidding/reveal policy quality and server scheduling are outside this benchmark.
+All policies consume the same corrected public/private observation boundary and
+engine-legal cards. `heuristic` retains the tactical tree and selects its first
+vetted candidate. `production-legacy` retains the old approximate MC algorithm
+and 100 rollouts, including its known flaws, for evaluation only.
+`corrected-search` retains tactical pruning and evaluates candidates through
+constrained worlds and the real engine. `neural-direct` bypasses tactical pruning
+and uses a validated masked network for evaluation only. Older `production` and
+`neural` CLI aliases map to `production-legacy` and `neural-direct`.
 
-For each seed, reset the deterministic PRNG for engine setup and capture a SHA-256
-fingerprint of initial private hands/trump, dealer and caller/mode context. Repeat
-that setup with candidate on TEAM_1, then on TEAM_2 (same cards stay at the same
-seats). Equal fingerprints are required; these are policy-team swaps, not two
-independently shuffled games. Since initial hands and bidding are fixed, this
-controls deal/seat advantage but does not measure candidate bidding strength.
-Model deserialization occurs outside the per-game random stream. A separate
-seeded play stream starts after setup; divergent policies may consume it
-differently. Within each MC decision, candidate cards share worlds as in the
-existing planner. There is no promise of common sampled worlds between policies
-that reach different game states.
+No policy monkey-patches BotPlayer methods. The isolated synchronous benchmark
+uses a scoped seeded `Math.random` stream because the existing engine's setup
+RNG is global; it restores that stream in `finally`. Do not run tournaments
+concurrently in one JavaScript process or in the live server. PRNG: Mulberry32;
+seeds are uint32; pair seed is `(seed + pairIndex) >>> 0`.
 
-The PRNG is Mulberry32, seed is uint32, pairs use `(seed + pairIndex) >>> 0`.
-Only synchronous CLI/test execution temporarily replaces `Math.random` and the
-candidate adapter. Both restore in `finally`. Do not import these adapters into
-a live server or run tournaments concurrently in one process. The test suite
-checks same-seed action/outcome replay, adapter cleanup, identical paired deals
-and symmetric baseline controls. Floating-point behavior is expected to be
-stable on the same Node/runtime; latency is intentionally nondeterministic.
+Setup/toss/shuffle/cut/bidding are identical heuristic controls for all policies.
+Each seed resets setup; candidate policies exchange TEAM_1/TEAM_2 on the same
+seat hands, dealer/caller, trump context and initial private-state fingerprint.
+Fingerprints must match. Play uses a separate seeded stream. Different policies
+can consume it differently; within corrected search every candidate uses the
+same sampled world per iteration. Model loading happens before the play stream.
 
-## JSON schema (version 1)
+Reveal requests, caller show, resume and challenge acceptance are shared forced
+controls, not learned actions. Their timings/counts are recorded separately from
+card selection. The benchmark ends at GAME_RESOLVED or MATCH_OVER for **one
+hand**; it is not a tournament of complete multi-hand matches. Engine scorecard
+transfer and actual terminal KHOTI still apply within that hand.
 
-Top-level metadata: seed, pairs, candidate/baseline, Node version, model SHA-256.
-`summary` includes completed/aborted games, wins for each policy assignment,
-invalid moves, signed score total and decision latency per policy (count, mean,
-p95, max in milliseconds). `results` retain each seed, assigned candidate team,
-deal hash, winner, completion/error, completed tricks, score metric, trick
-margin and each selected card/player/policy with latency.
+Comparison budgets: corrected search 16 worlds with deterministic iteration
+budget, no wall-clock cutoff; legacy 100 approximate worlds. These are **not equal
+computational budgets**. Legacy iterations are separate from corrected iterations
+and default to 100. The default live corrected policy instead has a soft 25 ms
+limit checked between complete comparisons. `--time-ms` can enable a benchmark
+time cutoff, but the resulting world counts/outcomes need not replay exactly.
+Iterations are capped at 1,000; each corrected rollout at 160 engine transitions.
 
-There are not two conventional team scores in the engine: it tracks a signed
-dealer score. `signedScoreAdjustment` is the authoritative hand adjustment,
-negated when the candidate is the dealer's team, unchanged otherwise. Positive
-means favorable to the candidate. It is computed from the scoring entry's dealer
-team, not the possibly transferred current dealer. This is a candidate-relative
-point differential per hand, not `dealerScore` after absolute-value transfer and
-not a cumulative KHOTI match differential. `trickDifferential` is candidate tricks
-minus baseline tricks and must not be used to infer the winner. Invalid moves
-count selections outside legal cards and engine-rejected plays; other exceptions
-are recorded separately as aborted-game errors.
+The legacy policy now sees redacted information too. Thus these runs isolate
+planner behavior on the corrected boundary; they are not bit-for-bit reruns of
+pre-repair games that leaked hidden identities. Historical 40-game JSON files
+remain unchanged for provenance, not directly comparable strength estimates.
 
-Timing covers card selection, including tactical logic and MC or neural work,
-not setup, networking, UI, reveal actions, or training. Forced single-card
-choices are included. Cold code/JIT effects and machine load affect timing;
-do not use these measurements as universal production latency guarantees.
+## Results: 200 paired deals per run
 
-No `LiveLearningEngine` hooks, training scripts or model saves run. A model hash
-before/after each tournament detects accidental file changes. A focused neural
-benchmark test also spies on `saveModel` and verifies its checksum. Read-only
-model loading can initialize an in-memory random learner through imports, but
-that learner does not train or persist.
+Node v24.19.0, seeds 1–200, both team assignments, 31 October 2026.
+Machine-readable report with per-hand outcomes and search counters:
+[`benchmarks/ai-repair-comparison.json`](../benchmarks/ai-repair-comparison.json).
+The report retains compact per-hand records and summary latency; CLI exports also
+retain every decision/card and reveal action. Raw current-session CLI files are
+`/tmp/repair-corrected-final.json`, `/tmp/repair-legacy-final.json`, and
+`/tmp/repair-headtohead-final.json`.
 
-## Committed baseline
+| Candidate vs baseline | Wins–losses | Win rate / paired 95% CI | Signed points | Invalid / aborted |
+| --- | --- | --- | ---: | --- |
+| corrected-search vs heuristic | 201–199 | 50.25% / 47.50–52.75% | +39 | 0 / 0 |
+| production-legacy vs heuristic | 188–212 | 47.00% / 44.25–49.75% | -117 | 0 / 0 |
+| corrected-search vs production-legacy | 212–188 | 53.00% / 50.50–55.75% | +585 | 0 / 0 |
 
-Base engine/AI revision: `b07dea61c43edb4b5390566361f4bb405c6414c9`.
-Run date: 31 October 2026; Node v24.19.0, locked dependencies. Model SHA-256:
-`66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3`.
-All runs use seeds 1–20, 20 pairs / 40 games against `heuristic`.
+All 1,200 hands completed. Corrected search evaluated 24,288 complete common
+worlds against heuristics and 22,384 head-to-head, with **zero sampling failures,
+zero fallbacks and zero neural inferences**. The legacy policy reported no thrown
+errors; its unvalidated sampling is intentionally not a consistency certificate.
 
-| Candidate | Wins–losses | Aborts / invalid moves | Signed point total | Mean / p95 / max selection ms |
-| --- | --- | --- | --- | --- |
-| production | 20–20 | 0 / 0 | +117 | 5.804 / 46.494 / 160.762 |
-| neural (direct ablation) | 10–30 | 0 / 0 | -390 | .140 / .250 / 4.620 |
+| Run / policy | Decisions | Mean ms | p95 ms | Max ms |
+| --- | ---: | ---: | ---: | ---: |
+| vs heuristic / corrected-search | 8,398 | 9.065 | 62.586 | 246.416 |
+| vs heuristic / production-legacy | 8,242 | 5.638 | 39.774 | 426.239 |
+| head-to-head / corrected-search | 8,068 | 8.846 | 63.036 | 259.093 |
+| head-to-head / production-legacy | 8,068 | 5.768 | 40.544 | 427.377 |
 
-Full per-game/per-decision files:
-[production](../benchmarks/ai-baseline-production.json) and
-[neural](../benchmarks/ai-baseline-neural.json). The production run recorded 816
-candidate decisions; neural recorded 888. Opposing heuristic means were .028 ms
-and .034 ms respectively. The four-game default smoke also completed with no
-invalid moves. A larger 1,000-pair tournament was not run.
+Reveal controls: corrected/heuristic run 726 actions, .0030 ms mean/.0060 ms p95;
+legacy/heuristic 726, .0054/.0067 ms; head-to-head 724, .0042/.0065 ms.
+These timings include cold/JIT/GC and shared-host effects. They are not hard
+production latency guarantees; no network/UI time or learning work is included.
+The head-to-head latency of legacy reflects its original 100-world budget.
 
-These seeds are a small reproducible starting sample, not a statistically
-established strength estimate, human percentile or proof of general improvement.
-Paired games are correlated; do not treat 40 outcomes as 40 independent deals.
-The same setup/bidding policy, existing hidden-information leak and limited
-seed range constrain interpretation. The direct neural result does not measure
-how often the model controls production: usually it does not. Use held-out seeds
-and targeted rule scenarios before comparing model promotions. No algorithm was
-modified to improve these figures.
+Bootstrap intervals resample entire **deal pairs**, not individual correlated
+games, with 5,000 resamples, Mulberry32 seeded from the tournament seed, percentile
+endpoints 2.5%/97.5%. `pairedBootstrap` is exported by the harness. Paired win-rate
+differences against the common heuristic can be recomputed from report outcomes;
+the report contains that additional interval. These are diagnostic seed-suite
+intervals, not held-out guarantees: seed 65 was used to correct a void-inference
+bug, and policies do not optimize bidding/reveal decisions. Correctness repairs
+alone do not establish general playing strength. No hyperparameter search or
+model promotion was performed.
 
-## Validation and outstanding failures
+## Metrics, schema and limitations
 
-Application TypeScript validation (`npx tsc --noEmit`) and the added benchmark
-script check pass. The focused suites contain 13 ordinary passing tests and 12
-explicit expected failures for the audit's unresolved defects. The original
-109 tests remain separate from those expected failures.
+Schema v2 includes seed/pairs, policies, budgets, Node version, model hashes,
+per-hand deal hash, candidate team, authoritative winner, error, trick margin,
+signed score, search counters, every card's decision latency and reveal controls.
+Summary includes completed/aborted/invalid counts, wins, score total, per-policy
+mean/p95/max latency and paired win-rate interval. The compact comparison report
+has its own schema v1 and removes per-card arrays, retaining per-hand outcomes.
 
-Type-checking the old training scripts explicitly (they are excluded from the
-repository tsconfig) exposes pre-existing errors: missing `Card` import,
-nonexistent `dealerDistributeRemainingCards`, and a nonexistent public
-`secretTrumpSuit` field. Reproduce without running or saving models:
+The engine has a dealer-relative score, not two conventional team scores.
+`signedScoreAdjustment` uses the authoritative hand entry, negated when the
+candidate is the entry's dealer team, unchanged otherwise. Positive favors the
+candidate. It is not the post-transfer absolute dealer score. Trick margin is
+not used to decide a winner. Search utility additionally recognizes actual
+terminal match outcomes; the reported score remains the official hand adjustment.
 
-```sh
-npx tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop --skipLibCheck scripts/train_ai.ts scripts/train_expert_imitation.ts
-```
+Matching is not claimed uniform. An unconstrained 1,000-seed S_A ownership probe
+was 346/335/319 for p1/p2/p3 with the actor holding all hearts. This sanity probe
+cannot establish uniformity under constraints. Full midgame tests assert exact
+52-card accounting, hard voids, legitimate fixed ownership and deterministic
+seed reproduction, and reject infeasible worlds explicitly.
 
-That command is expected to exit nonzero until a separate trainer correction.
-Neither trainer was run. See [AI_AUDIT.md](AI_AUDIT.md) for the ranked findings and
-remaining parity/gradient work.
+Canonical checksum before and after benchmarks, tests and smoke training:
+
+`66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3`
+
+A 1,000-pair final comparison was not run: the required three 200-pair runs
+already exercised 1,200 complete hands; extrapolated larger fixed-budget work
+would add several minutes. Full multi-hand continuation, worker-thread hard
+preemption, bidding posterior calibration and stronger-model claims remain
+outside this correctness repair. See `AI_AUDIT.md` for unresolved limitations.
