@@ -348,7 +348,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     );
   };
 
-  const isCardFaceDownForViewer = (playedItem?: { playerId: string; card: Card; isFaceDown?: boolean } | null) => {
+  const isCardFaceDownForViewer = (playedItem?: { playerId: string; card: Card | null; isFaceDown?: boolean } | null) => {
     if (!playedItem) return false;
     if (playedItem.playerId === faceDownLeadPlayerId && faceDownLeadPending) {
       // If challenger team clicks to peek, it reveals ONLY to them!
@@ -366,7 +366,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     return false;
   };
 
-  const handlePlayedCardClick = (playedItem?: { playerId: string; card: Card; isFaceDown?: boolean } | null) => {
+  const handlePlayedCardClick = (playedItem?: { playerId: string; card: Card | null; isFaceDown?: boolean } | null) => {
     if (!playedItem) return;
     if (playedItem.playerId === faceDownLeadPlayerId && faceDownLeadPending) {
       if (faceDownCaller && myPlayer.team === faceDownCaller.team) {
@@ -376,7 +376,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     }
   };
 
-  const getPlayedCardData = (playedItem?: { playerId: string; card: Card; isFaceDown?: boolean } | null) => {
+  const getPlayedCardData = (playedItem?: { playerId: string; card: Card | null; isFaceDown?: boolean } | null) => {
     if (!playedItem) return null;
     if (
       playedItem.playerId === faceDownLeadPlayerId &&
@@ -389,7 +389,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
     return playedItem.card;
   };
 
-  const getPlayedCardBadge = (playedItem?: { playerId: string; card: Card; isFaceDown?: boolean; isAceDowngraded?: boolean } | null) => {
+  const getPlayedCardBadge = (playedItem?: { playerId: string; card: Card | null; isFaceDown?: boolean; isAceDowngraded?: boolean } | null) => {
     if (!playedItem) return undefined;
     if (
       playedItem.playerId === faceDownLeadPlayerId &&
@@ -819,7 +819,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 <AnimatePresence mode="popLayout">
                   {playedTop && (
                     <motion.div
-                      key={`played_top_${playedTop.card.id}_${playedTop.playedAt || ''}`}
+                      key={`played_top_${playedTop.card?.id ?? "concealed"}_${playedTop.playedAt || ''}`}
                       initial={{ y: -20, opacity: 0, scale: 0.9 }}
                       animate={{ y: 0, opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}
@@ -851,7 +851,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 <AnimatePresence mode="popLayout">
                   {playedBottom && (
                     <motion.div
-                      key={`played_bottom_${playedBottom.card.id}_${playedBottom.playedAt || ''}`}
+                      key={`played_bottom_${playedBottom.card?.id ?? "concealed"}_${playedBottom.playedAt || ''}`}
                       initial={{ y: 20, opacity: 0, scale: 0.9 }}
                       animate={{ y: 0, opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}
@@ -883,7 +883,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 <AnimatePresence mode="popLayout">
                   {playedLeft && (
                     <motion.div
-                      key={`played_left_${playedLeft.card.id}_${playedLeft.playedAt || ''}`}
+                      key={`played_left_${playedLeft.card?.id ?? "concealed"}_${playedLeft.playedAt || ''}`}
                       initial={{ x: -20, opacity: 0, scale: 0.9 }}
                       animate={{ x: 0, opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}
@@ -915,7 +915,7 @@ export const TableLayout: React.FC<TableLayoutProps> = ({
                 <AnimatePresence mode="popLayout">
                   {playedRight && (
                     <motion.div
-                      key={`played_right_${playedRight.card.id}_${playedRight.playedAt || ''}`}
+                      key={`played_right_${playedRight.card?.id ?? "concealed"}_${playedRight.playedAt || ''}`}
                       initial={{ x: 20, opacity: 0, scale: 0.9 }}
                       animate={{ x: 0, opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}

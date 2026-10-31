@@ -135,7 +135,8 @@ describe('Normal Play (Close Rung) & Rung Reveal Game Mechanics', () => {
     const publicState = engine.getPublicState();
     expect(publicState.previousTrickCards?.find((c) => c.playerId === 'p1')?.isFaceDown).toBe(true);
     expect(publicState.faceDownCallerCards.length).toBe(1);
-    expect(publicState.faceDownCallerCards[0].card.id).toBe('D_5');
+    expect(publicState.faceDownCallerCards[0].card).toBeNull();
+    expect(engine.getPrivateState('p1').knownConcealedCards?.['1:p1']?.id).toBe('D_5');
     expect(publicState.faceDownCallerCards[0].isRevealed).toBe(false);
     expect(publicState.faceDownCallerCards[0].trickNumber).toBe(1);
 

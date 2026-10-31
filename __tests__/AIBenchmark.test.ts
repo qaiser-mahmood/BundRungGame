@@ -1,11 +1,13 @@
+import {selectCandidate} from '../server/ai/DecisionPolicy';
+import {LegacyMonteCarloPlanner} from '../server/ai/planning/LegacyMonteCarloPlanner';
 import { describe, expect, it, vi } from 'vitest';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { BotPlayer } from '../server/ai/BotPlayer';
 import { ModelManager } from '../server/ai/neural/ModelManager';
-import { runGame, runTournament, seededRandom, withHeuristic, withRandom } from '../scripts/ai-benchmark';
+import { runGame, runTournament, setupGame, seededRandom, withRandom } from '../scripts/ai-benchmark';
 
-const withoutTiming = (r: ReturnType<typeof runGame>) => ({...r,decisions:r.decisions.map(({milliseconds,...d})=>d)});
+const withoutTiming = (r: ReturnType<typeof runGame>) => ({...r,revealActions:r.revealActions.map(({milliseconds,...a})=>a),decisions:r.decisions.map(({milliseconds,...d})=>d)});
 describe('seeded AI benchmark',()=>{
   it('replays games exactly apart from wall-clock timing and restores globals',()=>{
     const random=Math.random, pick=BotPlayer.pickBestFromCandidates, neural=BotPlayer.useNeuralPolicy;
@@ -41,9 +43,21 @@ describe('seeded AI benchmark',()=>{
       expect(result.error).toBeNull();expect(lockedObservations).toBeGreaterThan(0);
     } finally {spy.mockRestore();}
   });
+  it('does not confuse pre-reveal caller discards with a void in the locked trump slot (seed 65)',()=>{
+    const result=runGame(65,'TEAM_2','corrected-search');
+    expect(result.error).toBeNull();expect(result.search.samplingFailures).toBe(0);expect(result.search.fallbacks).toBe(0);
+  });
+  it('rejects unbounded legacy budgets before entering the preserved planner',()=>{
+    const engine=setupGame(2),state=engine.getPublicState(),id=state.currentTurnPlayerId!,priv=engine.getPrivateState(id),cards=priv.myHand.slice(0,2);
+    const planner=vi.spyOn(LegacyMonteCarloPlanner,'evaluateCandidates').mockReturnValue(cards[1]);
+    try {
+      expect(selectCandidate(cards,state,priv,id,state.players,{name:'production-legacy',search:{legacyIterations:Infinity}})).toBe(cards[0]);
+      expect(planner).not.toHaveBeenCalled();
+    }finally{planner.mockRestore();}
+  });
   it('restores adapters when a policy throws',()=>{
     const random=Math.random,pick=BotPlayer.pickBestFromCandidates;
-    expect(()=>withRandom(seededRandom(1),()=>withHeuristic(()=>{throw new Error('test');}))).toThrow('test');
+    expect(()=>withRandom(seededRandom(1),()=>{throw new Error('test');})).toThrow('test');
     expect(Math.random).toBe(random);expect(BotPlayer.pickBestFromCandidates).toBe(pick);
   });
   it('runs a direct neural policy without saving or changing the trained model',()=>{

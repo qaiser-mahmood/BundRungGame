@@ -1,4 +1,6 @@
 export interface Transition {
+  roomId?: string;
+  episodeId?: string;
   state: Float32Array;
   action: number;
   reward: number;
@@ -13,11 +15,14 @@ export class ReplayBuffer {
   private pointer: number = 0;
 
   constructor(maxSize: number = 20000) {
+    if(!Number.isSafeInteger(maxSize)||maxSize<1)throw new Error('Invalid replay capacity');
     this.maxSize = maxSize;
     this.buffer = [];
   }
 
   public push(transition: Transition): void {
+    transition = { ...transition, state: new Float32Array(transition.state),
+      nextState: new Float32Array(transition.nextState), legalActionsNext: [...transition.legalActionsNext] };
     if (this.buffer.length < this.maxSize) {
       this.buffer.push(transition);
     } else {
@@ -31,6 +36,7 @@ export class ReplayBuffer {
   }
 
   public sample(batchSize: number): Transition[] {
+    if(!Number.isSafeInteger(batchSize)||batchSize<0)throw new Error('Invalid replay sample size');
     const samples: Transition[] = [];
     const len = this.buffer.length;
     if (len === 0) return samples;

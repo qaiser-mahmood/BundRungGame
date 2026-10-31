@@ -10,10 +10,11 @@
     "build": "tsc && vite build",
     "start": "tsx server/server.ts",
     "test": "vitest run",
-    "train:ai": "tsx scripts/train_ai.ts",
-    "train:imitate": "tsx scripts/train_expert_imitation.ts",
+    "train:ai": "node --import tsx scripts/train_ai.ts",
+    "train:imitate": "node --import tsx scripts/train_expert_imitation.ts",
     "benchmark:ai": "node --import tsx scripts/ai-benchmark.ts",
-    "typecheck:ai": "tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop --skipLibCheck scripts/ai-benchmark.ts"
+    "typecheck:ai": "tsc --noEmit -p tsconfig.ai.json",
+    "benchmark:latency": "node --import tsx scripts/benchmark-ai-latency.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

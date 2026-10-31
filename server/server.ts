@@ -1,3 +1,6 @@
+import { registerVoiceHandlers } from './transport/Voice';
+import { liveBotTurns } from './ai/RoomTurnQueue';
+import { sendGameState } from './transport/GameState';
 import express from 'express';
 import http from 'http';
 import path from 'path';
@@ -23,7 +26,7 @@ app.use(cors());
 app.use(express.json());
 
 // Enable autonomous neural network AI policy for live games
-BotPlayer.useNeuralPolicy = true;
+// Corrected search is the default; neural-direct is evaluation-only.
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
@@ -58,13 +61,13 @@ function getOrCreateRoom(roomId: string = 'main_room'): GameRoom {
 }
 
 function broadcastRoomState(room: GameRoom): void {
+  LiveLearningEngine.observe(room.engine, room.id);
   const players = room.engine.getPlayers();
 
   for (const player of players) {
     const socketId = room.playerSocketMap[player.id];
     if (socketId) {
-      const clientState = room.engine.getClientGameState(player.id);
-      io.to(socketId).emit('gameStateUpdated', clientState);
+      sendGameState(io.to(socketId), room.engine, player.id);
     }
   }
 
@@ -72,25 +75,7 @@ function broadcastRoomState(room: GameRoom): void {
   for (const [sId, pId] of Object.entries(room.socketMap)) {
     if (!pId) {
       // Spectator view
-      const publicState = room.engine.getPublicState();
-      io.to(sId).emit('gameStateUpdated', {
-        publicState,
-        privateState: {
-          myPlayerId: '',
-          myHand: [],
-          myTrumpCard: null,
-          isMyTrumpCardPlayable: false,
-          secretTrumpSuit: null,
-          legalPlayableCardIds: [],
-          canRequestRungReveal: false,
-          canShowTrump: false,
-          teammateFaceDownCard: null,
-          partnerHand: null,
-          isInspectingPartnerCards: false,
-          isMyHandRevealed: false,
-          hasVotedSurrender: false,
-        },
-      });
+      sendGameState(io.to(sId), room.engine);
     }
   }
 
@@ -117,7 +102,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
 
       if (activeBotIds.length > 0) {
         const nextBotId = activeBotIds[0];
-        BotPlayer.handleBotTurn(room.engine, nextBotId);
+        BotPlayer.handleBotTurn(room.engine, nextBotId, {roomId:room.id,learning:true});
         botActionTaken = true;
       }
     }
@@ -148,7 +133,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
     else if (phase === 'PRE_DEAL_SHUFFLE') {
       const dealer = players[publicState.dealerPlayerIndex];
       if (dealer && dealer.isBot) {
-        BotPlayer.handleBotTurn(room.engine, dealer.id);
+        BotPlayer.handleBotTurn(room.engine, dealer.id, {roomId:room.id,learning:true});
         botActionTaken = true;
       }
     }
@@ -157,7 +142,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
     else if (phase === 'PRE_DEAL_CUT' && publicState.cutOfferPlayerId) {
       const cutPlayer = players.find((p) => p.id === publicState.cutOfferPlayerId);
       if (cutPlayer && cutPlayer.isBot) {
-        BotPlayer.handleBotTurn(room.engine, cutPlayer.id);
+        BotPlayer.handleBotTurn(room.engine, cutPlayer.id, {roomId:room.id,learning:true});
         botActionTaken = true;
       }
     }
@@ -169,7 +154,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
         setTimeout(() => {
           try {
             if (room.engine.getPhase() === 'BIDDING_PHASE' && room.engine.getPublicState().biddingTurnPlayerId === bidder.id) {
-              BotPlayer.handleBotTurn(room.engine, bidder.id);
+              BotPlayer.handleBotTurn(room.engine, bidder.id, {roomId:room.id,learning:true});
               broadcastRoomState(room);
             }
           } catch (e) {}
@@ -238,12 +223,15 @@ function checkAndRunBotTurns(room: GameRoom): void {
         if (turnPlayer && turnPlayer.isBot) {
           const delay = publicState.currentTrick.trickNumber === 1 ? 1200 : 700;
           setTimeout(() => {
-            try {
-              if (room.engine.getPhase() === 'TRICK_PLAYING' && room.engine.getPublicState().currentTurnPlayerId === turnPlayer.id && !room.engine.getPublicState().faceDownLeadPending) {
-                BotPlayer.handleBotTurn(room.engine, turnPlayer.id);
+            liveBotTurns.enqueue(room.id, () => {
+              const now=room.engine.getPublicState();
+              if(now.phase==='TRICK_PLAYING'&&now.currentTurnPlayerId===turnPlayer.id&&!now.faceDownLeadPending&&
+                 now.gameIndex===publicState.gameIndex&&now.currentTrick.trickNumber===publicState.currentTrick.trickNumber&&
+                 now.currentTrick.cards.length===publicState.currentTrick.cards.length){
+                BotPlayer.handleBotTurn(room.engine,turnPlayer.id,{roomId:room.id,learning:true});
                 broadcastRoomState(room);
               }
-            } catch (e) {}
+            });
           }, delay);
           return;
         }
@@ -270,33 +258,22 @@ function checkAndRunBotTurns(room: GameRoom): void {
 
 io.on('connection', (socket: Socket) => {
   let currentRoomId = 'main_room';
-  const room = getOrCreateRoom(currentRoomId);
+  let room = getOrCreateRoom(currentRoomId);
   room.socketMap[socket.id] = '';
 
   // Immediately send initial state to new connection
-  const publicState = room.engine.getPublicState();
-  socket.emit('gameStateUpdated', {
-    publicState,
-    privateState: {
-      myPlayerId: '',
-      myHand: [],
-      myTrumpCard: null,
-      isMyTrumpCardPlayable: false,
-      secretTrumpSuit: null,
-      legalPlayableCardIds: [],
-      canRequestRungReveal: false,
-      canShowTrump: false,
-      teammateFaceDownCard: null,
-      partnerHand: null,
-      isInspectingPartnerCards: false,
-      isMyHandRevealed: false,
-      hasVotedSurrender: false,
-    },
-  });
+  sendGameState(socket, room.engine);
 
   socket.on('joinLobby', ({ playerName, roomId, gameType }) => {
     const targetRoomId = roomId || 'main_room';
     const targetRoom = getOrCreateRoom(targetRoomId);
+    if (room !== targetRoom) {
+      const previousPlayer = room.socketMap[socket.id];
+      if (previousPlayer) { LiveLearningEngine.resetRoom(room.id); room.engine.removePlayer(previousPlayer); delete room.playerSocketMap[previousPlayer]; }
+      delete room.socketMap[socket.id];
+      room = targetRoom;
+      currentRoomId = targetRoomId;
+    }
 
     if (gameType) {
       targetRoom.engine.setGameType(gameType);
@@ -569,9 +546,7 @@ io.on('connection', (socket: Socket) => {
     const playerId = room.socketMap[socket.id];
     if (playerId) {
       try {
-        LiveLearningEngine.onBeforeCardPlayed(room.engine, room.id, playerId, cardId);
-        const result = room.engine.playCard(playerId, cardId);
-        LiveLearningEngine.onAfterCardPlayed(room.engine, room.id);
+        LiveLearningEngine.playCard(room.engine, room.id, playerId, cardId);
         broadcastRoomState(room);
       } catch (err: any) {
         socket.emit('notification', { message: err.message, type: 'error' });
@@ -619,6 +594,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('startNewMatch', () => {
     try {
+      LiveLearningEngine.resetRoom(room.id);
       room.engine.startNewMatch();
       broadcastRoomState(room);
       checkAndRunBotTurns(room);
@@ -651,23 +627,8 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
-  // --- Voice Chat Streaming Handlers ---
-  socket.on('voiceStreamSend', ({ playerId, socketId, audioChunk, sampleRate }) => {
-    // Relay audio chunk to all other sockets, resolving sender identity reliably
-    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
-    socket.broadcast.emit('voiceStreamReceive', {
-      playerId: effectivePlayerId,
-      socketId: socketId || socket.id,
-      audioChunk,
-      sampleRate,
-    });
-  });
-
-  socket.on('voiceMuteStatusChanged', ({ playerId, isMuted }) => {
-    // Broadcast mute status to all clients
-    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
-    io.emit('voiceMuteStatusUpdated', { playerId: effectivePlayerId, isMuted });
-  });
+  // Resolve the authoritative socket-room mapping for every voice event.
+  registerVoiceHandlers(socket,()=>room,socketId=>io.to(socketId));
 
   socket.on('disconnect', () => {
     const playerId = room.socketMap[socket.id];
@@ -677,6 +638,7 @@ io.on('connection', (socket: Socket) => {
       delete room.playerSocketMap[playerId];
 
       // Remove player from engine and reset game state
+      LiveLearningEngine.resetRoom(room.id);
       const result = room.engine.removePlayer(playerId);
 
       // Check if any human players remain in the room
@@ -732,8 +694,8 @@ server.listen(PORT, () => {
   console.log(`🎴 Bund Rung Server listening on port ${PORT}`);
   const brain = ModelManager.getModel();
   if (brain) {
-    console.log(`🧠 Autonomous Neural AI Brain: ACTIVE & IN USE (server/ai/models/bund_rung_brain.json)`);
+    console.log(`🧠 Baseline neural checkpoint: VALIDATED (evaluation only) (server/ai/models/bund_rung_brain.json)`);
     LiveLearningEngine.init();
-    console.log(`🎓 Continuous Live Learning: ENABLED (Learning from Human & Bot matches)`);
+    console.log(`🎓 Room-isolated in-memory learning: ENABLED; canonical model is read-only`);
   }
 });

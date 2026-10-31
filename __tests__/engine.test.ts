@@ -277,7 +277,7 @@ describe('Bund Rung Engine Full State Flow', () => {
     const stateAfterTrick2Lead = engine.getPublicState();
     expect(stateAfterTrick2Lead.previousTrickCards).toBeNull();
     expect(stateAfterTrick2Lead.currentTrick.cards.length).toBe(1);
-    expect(stateAfterTrick2Lead.currentTrick.cards[0].card.id).toBe('C_10');
+    expect(stateAfterTrick2Lead.currentTrick.cards[0].card?.id).toBe('C_10');
   });
 
   it('allows the dealer to distribute 5 cards for the next game and enables Open Rung announcement on Trick 1 of Game 2', () => {

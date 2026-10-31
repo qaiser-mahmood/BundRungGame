@@ -18,13 +18,13 @@ export class TossEngine {
   private dealerPlayerId: string | null = null;
   private tiedPlayerIds: string[] = [];
 
-  constructor() {
+  constructor(private readonly shuffleOnReset=true) {
     this.reset();
   }
 
   public reset(playerIds: string[] = []): void {
     const deck = new Deck();
-    deck.shuffle();
+    if(this.shuffleOnReset)deck.shuffle();
     this.remainingDeckCards = deck.getCards();
     this.playerDrawHistory = {};
     this.currentRoundDraws = {};

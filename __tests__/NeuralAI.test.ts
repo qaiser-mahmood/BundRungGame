@@ -74,7 +74,7 @@ describe('Neural AI & Reinforcement Learning Architecture', () => {
   });
 
   it('performs backpropagation step and reduces loss', () => {
-    const net = new NeuralNetwork(10, 8, 8, 4);
+    const net = new NeuralNetwork(10, 8, 8, 4, 4, 4);
     const input = new Float32Array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]);
     const targetQ = new Float32Array([2.5, 0, 0, 0]);
     const mask = [true, false, false, false];

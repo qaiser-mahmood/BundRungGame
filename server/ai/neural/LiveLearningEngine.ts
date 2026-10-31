@@ -2,144 +2,102 @@ import { BundRungEngine } from '../../engine/BundRungEngine';
 import { StateVectorizer } from './StateVectorizer';
 import { ReinforcementLearner } from './ReinforcementLearner';
 import { ModelManager } from './ModelManager';
-import { Card } from '../../../shared/types';
+import type {Transition} from './ReplayBuffer';
 
-interface PendingMoveSnapshot {
-  playerId: string;
-  isHuman: boolean;
-  stateVector: Float32Array;
-  actionIndex: number;
+interface Pending {state:Float32Array;action:number;reward:number;}
+export interface RewardConfig {trickWin:number;terminalWin:number;scoreScale:number;}
+export const defaultRewards:RewardConfig={trickWin:0,terminalWin:1,scoreScale:0};
+/** One learner per room. Pending actions end at that actor's next legal decision,
+ * or an authoritative terminal hand. Departures discard incomplete experience. */
+export class TurnLearning {
+  private pending=new Map<string,Pending>();
+  private engine:BundRungEngine|null=null;
+  private gameIndex=-1;
+  private generation=0;
+  public readonly experiences:Transition[]=[];
+  public recordedCount=0;
+  constructor(public readonly roomId:string,public readonly learner=new ReinforcementLearner(),
+    public readonly rewards:RewardConfig=defaultRewards){}
+  reset():void {this.pending.clear();this.engine=null;this.gameIndex=-1;this.generation++;}
+  private bind(engine:BundRungEngine):void {
+    const game=engine.getPublicState().gameIndex;
+    if(this.engine!==engine||this.gameIndex!==game){this.reset();this.engine=engine;this.gameIndex=game;}
+  }
+  private close(engine:BundRungEngine,id:string,done:boolean):void {
+    const pending=this.pending.get(id);if(!pending)return;
+    const state=engine.getPublicState(),priv=engine.getPrivateState(id);
+    const cards=[...priv.myHand,...(priv.myTrumpCard?[priv.myTrumpCard]:[])];
+    const next=done?[]:priv.legalPlayableCardIds.map(cid=>{
+      const card=cards.find(c=>c.id===cid);if(!card)throw new Error('LEARNING_MASK_CARD_MISSING');
+      return StateVectorizer.cardToIndex(card);
+    });
+    if(!done&&!next.length)return;
+    const team=state.players.find(p=>p.id===id)?.team;
+    let reward=pending.reward;
+    if(done){
+      if(!state.lastGameWinningTeam)throw new Error('LEARNING_MISSING_TERMINAL_WINNER');
+      reward+=(state.lastGameWinningTeam===team?1:-1)*this.rewards.terminalWin;
+      const entry=state.scorecard.history.at(-1);
+      if(entry)reward+=entry.scoreAdjustment*(entry.dealerTeam===team?-1:1)*this.rewards.scoreScale;
+    }
+    const transition:Transition={state:pending.state,action:pending.action,reward,
+      nextState:StateVectorizer.vectorize(state,priv,id,state.players),done,legalActionsNext:next,
+      roomId:this.roomId,episodeId:`${this.generation}:${this.gameIndex}`};
+    this.learner.recordExperience(transition);this.experiences.push(transition);this.recordedCount++;
+    if(this.experiences.length>256)this.experiences.shift();
+    this.pending.delete(id);
+  }
+  observe(engine:BundRungEngine):void {
+    this.bind(engine);const state=engine.getPublicState();
+    if(state.phase==='GAME_RESOLVED'||state.phase==='MATCH_OVER'){
+      for(const id of [...this.pending.keys()])this.close(engine,id,true);
+    }else if(state.currentTurnPlayerId)this.close(engine,state.currentTurnPlayerId,false);
+  }
+  play(engine:BundRungEngine,id:string,cardId:string):ReturnType<BundRungEngine['playCard']> {
+    // Validate before touching history: rejected actions have no learning effects.
+    const state=engine.getPublicState(),priv=engine.getPrivateState(id);
+    if(!priv.legalPlayableCardIds.includes(cardId))throw new Error('LEARNING_REJECTED_ACTION');
+    const card=[...priv.myHand,...(priv.myTrumpCard?[priv.myTrumpCard]:[])].find(c=>c.id===cardId);
+    if(!card)throw new Error('LEARNING_CARD_MISSING');
+    this.observe(engine);
+    const snapshot=StateVectorizer.vectorize(state,priv,id,state.players);
+    const result=engine.playCard(id,cardId);
+    this.pending.set(id,{state:snapshot,action:StateVectorizer.cardToIndex(card),reward:0});
+    if(result.trickCompleted&&this.rewards.trickWin){
+      const team=result.trickWinner?.team;
+      for(const [pid,pending] of this.pending){pending.reward+=(state.players.find(p=>p.id===pid)?.team===team?1:-1)*this.rewards.trickWin;}
+    }
+    this.observe(engine);return result;
+  }
 }
-
 export class LiveLearningEngine {
-  private static learner: ReinforcementLearner = new ReinforcementLearner();
-  private static roomMoveHistory: Map<string, PendingMoveSnapshot[]> = new Map();
-  private static isInitialized: boolean = false;
-  private static completedTricksCount: Map<string, number> = new Map();
-
-  /**
-   * Initializes learner with existing brain if available
-   */
-  public static init(): void {
-    if (this.isInitialized) return;
-    const existing = ModelManager.getModel();
-    if (existing) {
-      this.learner.onlineNetwork = existing.clone();
-      this.learner.targetNetwork = existing.clone();
-      console.log('🧠 [Live Learning] Initialized with existing bund_rung_brain.json weights.');
-    }
-    this.isInitialized = true;
+  private static rooms=new Map<string,TurnLearning>();
+  private static queued=new Set<string>();
+  private static trained=new Map<string,number>();
+  private static schedule(roomId:string):void {
+    const room=this.rooms.get(roomId);
+    if(!room||this.queued.has(roomId)||room.recordedCount<=(this.trained.get(roomId)??0)||room.learner.replayBuffer.size()<room.learner.batchSize)return;
+    this.queued.add(roomId);
+    setImmediate(()=>{
+      try {
+        if(this.rooms.get(roomId)===room){room.learner.trainBatch();this.trained.set(roomId,room.recordedCount);}
+      }catch(error){console.error(JSON.stringify({component:'learning',reason:'BATCH_REJECTED',error:String(error)}));}
+      finally{this.queued.delete(roomId);}
+    });
   }
-
-  /**
-   * Captures the board state right before a card is played
-   */
-  public static onBeforeCardPlayed(engine: BundRungEngine, roomId: string, playerId: string, cardId: string): void {
-    try {
-      this.init();
-      const publicState = engine.getPublicState();
-      const privateState = engine.getPrivateState(playerId);
-      const players = engine.getPlayers();
-      const player = players.find((p) => p.id === playerId);
-      if (!player) return;
-
-      const allCards = [...privateState.myHand, privateState.myTrumpCard].filter((c): c is Card => Boolean(c));
-      const card = allCards.find((c) => c.id === cardId);
-      if (!card) return;
-
-      const stateVector = StateVectorizer.vectorize(publicState, privateState, playerId, players);
-      const actionIndex = StateVectorizer.cardToIndex(card);
-
-      if (!this.roomMoveHistory.has(roomId)) {
-        this.roomMoveHistory.set(roomId, []);
-      }
-
-      this.roomMoveHistory.get(roomId)!.push({
-        playerId,
-        isHuman: !player.isBot,
-        stateVector,
-        actionIndex,
-      });
-
-      // Keep track of trick count for completion detection
-      if (!this.completedTricksCount.has(roomId)) {
-        this.completedTricksCount.set(roomId, publicState.completedTricks.length);
-      }
-    } catch (err) {
-      // Non-critical, never crash game
+  public static init():void { /* canonical checkpoint is read-only; learners initialize per room */ }
+  public static session(roomId:string):TurnLearning {
+    if(!roomId)throw new Error('EXPLICIT_ROOM_REQUIRED');
+    let room=this.rooms.get(roomId);
+    if(!room){
+      const learner=new ReinforcementLearner(),baseline=ModelManager.getModel();
+      learner.batchSize=4;
+      if(baseline){learner.onlineNetwork=baseline.clone();learner.targetNetwork=baseline.clone();}
+      room=new TurnLearning(roomId,learner);this.rooms.set(roomId,room);
     }
+    return room;
   }
-
-  /**
-   * Evaluates after a card is played to detect trick or game completion and trigger learning
-   */
-  public static onAfterCardPlayed(engine: BundRungEngine, roomId: string): void {
-    try {
-      const publicState = engine.getPublicState();
-      const prevTrickCount = this.completedTricksCount.get(roomId) || 0;
-      const currentTrickCount = publicState.completedTricks.length;
-
-      // Detect trick completed
-      if (currentTrickCount > prevTrickCount) {
-        this.completedTricksCount.set(roomId, currentTrickCount);
-        const lastTrick = publicState.completedTricks[currentTrickCount - 1];
-        const trickWinnerId = lastTrick.winnerPlayerId;
-        const players = engine.getPlayers();
-        const winnerPlayer = players.find((p) => p.id === trickWinnerId);
-        const winnerTeam = winnerPlayer?.team;
-
-        const history = this.roomMoveHistory.get(roomId) || [];
-        const isGameDone = publicState.isMatchOver || currentTrickCount >= 13;
-
-        // Feed each of the 4 plays from this trick into the experience replay buffer
-        for (const item of history) {
-          const player = players.find((p) => p.id === item.playerId);
-          const isWinner = item.playerId === trickWinnerId;
-          const isPartner = player?.team === winnerTeam && !isWinner;
-
-          // Reward formula with bonus for successful human demonstration
-          let reward = isWinner ? 1.0 : isPartner ? 0.8 : -1.0;
-          if (item.isHuman && isWinner) {
-            reward += 0.5; // Extra weight to learn from human master moves!
-          }
-
-          const privateState = engine.getPrivateState(item.playerId);
-          const nextLegal = (privateState.legalPlayableCardIds || []).map((cid) => {
-            const c = [...privateState.myHand, privateState.myTrumpCard].find((x) => x?.id === cid);
-            return c ? StateVectorizer.cardToIndex(c) : 0;
-          });
-
-          this.learner.recordExperience({
-            state: item.stateVector,
-            action: item.actionIndex,
-            reward,
-            nextState: item.stateVector,
-            done: isGameDone,
-            legalActionsNext: nextLegal,
-          });
-        }
-
-        // Clear history for next trick
-        this.roomMoveHistory.set(roomId, []);
-
-        // Background non-blocking training step
-        setImmediate(() => {
-          this.learner.trainBatch();
-        });
-      }
-
-      // Detect match completion: save updated weights to disk!
-      if (publicState.isMatchOver) {
-        setImmediate(() => {
-          this.learner.trainBatch();
-          ModelManager.saveModel(this.learner.onlineNetwork);
-          console.log(`🧠 [Live Learning] Absorbed complete live game from Room "${roomId}". Saved updated neural brain to disk!`);
-        });
-        this.roomMoveHistory.delete(roomId);
-        this.completedTricksCount.delete(roomId);
-      }
-    } catch (err) {
-      // Non-critical, never crash game
-    }
-  }
+  public static playCard(engine:BundRungEngine,roomId:string,playerId:string,cardId:string){const result=this.session(roomId).play(engine,playerId,cardId);this.schedule(roomId);return result;}
+  public static observe(engine:BundRungEngine,roomId:string):void {this.rooms.get(roomId)?.observe(engine);this.schedule(roomId);}
+  public static resetRoom(roomId:string):void {this.rooms.delete(roomId);this.trained.delete(roomId);}
 }

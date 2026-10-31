@@ -1,140 +1,139 @@
-# AI foundation audit
+# AI correctness and learning repair
 
-Scope: base `b07dea61c43edb4b5390566361f4bb405c6414c9`.
-No policy/rule fixes are bundled. No model was trained or overwritten. Ranked
-findings below distinguish reproducible bugs from weaknesses and hypotheses.
+Original audit base: `b07dea61c43edb4b5390566361f4bb405c6414c9`; repair base:
+`audit/ai-foundation-and-benchmarks` at `10075a4`. Original findings are preserved
+in that branch/history. This document records their repair status and limits.
 
-## Reproduce the evidence
+## Repaired confirmed findings
 
-```sh
-npx vitest run __tests__/AIFoundationAudit.test.ts __tests__/AIBenchmark.test.ts
-npx tsc --noEmit
-npm run typecheck:ai
-```
+| Priority / IDs | Repair | Executable evidence |
+| --- | --- | --- |
+| Critical: INFO-01 | Separate authoritative and nullable visible records; opaque concealed slots; viewer private state; one transport boundary; no disclosure on unaccepted challenge surrender | `InformationBoundary.test.ts`, INFO-01 in `AIFoundationAudit.test.ts` |
+| Critical: MC-01 | Randomized capacity matching preserves voids; infeasible worlds explicitly rejected | `WorldSampler.test.ts` (200 seeds), midgame randomized invariant test |
+| Critical: MC-02 / MC-06 | Own locked card reserved; public and legitimately private owner cards pinned; hidden played slots counted separately | Corresponding audit regressions; complete 52-card accounting in `SimulationParity.test.ts` |
+| Critical: MC-03 / MC-04 / MC-05 | Corrected rollouts execute authoritative engine methods: final trick, hidden trump, explicit reveal, same-opponent-player streak and first-trick exclusion | Original scenario regressions; 12 complete-game transition comparisons; explicit challenge, future Ace and streak tests |
+| Critical: RL-02 | Actual pre-action to next-legal-decision transitions; authoritative hand termination; no rejected-action records or human-expert bonus | Audit regression plus `LearningLifecycle.test.ts` |
+| Critical: RL-03 | Explicit internal room identity, per-room learner/replay, episode generations, cleanup on departure/new game; fix socket handler's stale main-room reference after joining another room | Explicit room callback regression; interleaved rooms and same-engine next-hand tests |
+| Critical: NN-01 | Dueling mean derivative updates all advantage outputs; correct layer-normalization Jacobians | `NeuralGradients.test.ts`: 34 central-difference checks across all 12 parameter tensors; NN-01 regression |
+| High: RL-01 | One feature-group definition drives vectorizer and default network dimensions | RL-01 regression; feature schema metadata |
+| High: NN-02 | Complete architecture/dimension/finite-value/tensor/schema validation; hash-pinned legacy baseline only | NN-02, malformed checkpoint tests and `CheckpointSafety.test.ts` |
+| High: unsafe training / persistence | Explicit new experimental output, atomic exclusive writes; no default/SIGINT overwrite; current engine phases; self-play uses its own learner; validated resume | Both trainer type checks; two-hand self-play/imitation jobs plus one-hand resume smoke |
+| High: ambiguous controller priority | Explicit heuristic/legacy/corrected/neural-direct policy interface, no static-method monkey-patching; corrected live default; deterministic diagnostic fallback | Policy/benchmark tests and search counters |
 
-`AIFoundationAudit.test.ts` uses ordinary passing invariant/characterization tests
-and explicitly named `it.fails` tests for **unresolved defects**. An expected
-failure is a failing desired correctness assertion, not verified correct behavior.
-If a fix makes one pass, Vitest fails the suite as an unexpected success: remove
-`.fails` with the fix. This avoids changing gameplay to make an audit green.
-Synthetic small-hand fixtures isolate the planner/engine differences; normal
-seeded full-deal tests exercise the actual phase driver separately.
+All 12 former `it.fails` desired-invariant tests are now ordinary tests. None were
+skipped or deleted to obtain a green run. Some old synthetic fixtures were
+updated to supply the card/hand accounting the new strict sampler requires.
+The old mutation test now uses a complete two-card endgame world; replay tests
+explicitly account for defensive transition copies. The old small-network loss
+test now actually constructs its intended four-output network instead of passing
+a four-entry target to a 52-output default.
 
-## Ranked confirmed defects
+## Additional corrections found during repair
 
-| Rank | ID / priority | Finding and reproducible evidence | Consequence / next correction |
-| --- | --- | --- | --- |
-| 1 | INFO-01 / P1 | `getPublicState` serializes actual `card` objects for unrevealed `currentTrick`, `completedTricks`, previous tricks and `faceDownCallerCards`. `getClientGameState('p1')` exposes `D_5` face-down from p0; INFO-01 expected failure. Trackers/vectorizer read `pc.card` regardless of hidden status. | Hidden-card identity leak biases decisions and reaches clients. Define and test viewer-specific redaction before changing public types or Socket.IO payloads. No contract change in this PR. |
-| 2 | MC-03, MC-05 / P1 | Rollouts award same-team consecutive tricks and use >=7 trick majority; authoritative `resolveTrick` requires the **same opponent player**, after reveal, with trick 1 excluded, and final trick decides otherwise. MC-03: T1 has 10 previous tricks but loses trick 13: engine T2, rollout positive for T1. MC-05: p1 wins trick 1, teammate p3 wins trick 2: engine continues, rollout returns -150. | Candidate utilities optimize different rules. Reuse or parity-test authoritative transitions before trusting planner strength. |
-| 3 | MC-04 / P1 | Secret suit is passed as active trump even while hidden; rollout treats an off-suit S_K as beating H_A. With 6:6 previous totals, engine T2, rollout positive for T1. It also auto-reveals if a simulated trick contains that suit, unlike engine explicit reveal. | Caller simulations can predict impossible wins and reveal timing. Model explicit reveal/locked-card state. |
-| 4 | RL-02 / P1 | Live experience uses `nextState: item.stateVector`; terminal flag only checks match over or 13 completed tricks. RL-02 completes an ordinary final game and finds original state references and nonterminal GAME_RESOLVED records. | Corrupted Bellman targets. Capture actual next decision state per actor and distinguish game versus match termination. |
-| 5 | RL-03 / P1 | Bot hooks use `(engine as any).roomId || 'main_room'`, while engine has no roomId and server never assigns it. RL-03 drives two engine instances and records identical room IDs. Human hooks use real `room.id`. | Bot histories from separate rooms mix with main-room events; other rooms' human and bot histories split. Pass an explicit room context through a compatible internal API. |
-| 6 | MC-01 / P1 | Feasible three-card assignment with p1 void in hearts/clubs and needing one spade: greedy sampling may give the spade elsewhere and fallback assigns p1 a forbidden suit. Seeds 0–19 reproduce. | “Consistent” worlds contradict observations. Use constraint-preserving assignment/rejection with explicit infeasibility handling. |
-| 7 | MC-02, MC-06 / P1 | Locked own S_A is not included when default private hand is passed, so generator assigns it to someone else; known shown S_A is not pinned to p1. Tests exercise each. | Worlds have incorrect ownership/omitted actual cards despite unique generated IDs. Track own locked card and public fixed ownership separately from unknown pool. |
-| 8 | NN-01 / P1 | For one masked target, unselected advantage outputs get zero gradient. Correct derivative of `-mean(A)` is `-sum(dQ)/52` on **all** outputs. NN-01 observes unchanged unselected `b_adv2[1]`. | Wrong gradient changes learned function; repair with numerical-gradient checks before retraining. |
-| 9 | RL-01 / P2 | Fresh learner has 241 inputs; vectorizer and current model have 245. RL-01 compares dimensions. | Fresh RL silently ignores four input features. Existing compatible-model resume uses 245 and avoids this dimension mismatch. |
-| 10 | NN-02 / P2 | `fromJSON({inputSize:245,w_shared1:[0]})` succeeds, leaving unspecified values randomly initialized. NN-02 expects rejection. | Invalid checkpoints can become partly random models. Validate complete shapes, finite values, output dimension and feature schema. |
+- **Seed 65 false void:** later flipping a caller's discard erased the distinction
+  between no ordinary lead-suit card and a separate locked trump of that suit.
+  Public play-time reveal provenance and shared tracker inference prevent this
+  contradictory world. Seed 65 is a dedicated zero-fallback benchmark regression.
+- **Challenge visibility:** public trump suit does not imply the face-down lead
+  identity is visible. Acceptance reveals it; surrender does not. The serializer
+  follows the explicit challenge modifier, including historical/no-play views.
+- **Transport room reference:** joining a named room previously left event
+  handlers bound to the main-room engine. The connection's current room is now
+  updated, its prior player detached, and old learning cleaned up.
+- **Replay/experience validation:** ring insertion copies transition arrays and
+  masks; the learner rejects malformed dimensions, indices, nonfinite values and
+  nonterminal empty masks. Replay capacities/sample sizes are validated.
+- **Snapshot safety:** corrected reconstruction clones hands/cards, score state,
+  votes, history and public setup metadata. It validates hand counts and duplicate
+  identities and throws on missing concealed slots.
 
-The normal neural bypass is a **confirmed control-flow fact**, not proof that a
-neural-first controller would be stronger. The spy test verifies successful MC
-never invokes `ModelManager.getModel`; exception fallback does. Decide controller
-intent after measuring; do not reorder it to claim sophistication.
+## Rules preserved and ambiguities isolated
 
-## Monte Carlo verification matrix
+The authoritative engine, not the UI prose, is the source of truth. No change was
+made to its trick-winning, follow-suit, Ace, individual streak, final-trick,
+modifier adjustment, dealer-transfer or KHOTI algorithms.
 
-| Requirement | Finding |
-| --- | --- |
-| Known voids and exact counts | Unconstrained 13-card hands/counts pass. Void fallback fails MC-01. Greedy counts are capped but not validated for infeasible/mismatched inputs. |
-| No duplicates of known/played cards | Visible played IDs and supplied own-hand IDs are excluded; generated IDs unique in tested full deck. Locked own trump and known ownership fail MC-02/06. Other players' locked trump has no distinct reserved slot. |
-| No opponent secret access | No direct engine-hand reads in generator; independence test changes hidden storage with fixed public state/RNG. Public face-down identity leak fails INFO-01. |
-| Authoritative trick resolution | Ordinary lead/trump comparison is similar and initial candidate Ace downgrade passes a focused parity case. Terminal/streak/reveal cases fail MC-03/04/05. No comprehensive rule equivalence claim. |
-| Hidden trump and reveal | Hidden suit used with immediate trump superiority; implicit auto-reveal; no reveal requester, reveal obligation, pause, or locked-card release transitions. Secret suit parameter to world generation is unused. |
-| Accumulated tricks/cards | Aggregate counts start from public totals, but utility uses incorrect majority rule. Completed/face-down history is reduced to known-card exclusion and inferred voids; accumulated hidden-card reveal lifecycle is not simulated. |
-| Ace downgrade | Candidate checks last winning Ace, but omits leading/trick-number guard. All later rollout cards hard-code `isAceDowngraded:false`, and `lastWinnerPlayerId` is assigned without maintaining a last winning card. Future lead Aces therefore miss the rule (code-confirmed; initial candidate tested, later-step differential test remains to add). |
-| Scoring | Utility is +/-150 for simulated Bund, or +/-50 plus trick margin. It never calls `ScoringEngine`, represents modifiers, dealer transfer, KHOTI thresholds or cumulative match scoring. Code-confirmed limitation; existing scoring tests validate engine only. |
-| Live-state mutation | Current rollout arrays copied; invariant test checks public state, own and sampled hands unchanged. No live writes observed. Shared card references remain an API fragility. |
-| Comparable candidate worlds | Pass: one generated map per iteration is used for every candidate. Rollout shedding currently deterministic; it does not re-sample per card. Tie breaks preserve input candidate order. |
+The UI describes center accumulation and other variants that `BaseRungEngine` /
+`BundRungEngine` do not separately implement; gameType is mostly a label. This
+repair does not invent collection or bidding-variant rules. Simulations reproduce
+the existing engine's counters and accumulated face-down card lifecycle.
 
-Rollout also creates a dummy H_2 when a simulated hand is empty and stops when
-**any** hand empties. With unequal/missing locked-card counts, this can conceal
-invalid worlds or terminate before remaining cards are played. No input
-consistency validator exists. These code paths are identified, but their
-frequency/strength effect in live games is unmeasured.
+The engine's request-reveal method itself allows some requests broader than the
+private `canRequestRungReveal` permission. Controllers use that permission and
+preserve the method's existing gameplay behavior. No extra reveal permission was
+introduced. First-trick exclusion and caller-team ineligibility for an early
+Bund win remain exactly as implemented, even if broader prose suggests otherwise.
 
-## Reinforcement-learning review
+Surrender clears a challenge's display flag without explicitly flipping its card,
+whereas acceptance explicitly flips it. The serializer conservatively keeps the
+unaccepted identity concealed; scoring/termination are unchanged. Historical
+caller cards become visible after actual trump reveal, even when an old internal
+face-down flag was retained. These are disclosure-boundary corrections, not new
+card-play rules.
 
-- **Transitions and masks:** self-play closes a previous actor transition at that
-  actor's next turn, a better boundary than live learning's pre-state reuse.
-  Live learning gathers next legal masks just after a trick, when only its next
-  leader can act; other actors' empty masks suppress bootstrapping prematurely.
-  `ReinforcementLearner` itself correctly honors provided next-action masks and
-  `done`; the focused Bellman test verifies both. Caller legal IDs are mapped
-  through hand/trump; missing IDs silently map to action 0 in trainers/live hooks.
-- **Reward attribution:** live rewards are +1 winner, +.8 partner, -1 opponent,
-  with +.5 for human winners, regardless of game/score value. A human winner is
-  not evidence of an optimal demonstration. Self-play adds team-streak bonuses,
-  caller trump penalties and Ace bonuses that encode heuristics, not the actual
-  objective. Its final winner is trick majority instead of
-  `lastGameWinningTeam`, including prematurely exited games. This can train
-  against authoritative outcomes. It does not measure a real match win.
-- **Terminal handling:** live flags ignore early GAME_RESOLVED hands; history
-  count persists across games even though completedTricks resets. The next hand
-  can accumulate events until its trick count exceeds the previous hand's count.
-  Hooks capture before validation: a rejected play can leave a pending sample.
-  These are direct code-path findings; only the pre-state/terminal and room-mix
-  cases have executable regression cases here. Abort/removal cleanup is absent.
-- **Replay:** ring eviction and with-replacement sampling pass focused tests.
-  Transition references are mutable, no range/dimension/finite validation, no
-  room/episode IDs or per-policy metadata. These are limitations, not evidence
-  the ring's indexing is broken.
-- **Gradients:** dueling mean gradient is confirmed incorrect (NN-01).
-  Shared-layer backprop also omits layer-normalization derivatives: it applies
-  leaky-ReLU gradients directly to shared affine layers. This is code-confirmed
-  mathematical mismatch; finite-difference coverage remains outstanding. The
-  returned “loss” is squared error, whereas updates use clipped Huber gradients,
-  so logs are not the actual optimized loss. Training-loss decline alone cannot
-  establish policy strength.
-- **Compatibility:** current JSON 245x52 loads and serialization/forward parity
-  passes on a small network. No feature-layout version exists, so same-length
-  incompatible representations cannot be rejected. Input-size check alone does
-  not establish full checkpoint validity. Existing cached-model error fallback
-  may mask incompatible or corrupt disk state.
-- **Persistence:** both scripts save the tracked model periodically, on completion
-  and on SIGINT. Imitation starts a **fresh** model rather than resuming, so even
-  an immediately interrupted invocation can replace existing weights. No trainer
-  was executed in this audit. Live learning also saves at match completion, with
-  shared static learner state, no tournament gate and no atomic checkpoint write.
-- **Training control:** self-play's normal exploitation calls the teacher, not its
-  own online learner. Imitation intentionally never lets student predictions
-  choose actions. Live neural selection is a planner-error fallback. None of the
-  advertised training progress metrics demonstrates that the resulting model is
-  controlling or improving live decisions.
-- **Trainer execution gaps:** `train_ai.ts` uses the `Card` type without importing
-  it, hidden by tsconfig excluding scripts. Explicit trainer type-checking also
-  finds both scripts call nonexistent `dealerDistributeRemainingCards`, and
-  self-play reads nonexistent `publicState.secretTrumpSuit`. These existing
-  trainer compile errors are documented rather than changing their behavior. Training loops can break on zero
-  legal actions while pending reveal belongs to a different player, and omit
-  face-down challenge handling. They still tally/save after breaking. Do not run
-  them against the canonical checkpoint before adding abort checks, explicit
-  output paths and protected evaluation.
+## Mathematical and learning verification
 
-## Design weaknesses and unverified hypotheses
+Finite-difference tests use fixed seed 731, a small 3/5/4/3/3/4 network, delta-1
+Huber targets inside and outside the quadratic region, step 1e-3 and tolerance
+`3e-3 + .02 * |numerical gradient|` for Float32 rounding/normalization. Both ends
+and middle of every tensor are checked (34 distinct locations). Dueling and
+normalization derivatives are tested together; serialized forward output remains
+compatible with validated weights.
 
-**Design weaknesses:** greedy determinization is not a uniform constrained-world
-sampler; rollouts are deterministic greedy play rather than adversarial search;
-100 worlds is fixed regardless of candidate count/remaining tricks; errors are
-silently swallowed; neural features omit scoring and some locked-card concepts;
-training mixes reward scales without policy provenance. These facts do not alone
-prove a specific win-rate loss.
+Transitions use actor-next-decision boundaries, explicit terminal observations,
+authoritative winners and legal next masks. Configurable shaping defaults off.
+Live training is per-room and in memory; off-policy human actions are ordinary
+outcome experience, not imitation labels. Imitation's teacher is explicitly the
+heuristic policy, not assumed expert humans or a model-strength oracle.
 
-**Unverified hypotheses:** more rollouts, belief weighting, richer features,
-neural-first action ordering or different network size might help. No claim of
-causal strength improvement follows from this audit. The small benchmark is a
-starting measurement, not a ranking of human or tournament skill. No evidence
-supports the trainer's “85th+ percentile” claim.
+Short jobs executed without touching the canonical checkpoint:
 
-Recommended order: correct hidden-information boundary; establish engine/rollout
-parity and constrained worlds; repair transition/gradient/model validation;
-separate checkpoint outputs and promotion; then compare candidates on more paired
-seeds and held-out scenarios. Keep each behavior fix separately reviewable.
+| Job | Completed / aborted | Decisions | Updates |
+| --- | --- | ---: | ---: |
+| Self-play: seeds 1–2, batch 4 | 2 / 0 | 104 learner-selected | 25 minibatches |
+| Imitation: seeds 1–2 | 2 / 0 | 36 legal teacher actions | 36 gradient steps |
+| Validated resume: seed 3, epsilon 0, batch 4 | 1 / 0 | 52 learner-selected | 12 minibatches |
+
+Checkpoint outputs were new files under `/tmp`; neither script ran prolonged
+training. No stronger-model claim or production promotion follows.
+
+## Remaining limitations (explicitly unresolved)
+
+1. The **legacy evaluation policy intentionally retains the old planner defects**
+   for comparison. It is not the live default. Its zero reported errors do not
+   certify its worlds or rules; that implementation never validated them.
+2. Constrained matching is randomized, not uniform. A simple unconstrained
+   1,000-seed ownership probe assigned S_A to p1/p2/p3 346/335/319 times; this is a
+   sanity measurement, not proof of unbiased constrained posterior sampling.
+   Bidding-conditioned probabilities are not modeled.
+3. Rollout continuation is greedy and ends at one hand. Engine scoring, transfer
+   and actual KHOTI are exact; optimal multi-hand continuation after transfer is
+   not solved. The +/-1000 match utility and tactical candidate pruning are
+   explicit evaluation choices, not new authoritative rules.
+4. Decision deadlines are cooperative between transitions/candidate calls, not hard
+   preemption. Bounded iterations/graph/transition counts prevent indefinite
+   search, but individual comparisons or GC can exceed 25 ms. Worker isolation
+   and hard real-time latency remain future work.
+5. Neural-direct remains evaluation-only. The legacy baseline model was trained
+   with the old defects; correcting code does not repair its existing weights.
+   There is no automatic checkpoint promotion.
+6. Coverage establishes tested reconstruction/rule parity, not a formal proof for
+   every possible server state. Browser/audio/UI redesign, other game variants,
+   adversarial networking and a full multi-hand match tournament are out of scope.
+7. Only 200 paired deals per comparison were run; a 1,000-pair tournament was not
+   run. The suite reused diagnostic seeds, including the seed-65 repair, so its
+   confidence intervals are not held-out general-strength guarantees.
+
+No known critical/high-priority original audit defect remains in the corrected
+path. The retained legacy path and limitations above must stay visible in review.
+See `AI_BENCHMARKS.md` and the committed machine-readable comparison for results,
+commands, confidence intervals and latency evidence.
+
+## Pre-merge review follow-up
+
+[AI_REFINEMENT_REVIEW.md](AI_REFINEMENT_REVIEW.md) records the additional recovery,
+concurrent latency, secondary-field privacy and cross-room voice fixes. All 178
+tests and both TypeScript checks pass. The review includes real Socket.IO
+isolation coverage and preserved model checksums; hard latency bounds remain an
+explicit limitation. Earlier 200-pair results above are historical evidence, not
+results of the refined sampling stream.

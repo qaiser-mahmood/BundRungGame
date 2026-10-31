@@ -20,6 +20,11 @@ export class ReinforcementLearner {
    * Records a game step transition into replay memory
    */
   public recordExperience(transition: Transition): void {
+    const {state,nextState,action,reward,done,legalActionsNext}=transition;
+    if(state.length!==this.onlineNetwork.inputSize||nextState.length!==this.onlineNetwork.inputSize||
+       !Array.from(state).every(Number.isFinite)||!Array.from(nextState).every(Number.isFinite)||!Number.isFinite(reward)||
+       !Number.isInteger(action)||action<0||action>=52||(!done&&!legalActionsNext.length)||
+       legalActionsNext.some(a=>!Number.isInteger(a)||a<0||a>=52))throw new Error('INVALID_EXPERIENCE');
     this.replayBuffer.push(transition);
   }
 

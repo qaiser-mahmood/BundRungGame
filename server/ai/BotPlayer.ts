@@ -1,15 +1,14 @@
-import { Card, Suit, Player, PublicGameState, PrivatePlayerState, Trick, PlayedCard, TeamId } from '../../shared/types';
+import { DecisionPolicy, defaultPolicy, selectCandidate } from './DecisionPolicy';
+import { isVisiblePlay } from '../../shared/visibility';
+import { Card, Suit, Player, PublicGameState, PrivatePlayerState, VisibleTrick, PlayedCard, TeamId } from '../../shared/types';
 import { BundRungEngine } from '../engine/BundRungEngine';
-import { ModelManager } from './neural/ModelManager';
-import { StateVectorizer } from './neural/StateVectorizer';
 import { LiveLearningEngine } from './neural/LiveLearningEngine';
 import { CardTracker } from './planning/CardTracker';
-import { MonteCarloPlanner } from './planning/MonteCarloPlanner';
 import { DynamicSuitEvaluator } from './planning/DynamicSuitEvaluator';
 
 export class BotPlayer {
   /**
-   * Set to true in live games to activate autonomous learned neural policy
+   * Deprecated compatibility flag; use explicit DecisionPolicy and learning context.
    */
   public static useNeuralPolicy: boolean = false;
 
@@ -92,29 +91,14 @@ export class BotPlayer {
    * Infers which players are void in which suits based on past reneges/off-suit plays.
    */
   public static inferPlayerVoids(publicState: PublicGameState): Map<string, Set<Suit>> {
-    const voids = new Map<string, Set<Suit>>();
-    for (const p of publicState.players) {
-      voids.set(p.id, new Set<Suit>());
-    }
-
-    const allTricks = [...publicState.completedTricks, publicState.currentTrick];
-    for (const trick of allTricks) {
-      if (!trick.leadSuit) continue;
-      const leadSuit = trick.leadSuit;
-      for (const pc of trick.cards) {
-        if (pc.card && pc.card.suit !== leadSuit && !pc.isFaceDown) {
-          voids.get(pc.playerId)?.add(leadSuit);
-        }
-      }
-    }
-    return voids;
+    return CardTracker.getVoidMatrix(publicState);
   }
 
   /**
    * Evaluates who is currently winning the trick, whether teammate is winning, and how many opponents are yet to play.
    */
   public static evaluateCurrentTrick(
-    trick: Trick,
+    trick: VisibleTrick,
     activeTrumpSuit: Suit | null,
     myPlayerId: string,
     players: Player[]
@@ -125,7 +109,8 @@ export class BotPlayer {
     isOpponentWinning: boolean;
     opponentsLeftToPlay: number;
   } {
-    if (trick.cards.length === 0 || !trick.leadSuit) {
+    const visibleCards = trick.cards.filter(isVisiblePlay);
+    if (visibleCards.length === 0 || !trick.leadSuit) {
       return {
         winningCard: null,
         winningPlayer: null,
@@ -138,11 +123,11 @@ export class BotPlayer {
     const leadSuit = trick.leadSuit;
     const getCardPower = (pc: PlayedCard) => (pc.isAceDowngraded ? 2 : pc.card.playValue);
 
-    let winningCard: PlayedCard = trick.cards[0];
+    let winningCard: PlayedCard = visibleCards[0];
     let highestPower = getCardPower(winningCard);
 
-    for (let i = 1; i < trick.cards.length; i++) {
-      const cand = trick.cards[i];
+    for (let i = 1; i < visibleCards.length; i++) {
+      const cand = visibleCards[i];
       const candPower = getCardPower(cand);
 
       const winIsTrump = activeTrumpSuit && winningCard.card.suit === activeTrumpSuit;
@@ -199,7 +184,7 @@ export class BotPlayer {
 
   // --- Main Turn Handler ---
 
-  public static handleBotTurn(engine: BundRungEngine, botPlayerId: string): void {
+  public static handleBotTurn(engine: BundRungEngine, botPlayerId: string, context?: {roomId:string; policy?:DecisionPolicy; learning?:boolean}): void {
     const player = engine.getPlayers().find((p) => p.id === botPlayerId);
     if (!player || !player.isBot) return;
 
@@ -296,7 +281,7 @@ export class BotPlayer {
           // MISSION 2: Our team called Trump! PROTECT IT!
           // Only reveal if opponent is about to win trick with an unchallengeable Ace or high honor
           const trick = publicState.currentTrick;
-          const isOpponentWinningWithAce = trick.cards.some((c) => c.card.rank === 'A' && c.playerId !== botPlayerId);
+          const isOpponentWinningWithAce = trick.cards.some((c) => c.card?.rank === 'A' && c.playerId !== botPlayerId);
           if (isOpponentWinningWithAce) {
             console.log(`🛡️ [Strategic Intent] ${player.name} (${player.team}): Opponent winning with Ace, revealing trump to cut!`);
             engine.requestTrumpReveal(botPlayerId);
@@ -317,21 +302,18 @@ export class BotPlayer {
       if (legalCards.length === 0) return;
 
       const chosenCard = BotPlayer.chooseMasterCard(
-        engine,
+        {getPlayers:()=>publicState.players},
         botPlayerId,
         legalCards,
         allCards,
         publicState,
-        privateState
+        privateState,
+        context?.policy ?? defaultPolicy
       );
 
-      if (BotPlayer.useNeuralPolicy) {
-        LiveLearningEngine.onBeforeCardPlayed(engine, (engine as any).roomId || 'main_room', botPlayerId, chosenCard.id);
-        engine.playCard(botPlayerId, chosenCard.id);
-        LiveLearningEngine.onAfterCardPlayed(engine, (engine as any).roomId || 'main_room');
-      } else {
-        engine.playCard(botPlayerId, chosenCard.id);
-      }
+      if (context?.learning && context.roomId) {
+        LiveLearningEngine.playCard(engine, context.roomId, botPlayerId, chosenCard.id);
+      } else engine.playCard(botPlayerId, chosenCard.id);
     }
   }
 
@@ -349,54 +331,25 @@ export class BotPlayer {
     myHand: Card[] = [],
     secretTrumpSuit?: Suit | null
   ): Card {
-    if (candidates.length <= 1) return candidates[0];
-
-    // --- 1. Deep Monte Carlo Planning & Rollout Simulation ---
-    try {
-      const bestMctsCard = MonteCarloPlanner.evaluateCandidates(
-        candidates,
-        botPlayerId,
-        myHand.length > 0 ? myHand : privateState.myHand,
-        publicState,
-        secretTrumpSuit,
-        100 // 100 deep multi-trick rollouts
-      );
-      if (bestMctsCard) return bestMctsCard;
-    } catch (e) {
-      // Graceful fallback
-    }
-
-    if (BotPlayer.useNeuralPolicy) {
-      const neuralBrain = ModelManager.getModel();
-      if (neuralBrain) {
-        try {
-          const stateVector = StateVectorizer.vectorize(publicState, privateState, botPlayerId, players);
-          const candidateIndices = candidates.map((c) => StateVectorizer.cardToIndex(c));
-          const chosenAction = neuralBrain.selectAction(stateVector, candidateIndices, 0.0);
-          const chosenCardInfo = StateVectorizer.indexToCard(chosenAction);
-          const matched = candidates.find((c) => c.suit === chosenCardInfo.suit && c.rank === chosenCardInfo.rank);
-          if (matched) return matched;
-        } catch (err) {
-          // Gracefully falls back
-        }
-      }
-    }
-
-    return candidates[0];
+    return selectCandidate(candidates,publicState,privateState,botPlayerId,players);
   }
 
   /**
    * Master Card Decision Engine
    */
   public static chooseMasterCard(
-    engine: BundRungEngine,
+    engine: Pick<BundRungEngine, 'getPlayers'>,
     botPlayerId: string,
     legalCards: Card[],
     myHand: Card[],
     publicState: PublicGameState,
-    privateState: PrivatePlayerState
+    privateState: PrivatePlayerState,
+    policy: DecisionPolicy = defaultPolicy
   ): Card {
-    const players = engine.getPlayers();
+    const players = publicState.players;
+    const pick = (cards:Card[],_state:PublicGameState,_private:PrivatePlayerState,_id:string,_players:Player[],_hand?:Card[],_secret?:Suit|null) =>
+      selectCandidate(cards,publicState,privateState,botPlayerId,players,policy);
+    if(policy.name === 'neural-direct') return selectCandidate(legalCards,publicState,privateState,botPlayerId,players,policy);
     const me = players.find((p) => p.id === botPlayerId)!;
     const partner = players.find((p) => p.team === me.team && p.id !== me.id);
     const partnerId = partner?.id || '';
@@ -431,7 +384,7 @@ export class BotPlayer {
       const secretTrumpSuit =
         privateState.secretTrumpSuit ||
         privateState.myTrumpCard?.suit ||
-        (isCaller ? ((engine as any).trumpSuit || publicState.trumpSuit) : null);
+        (isCaller ? publicState.trumpSuit : null);
 
       const isHunting2Streak =
         publicState.isTrumpRevealed &&
@@ -488,7 +441,7 @@ export class BotPlayer {
               const trumpLead = eligibleLeadCards.filter((c) => c.suit === secretTrumpSuit);
               if (trumpLead.length > 0) {
                 trumpLead.sort((a, b) => b.playValue - a.playValue);
-                return BotPlayer.pickBestFromCandidates(trumpLead, publicState, privateState, botPlayerId, players);
+                return pick(trumpLead, publicState, privateState, botPlayerId, players);
               }
             }
 
@@ -498,7 +451,7 @@ export class BotPlayer {
               const trumpLead = eligibleLeadCards.filter((c) => c.suit === secretTrumpSuit);
               if (trumpLead.length > 0) {
                 trumpLead.sort((a, b) => a.playValue - b.playValue); // Start with smaller/mid trump to draw out Ace
-                return BotPlayer.pickBestFromCandidates(trumpLead, publicState, privateState, botPlayerId, players);
+                return pick(trumpLead, publicState, privateState, botPlayerId, players);
               }
             }
           }
@@ -556,10 +509,10 @@ export class BotPlayer {
             if (chosenSuitStat) {
               if (chosenSuitStat.hasAce && chosenSuitStat.smallCards.length > 0) {
                 chosenSuitStat.smallCards.sort((a, b) => a.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(chosenSuitStat.smallCards, publicState, privateState, botPlayerId, players);
+                return pick(chosenSuitStat.smallCards, publicState, privateState, botPlayerId, players);
               }
               chosenSuitStat.myCards.sort((a, b) => a.playValue - b.playValue);
-              return BotPlayer.pickBestFromCandidates(chosenSuitStat.myCards, publicState, privateState, botPlayerId, players);
+              return pick(chosenSuitStat.myCards, publicState, privateState, botPlayerId, players);
             }
           }
 
@@ -567,7 +520,7 @@ export class BotPlayer {
           const nonTrumpLeads = eligibleLeadCards.filter((c) => !secretTrumpSuit || c.suit !== secretTrumpSuit);
           if (nonTrumpLeads.length > 0) {
             nonTrumpLeads.sort((a, b) => a.playValue - b.playValue);
-            return BotPlayer.pickBestFromCandidates(nonTrumpLeads, publicState, privateState, botPlayerId, players);
+            return pick(nonTrumpLeads, publicState, privateState, botPlayerId, players);
           }
         } else {
           // =======================================================================
@@ -606,10 +559,10 @@ export class BotPlayer {
               );
               if (bossOrAces.length > 0) {
                 bossOrAces.sort((a, b) => b.playValue - a.playValue);
-                return BotPlayer.pickBestFromCandidates(bossOrAces, publicState, privateState, botPlayerId, players);
+                return pick(bossOrAces, publicState, privateState, botPlayerId, players);
               }
               myCardsInFishingSuit.sort((a, b) => a.playValue - b.playValue);
-              return BotPlayer.pickBestFromCandidates(myCardsInFishingSuit, publicState, privateState, botPlayerId, players);
+              return pick(myCardsInFishingSuit, publicState, privateState, botPlayerId, players);
             }
           }
 
@@ -637,7 +590,7 @@ export class BotPlayer {
             if (callerId) {
               for (const t of publicState.completedTricks) {
                 const callerC = t.cards.find((c) => c.playerId === callerId);
-                if (callerC && t.leadSuit === targetSuit.suit && callerC.card.suit !== targetSuit.suit) {
+                if (callerC && t.leadSuit === targetSuit.suit && callerC.card?.suit !== targetSuit.suit) {
                   callerSloughedInSuit++;
                 }
               }
@@ -647,10 +600,10 @@ export class BotPlayer {
               const bossOrAces = targetSuit.inHand.filter((c) => c.rank === 'A' || BotPlayer.isBossCard(c, playedCards, myHand));
               if (bossOrAces.length > 0) {
                 bossOrAces.sort((a, b) => b.playValue - a.playValue);
-                return BotPlayer.pickBestFromCandidates(bossOrAces, publicState, privateState, botPlayerId, players);
+                return pick(bossOrAces, publicState, privateState, botPlayerId, players);
               }
               targetSuit.inHand.sort((a, b) => b.playValue - a.playValue);
-              return BotPlayer.pickBestFromCandidates(targetSuit.inHand, publicState, privateState, botPlayerId, players);
+              return pick(targetSuit.inHand, publicState, privateState, botPlayerId, players);
             }
           }
 
@@ -676,9 +629,9 @@ export class BotPlayer {
             const chosenSuitStat = suitStats[0];
             if (chosenSuitStat) {
               const aces = chosenSuitStat.myCards.filter((c) => c.rank === 'A');
-              if (aces.length > 0) return BotPlayer.pickBestFromCandidates(aces, publicState, privateState, botPlayerId, players);
+              if (aces.length > 0) return pick(aces, publicState, privateState, botPlayerId, players);
               chosenSuitStat.myCards.sort((a, b) => b.playValue - a.playValue);
-              return BotPlayer.pickBestFromCandidates(chosenSuitStat.myCards, publicState, privateState, botPlayerId, players);
+              return pick(chosenSuitStat.myCards, publicState, privateState, botPlayerId, players);
             }
           }
         }
@@ -712,14 +665,14 @@ export class BotPlayer {
           // A. Cash Outside Boss Aces
           const outsideBossAces = nonTrumpLeadCards.filter((c) => c.rank === 'A');
           if (outsideBossAces.length > 0) {
-            return BotPlayer.pickBestFromCandidates(outsideBossAces, publicState, privateState, botPlayerId, players);
+            return pick(outsideBossAces, publicState, privateState, botPlayerId, players);
           }
 
           // B. Cash Outside Boss Cards
           const outsideBossCards = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (outsideBossCards.length > 0) {
             outsideBossCards.sort((a, b) => b.playValue - a.playValue);
-            return BotPlayer.pickBestFromCandidates(outsideBossCards, publicState, privateState, botPlayerId, players);
+            return pick(outsideBossCards, publicState, privateState, botPlayerId, players);
           }
 
           // C. Cross-Ruff Partner: Lead low card in suit where partner is known to be void
@@ -730,7 +683,7 @@ export class BotPlayer {
                 const cardsInPartnerVoidSuit = nonTrumpLeadCards.filter((c) => c.suit === suit);
                 if (cardsInPartnerVoidSuit.length > 0) {
                   cardsInPartnerVoidSuit.sort((a, b) => a.playValue - b.playValue);
-                  return BotPlayer.pickBestFromCandidates(cardsInPartnerVoidSuit, publicState, privateState, botPlayerId, players);
+                  return pick(cardsInPartnerVoidSuit, publicState, privateState, botPlayerId, players);
                 }
               }
             }
@@ -742,7 +695,7 @@ export class BotPlayer {
               const cardsInPSuit = nonTrumpLeadCards.filter((c) => c.suit === pSuit);
               if (cardsInPSuit.length > 0 && cardsInPSuit.length <= 2) {
                 cardsInPSuit.sort((a, b) => a.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(cardsInPSuit, publicState, privateState, botPlayerId, players);
+                return pick(cardsInPSuit, publicState, privateState, botPlayerId, players);
               }
             }
           }
@@ -756,7 +709,7 @@ export class BotPlayer {
             isWinningGameContext,
             activeTrumpSuit
           );
-          return BotPlayer.pickBestFromCandidates(
+          return pick(
             [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
             publicState,
             privateState,
@@ -772,7 +725,7 @@ export class BotPlayer {
         if (isCaller && !hasTrumpAce && !isTrumpAcePlayed && myTrumpCards.length > 0) {
           // Time to flush opponents' Ace of Trump out of the game!
           myTrumpCards.sort((a, b) => a.playValue - b.playValue); // Start with smaller/mid trump to draw out Ace
-          return BotPlayer.pickBestFromCandidates(myTrumpCards, publicState, privateState, botPlayerId, players);
+          return pick(myTrumpCards, publicState, privateState, botPlayerId, players);
         }
 
         // -----------------------------------------------------------------------
@@ -785,24 +738,24 @@ export class BotPlayer {
           if (isHunting2Streak) {
             const outsideBossAces = nonTrumpLeadCards.filter((c) => c.rank === 'A');
             if (outsideBossAces.length > 0) {
-              return BotPlayer.pickBestFromCandidates(outsideBossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+              return pick(outsideBossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
             }
           }
 
           // A. If holding non-trump Boss cards or Boss Aces, cashing them is high priority
           const bossAces = nonTrumpLeadCards.filter((c) => c.rank === 'A');
           if (bossAces.length > 0) {
-            return BotPlayer.pickBestFromCandidates(bossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+            return pick(bossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
           const outsideBossCards = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (outsideBossCards.length > 0) {
             outsideBossCards.sort((a, b) => b.playValue - a.playValue);
-            return BotPlayer.pickBestFromCandidates(outsideBossCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+            return pick(outsideBossCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
 
           // B. Otherwise run Rung cards to bleed and weaken the Rung caller!
           myTrumpCards.sort((a, b) => a.playValue - b.playValue);
-          return BotPlayer.pickBestFromCandidates(myTrumpCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+          return pick(myTrumpCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
         }
 
         // -----------------------------------------------------------------------
@@ -812,13 +765,13 @@ export class BotPlayer {
         if (isHunting2Streak) {
           // A. Non-trump Boss Aces
           const bossAces = nonTrumpLeadCards.filter((c) => c.rank === 'A');
-          if (bossAces.length > 0) return BotPlayer.pickBestFromCandidates(bossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+          if (bossAces.length > 0) return pick(bossAces, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
 
           // B. Non-trump Boss Cards
           const nonTrumpBossCards = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (nonTrumpBossCards.length > 0) {
             nonTrumpBossCards.sort((a, b) => b.playValue - a.playValue);
-            return BotPlayer.pickBestFromCandidates(nonTrumpBossCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+            return pick(nonTrumpBossCards, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
 
           // C. Absolute Boss Trump to lock in 2-streak Bund ONLY if:
@@ -829,7 +782,7 @@ export class BotPlayer {
             const bossTrumps = myTrumpCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
             if (bossTrumps.length > 0) {
               bossTrumps.sort((a, b) => b.playValue - a.playValue);
-              return BotPlayer.pickBestFromCandidates(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+              return pick(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
             }
           }
         }
@@ -840,7 +793,7 @@ export class BotPlayer {
           const nonTrumpBoss = nonTrumpLeadCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (nonTrumpBoss.length > 0) {
             nonTrumpBoss.sort((a, b) => b.playValue - a.playValue);
-            return BotPlayer.pickBestFromCandidates(nonTrumpBoss, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+            return pick(nonTrumpBoss, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
 
           // B. Boss Trump only if non-trump cards are unavailable or trick >= 8 (and not holding Ace)
@@ -849,7 +802,7 @@ export class BotPlayer {
             const bossTrumps = myTrumpCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
             if (bossTrumps.length > 0) {
               bossTrumps.sort((a, b) => b.playValue - a.playValue);
-              return BotPlayer.pickBestFromCandidates(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+              return pick(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
             }
           }
         }
@@ -861,7 +814,7 @@ export class BotPlayer {
               const cardsInPartnerSuit = nonTrumpLeadCards.filter((c) => c.suit === suit);
               if (cardsInPartnerSuit.length > 0) {
                 cardsInPartnerSuit.sort((a, b) => a.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(cardsInPartnerSuit, publicState, privateState, botPlayerId, players);
+                return pick(cardsInPartnerSuit, publicState, privateState, botPlayerId, players);
               }
             }
           }
@@ -875,7 +828,7 @@ export class BotPlayer {
               const cardsInPartnerVoidSuit = nonTrumpLeadCards.filter((c) => c.suit === suit);
               if (cardsInPartnerVoidSuit.length > 0) {
                 cardsInPartnerVoidSuit.sort((a, b) => a.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(cardsInPartnerVoidSuit, publicState, privateState, botPlayerId, players);
+                return pick(cardsInPartnerVoidSuit, publicState, privateState, botPlayerId, players);
               }
             }
           }
@@ -887,7 +840,7 @@ export class BotPlayer {
             const cardsInPSuit = nonTrumpLeadCards.filter((c) => c.suit === pSuit);
             if (cardsInPSuit.length > 0 && cardsInPSuit.length <= 2) {
               cardsInPSuit.sort((a, b) => a.playValue - b.playValue);
-              return BotPlayer.pickBestFromCandidates(cardsInPSuit, publicState, privateState, botPlayerId, players);
+              return pick(cardsInPSuit, publicState, privateState, botPlayerId, players);
             }
           }
         }
@@ -897,7 +850,7 @@ export class BotPlayer {
         for (const suit of allSuits) {
           if (suit !== activeTrumpSuit) {
             const isAcePlayedByMe = publicState.completedTricks.some((t) =>
-              t.cards.some((c) => c.playerId === botPlayerId && c.card.suit === suit && c.card.rank === 'A')
+              t.cards.some((c) => c.playerId === botPlayerId && c.card?.suit === suit && c.card?.rank === 'A')
             );
             if (isAcePlayedByMe) {
               const honorsStillUnseen = [13, 12, 11].some(
@@ -909,7 +862,7 @@ export class BotPlayer {
                 const myFollowThroughCards = nonTrumpLeadCards.filter((c) => c.suit === suit);
                 if (myFollowThroughCards.length > 0) {
                   myFollowThroughCards.sort((a, b) => a.playValue - b.playValue);
-                  return BotPlayer.pickBestFromCandidates(myFollowThroughCards, publicState, privateState, botPlayerId, players);
+                  return pick(myFollowThroughCards, publicState, privateState, botPlayerId, players);
                 }
               }
             }
@@ -925,7 +878,7 @@ export class BotPlayer {
             if (aOpp !== bOpp) return aOpp - bOpp;
             return b.playValue - a.playValue;
           });
-          return BotPlayer.pickBestFromCandidates(nonTrumpBossCards, publicState, privateState, botPlayerId, players);
+          return pick(nonTrumpBossCards, publicState, privateState, botPlayerId, players);
         }
 
         // 8. CRITICAL GAME CHECK: If opponent team is winning the game (streak or >= 5 tricks) and bot holds Boss Trumps:
@@ -934,7 +887,7 @@ export class BotPlayer {
           const bossTrumps = myTrumpCards.filter((c) => BotPlayer.isBossCard(c, playedCards, myHand));
           if (bossTrumps.length > 0) {
             bossTrumps.sort((a, b) => b.playValue - a.playValue);
-            return BotPlayer.pickBestFromCandidates(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
+            return pick(bossTrumps, publicState, privateState, botPlayerId, players, myHand, activeTrumpSuit);
           }
         }
 
@@ -948,7 +901,7 @@ export class BotPlayer {
             isWinningGameContext,
             activeTrumpSuit
           );
-          return BotPlayer.pickBestFromCandidates(
+          return pick(
             [bestShed, ...nonTrumpLeadCards.filter((c) => c.id !== bestShed.id)],
             publicState,
             privateState,
@@ -960,7 +913,7 @@ export class BotPlayer {
         // 10. If ONLY Trump cards remain in hand:
         if (myTrumpCards.length > 0) {
           myTrumpCards.sort((a, b) => b.playValue - b.playValue);
-          return BotPlayer.pickBestFromCandidates(myTrumpCards, publicState, privateState, botPlayerId, players);
+          return pick(myTrumpCards, publicState, privateState, botPlayerId, players);
         }
       }
 
@@ -1020,14 +973,14 @@ export class BotPlayer {
               );
               if (bigWinningCards.length > 0) {
                 bigWinningCards.sort((a, b) => b.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(bigWinningCards, publicState, privateState, botPlayerId, players);
+                return pick(bigWinningCards, publicState, privateState, botPlayerId, players);
               }
             } else if (partnerCard.playValue >= 10) {
               // Partner led big honor! Let partner win!
               const lowerCards = matchingSuitCards.filter((c) => c.playValue < partnerCard.playValue);
               if (lowerCards.length > 0) {
                 lowerCards.sort((a, b) => a.playValue - b.playValue);
-                return BotPlayer.pickBestFromCandidates(lowerCards, publicState, privateState, botPlayerId, players);
+                return pick(lowerCards, publicState, privateState, botPlayerId, players);
               }
             }
           }
