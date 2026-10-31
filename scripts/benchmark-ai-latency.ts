@@ -14,7 +14,7 @@ if(![rooms,rounds,cadence].every(n=>Number.isSafeInteger(n)&&n>0)||rooms>64||rou
 const hash=()=>createHash('sha256').update(readFileSync('server/ai/models/bund_rung_brain.json')).digest('hex');
 const queued=value('--scheduler','direct')==='queued',queue=queued?new(await import('../server/ai/RoomTurnQueue')).RoomTurnQueue():null,queueWaitMs:number[]=[];
 const policy=value('--policy','corrected-search');
-if(policy!=='corrected-search'&&policy!=='advanced-search')throw new Error('Invalid policy');
+if(policy!=='corrected-search'&&policy!=='advanced-search'&&policy!=='ai-v2-ismcts')throw new Error('Invalid policy');
 const before=hash();
 const engines=Array.from({length:rooms},(_,i)=>setupGame(i+2));
 // Startup/checkpoint loading is measured separately from steady-state scheduling.

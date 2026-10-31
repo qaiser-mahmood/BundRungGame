@@ -1,3 +1,4 @@
+import type {V2Options} from '../server/ai/v2/search/ISMCTS';
 import {advancedStats} from '../server/ai/planning/AdvancedSearch';
 import {endgameStats} from '../server/ai/planning/ExactEndgame';
 import type {StrategyOptions} from '../server/ai/planning/PartnershipStrategy';
@@ -72,7 +73,7 @@ export interface GameResult {
   decisions: { policy: Policy; playerId: string; milliseconds: number; cardId: string }[];
 }
 
-export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={}): GameResult {
+export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={},v2?:V2Options): GameResult {
   // Deserialize outside the seeded stream: loading allocates randomly initialized
   // tensors before replacing them with persisted weights.
   if (candidate !== 'heuristic' || baseline !== 'heuristic') ModelManager.getModel();
@@ -123,7 +124,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const priorSearch={...searchStats};
           const start = performance.now();
           const chosen = BotPlayer.chooseMasterCard({getPlayers:()=>state.players},id,legal,all,state,priv,
-            {name:policyName(policy),search:searchOptions,strategy});
+            {name:policyName(policy),search:searchOptions,strategy,v2});
           const milliseconds = performance.now() - start;
           const policyStats=searchByPolicy[policy]??{...searchStats};
           if(!searchByPolicy[policy])for(const k of Object.keys(policyStats) as (keyof typeof searchStats)[])policyStats[k]=0;
@@ -218,7 +219,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const seed = Number(value('--seed','1')), pairs = Number(value('--pairs','2'));
     const candidate = value('--candidate','production') as Policy, baseline = value('--baseline','heuristic') as Policy;
     if (!Number.isSafeInteger(seed) || seed < 0 || seed > 0xffffffff || !Number.isSafeInteger(pairs) || pairs < 1 || pairs > 100000) throw new Error('Invalid seed or pairs');
-    if (![candidate,baseline].every(p => ['heuristic','production','neural','production-legacy','corrected-search','neural-direct','advanced-search'].includes(p))) throw new Error('Unknown policy');
+    if (![candidate,baseline].every(p => ['heuristic','production','neural','production-legacy','corrected-search','neural-direct','advanced-search','ai-v2-ismcts'].includes(p))) throw new Error('Unknown policy');
     // Keep stdout valid JSON even if existing bots/model loading emit diagnostic logs.
     const log = console.log;
     console.log = (...items) => console.error(...items);
