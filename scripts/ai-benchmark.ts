@@ -1,3 +1,4 @@
+import type {V2Options} from '../server/ai/v2/search/ISMCTS';
 import {advancedStats} from '../server/ai/planning/AdvancedSearch';
 import {endgameStats} from '../server/ai/planning/ExactEndgame';
 import type {StrategyOptions} from '../server/ai/planning/PartnershipStrategy';
@@ -56,8 +57,10 @@ export function setupGame(seed: number): BundRungEngine {
 export interface GameResult {
   seed: number;
   candidateTeam: TeamId;
+  candidatePlayerIds:string[];
   dealHash: string;
   winner: TeamId | null;
+  terminal:{matchOver:boolean;matchWinner:TeamId|null};
   candidateWon: boolean | null;
   signedScoreAdjustment: number | null;
   trickDifferential: number;
@@ -72,7 +75,7 @@ export interface GameResult {
   decisions: { policy: Policy; playerId: string; milliseconds: number; cardId: string }[];
 }
 
-export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={}): GameResult {
+export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={},v2?:V2Options,baselineV2?:V2Options): GameResult {
   // Deserialize outside the seeded stream: loading allocates randomly initialized
   // tensors before replacing them with persisted weights.
   if (candidate !== 'heuristic' || baseline !== 'heuristic') ModelManager.getModel();
@@ -119,11 +122,12 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
             ? [...priv.myHand, priv.myTrumpCard] : priv.myHand;
           const legal = all.filter(c => priv.legalPlayableCardIds.includes(c.id));
           if (!legal.length) throw new Error(`No legal cards for ${id}`);
-          const policy = state.players.find(p => p.id === id)!.team === candidateTeam ? candidate : baseline;
+          const candidateRole=state.players.find(p => p.id === id)!.team===candidateTeam;
+          const policy=candidateRole?candidate:baseline;
           const priorSearch={...searchStats};
           const start = performance.now();
           const chosen = BotPlayer.chooseMasterCard({getPlayers:()=>state.players},id,legal,all,state,priv,
-            {name:policyName(policy),search:searchOptions,strategy});
+            {name:policyName(policy),search:searchOptions,strategy,v2:candidateRole?v2:baselineV2??v2});
           const milliseconds = performance.now() - start;
           const policyStats=searchByPolicy[policy]??{...searchStats};
           if(!searchByPolicy[policy])for(const k of Object.keys(policyStats) as (keyof typeof searchStats)[])policyStats[k]=0;
@@ -134,7 +138,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const prior=BotPlayer.evaluateCurrentTrick(state.currentTrick,state.isTrumpRevealed?state.trumpSuit:null,id,state.players);
           try { engine.playCard(id, chosen.id);
             const next=engine.getPublicState();
-            if(prior.isPartnerWinning&&policy===candidate){
+            if(prior.isPartnerWinning&&candidateRole){
               const complete=next.completedTricks.find(t=>t.trickNumber===state.currentTrick.trickNumber);
               const trick=complete??next.currentTrick;
               const after=BotPlayer.evaluateCurrentTrick(trick,next.isTrumpRevealed?next.trumpSuit:null,id,state.players);
@@ -154,7 +158,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
     const delta={...searchStats};
     for(const key of Object.keys(delta) as (keyof typeof delta)[])delta[key]-=initialStats[key];
     return {
-      seed, candidateTeam, dealHash, winner,
+      seed, candidateTeam, candidatePlayerIds:initial.players.filter(p=>p.team===candidateTeam).map(p=>p.id),dealHash, winner, terminal:{matchOver:final.isMatchOver,matchWinner:final.matchWinnerTeam},
       search:delta,partnership,searchByPolicy,
       advanced:Object.fromEntries(Object.entries(advancedStats).map(([k,v])=>[k,v-initialAdvanced[k as keyof typeof advancedStats]])) as typeof advancedStats,
       endgame:Object.fromEntries(Object.entries(endgameStats).map(([k,v])=>[k,v-initialEndgame[k as keyof typeof endgameStats]])) as typeof endgameStats,
@@ -218,7 +222,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const seed = Number(value('--seed','1')), pairs = Number(value('--pairs','2'));
     const candidate = value('--candidate','production') as Policy, baseline = value('--baseline','heuristic') as Policy;
     if (!Number.isSafeInteger(seed) || seed < 0 || seed > 0xffffffff || !Number.isSafeInteger(pairs) || pairs < 1 || pairs > 100000) throw new Error('Invalid seed or pairs');
-    if (![candidate,baseline].every(p => ['heuristic','production','neural','production-legacy','corrected-search','neural-direct','advanced-search'].includes(p))) throw new Error('Unknown policy');
+    if (![candidate,baseline].every(p => ['heuristic','production','neural','production-legacy','corrected-search','neural-direct','advanced-search','ai-v2-ismcts'].includes(p))) throw new Error('Unknown policy');
     // Keep stdout valid JSON even if existing bots/model loading emit diagnostic logs.
     const log = console.log;
     console.log = (...items) => console.error(...items);
