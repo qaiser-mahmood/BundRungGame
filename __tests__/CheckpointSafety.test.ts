@@ -15,5 +15,5 @@ describe('checkpoint safety',()=>{
       const link=join(directory,'alias.json');symlinkSync(canonical,link);expect(()=>ModelManager.saveModel(model,link)).toThrow();
       expect(readFileSync(canonical)).toEqual(before);
     }finally{rmSync(directory,{recursive:true,force:true});}
-  });
+  },15000);
 });

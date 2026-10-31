@@ -3,7 +3,7 @@ import type {Card,PrivatePlayerState,PublicGameState,Suit} from '../../../shared
 import {BundRungEngine} from '../../engine/BundRungEngine';
 import {SimulationWorld} from '../../engine/SimulationWorld';
 import {CardTracker} from './CardTracker';
-import {sampleWorld} from './WorldSampler';
+import {sampleWorld,SamplingError} from './WorldSampler';
 export interface SearchOptions {iterations?:number;legacyIterations?:number;timeMs?:number;random?:()=>number;diagnostic?:(reason:string)=>void;}
 export interface SearchStats {worlds:number;samplingFailures:number;fallbacks:number;neuralUses:number;}
 export const searchStats:SearchStats={worlds:0,samplingFailures:0,fallbacks:0,neuralUses:0};
@@ -63,7 +63,7 @@ export class MonteCarloPlanner {
     if(!candidates.length)throw new Error('NO_CANDIDATES');
     if(candidates.length===1)return candidates[0];
     const limit=options.iterations??iterations,timeMs=options.timeMs??25;
-    if(!Number.isSafeInteger(limit)||limit<1||limit>1000 || timeMs<=0)throw new Error('INVALID_SEARCH_BUDGET');
+    if(!Number.isSafeInteger(limit)||limit<1||limit>1000 || Number.isNaN(timeMs) || timeMs<=0)throw new Error('INVALID_SEARCH_BUDGET');
     const started=performance.now(),scores=candidates.map(()=>0);let complete=0;
     try{
       for(let i=0;i<limit;i++){
@@ -76,7 +76,7 @@ export class MonteCarloPlanner {
       if(!complete)throw new Error('NO_COMPLETE_WORLDS');
       return candidates[scores.reduce((best,score,i)=>score>scores[best]?i:best,0)];
     }catch(error){
-      const reason=error instanceof Error?error.message:'SEARCH_FAILURE';
+      const reason=error instanceof SamplingError?error.reason:error instanceof Error && /^[A-Z_]+$/.test(error.message)?error.message:'ROLLOUT_TRANSITION_REJECTED';
       searchStats.samplingFailures++;searchStats.fallbacks++;
       (options.diagnostic??(reason=>console.error(JSON.stringify({component:'search',reason}))))(reason);
       return candidates[0];

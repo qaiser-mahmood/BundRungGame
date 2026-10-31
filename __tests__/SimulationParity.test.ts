@@ -1,3 +1,4 @@
+import {ScoringEngine} from '../server/engine/ScoringEngine';
 import {describe,it,expect,vi,afterEach} from 'vitest';
 import {setupGame,seededRandom,withRandom} from '../scripts/ai-benchmark';
 import {BundRungEngine} from '../server/engine/BundRungEngine';
@@ -110,14 +111,18 @@ describe('targeted authoritative endgame/scoring parity',()=>{
     ['OPEN_TRUMP','FACE_DOWN_NO_PLAY'],['BWINJI','FACE_UP'],['BWINJI','FACE_DOWN_PLAY'],['BWINJI','FACE_DOWN_NO_PLAY'],
   ] as const)('matches %s/%s scoring and KHOTI at final trick',(mode,modifier)=>{
     const engine=setupGame(2),state=engine.getPublicState(),world=oracle(engine);
-    const copy=BundRungEngine.fromObservation(state,world);
     // Scoring matrix exercised through both engine instances. No-play is a
     // forced challenge resolution, so use resolveGame rather than fabricate play.
     const configure=(e:BundRungEngine)=>{
       const f=e as unknown as {trumpMode:typeof mode;openTrumpModifier:string|null;bwinjiModifier:string|null;scoringEngine:import('../server/engine/ScoringEngine').ScoringEngine};
       f.trumpMode=mode;f.openTrumpModifier=mode==='OPEN_TRUMP'?modifier:null;f.bwinjiModifier=mode==='BWINJI'?modifier:null;
     };
-    configure(engine);configure(copy);engine.resolveGame('TEAM_2');copy.resolveGame('TEAM_2');
+    configure(engine);
+    const scoring=engine as unknown as {scoringEngine:ScoringEngine};
+    scoring.scoringEngine=new ScoringEngine({...state.scorecard,dealerScore:90});
+    const copy=BundRungEngine.fromObservation(engine.getPublicState(),world);
+    expect(copy.getPublicState().scorecard.dealerScore).toBe(90);
+    engine.resolveGame('TEAM_2');copy.resolveGame('TEAM_2');
     expect(copy.getPublicState().scorecard).toEqual(engine.getPublicState().scorecard);
     expect(copy.getPublicState().phase).toBe(engine.getPublicState().phase);
     expect(copy.getPublicState().matchWinnerTeam).toBe(engine.getPublicState().matchWinnerTeam);

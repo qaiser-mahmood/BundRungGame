@@ -6,6 +6,7 @@ export class SamplingError extends Error {
 }
 export function sampleWorld(state:PublicGameState,actor:string,hand:Card[],voids:Map<string,Set<Suit>>,
   privateState?:PrivatePlayerState,random:()=>number=Math.random):SimulationWorld {
+  if(state.players.length!==4||new Set(state.players.map(p=>p.id)).size!==4)throw new SamplingError('INVALID_PLAYERS');
   const world=new SimulationWorld();
   const known=new Map<string,string>();
   const canonical=new Map(ALL_52_CARDS.map(c=>[c.id,c]));
@@ -76,7 +77,8 @@ export function sampleWorld(state:PublicGameState,actor:string,hand:Card[],voids
   const caller=state.trumpCallerPlayerId;
   if(state.trumpCardPlaced && caller){
     const knownTrump=privateState?.myTrumpCard??state.revealedTrumpCard;
-    const candidates=world.get(caller)!.filter(c=>!privateState?.secretTrumpSuit||c.suit===privateState.secretTrumpSuit);
+    const ordinaryKnown=new Set((state.revealedHands[caller]??[]).map(c=>c.id));
+    const candidates=world.get(caller)!.filter(c=>!ordinaryKnown.has(c.id)&&(!privateState?.secretTrumpSuit||c.suit===privateState.secretTrumpSuit));
     const selected=knownTrump??candidates[Math.floor(random()*candidates.length)];
     if(!selected)throw new SamplingError('NO_PLAUSIBLE_LOCKED_TRUMP');
     world.lockedTrump=selected;world.trumpSuit=selected.suit;

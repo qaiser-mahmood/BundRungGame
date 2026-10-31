@@ -15,7 +15,9 @@ export function selectCandidate(cards:Card[],state:PublicGameState,priv:PrivateP
     if(policy.name==='corrected-search')return MonteCarloPlanner.evaluateCandidates(cards,id,priv.myHand,state,priv.secretTrumpSuit,
       policy.search?.iterations??16,priv,policy.search);
     if(policy.name==='production-legacy'){
-      return LegacyMonteCarloPlanner.evaluateCandidates(cards,id,priv.myHand,state,priv.secretTrumpSuit,policy.search?.legacyIterations??100);
+      const iterations=policy.search?.legacyIterations??100;
+      if(!Number.isSafeInteger(iterations)||iterations<1||iterations>1000)throw new Error('INVALID_LEGACY_BUDGET');
+      return LegacyMonteCarloPlanner.evaluateCandidates(cards,id,priv.myHand,state,priv.secretTrumpSuit,iterations);
     }
     const network=policy.network??ModelManager.getModel();
     if(!network)throw new Error('NO_VALIDATED_NETWORK');
@@ -26,7 +28,7 @@ export function selectCandidate(cards:Card[],state:PublicGameState,priv:PrivateP
     return card;
   }catch(error){
     searchStats.fallbacks++;
-    console.error(JSON.stringify({component:'policy',policy:policy.name,reason:error instanceof Error?error.message:'POLICY_FAILURE'}));
+    console.error(JSON.stringify({component:'policy',policy:policy.name,reason:error instanceof Error && /^[A-Z_]+$/.test(error.message)?error.message:'POLICY_FAILURE'}));
     return cards[0];
   }
 }

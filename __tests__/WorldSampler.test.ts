@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {BundRungEngine} from '../server/engine/BundRungEngine';
 import {sampleWorld} from '../server/ai/planning/WorldSampler';
 import {ALL_52_CARDS} from '../server/ai/planning/CardTracker';
-import {seededRandom} from '../scripts/ai-benchmark';
+import {setupGame,seededRandom} from '../scripts/ai-benchmark';
 import type {Suit} from '../shared/types';
 describe('constraint-preserving matching sampler',()=>{
   it('preserves ownership, voids, exact counts and unique cards across 200 seeds',()=>{
@@ -20,5 +20,18 @@ describe('constraint-preserving matching sampler',()=>{
     const impossible=new Map<string,Set<Suit>>([['p1',new Set(['HEARTS','DIAMONDS','CLUBS','SPADES'])]]);
     expect(()=>sampleWorld(state,'p0',hand,impossible)).toThrow('INFEASIBLE_VOIDS');
     expect(()=>sampleWorld({...state,players:state.players.map(p=>({...p,cardsInHandCount:0}))},'p0',hand,voids)).toThrow();
+  });
+});
+
+describe('locked slot ownership',()=>{
+  it('never uses a publicly shown ordinary hand card as an unknown locked trump',()=>{
+    const engine=setupGame(2),state=engine.getPublicState(),caller=state.trumpCallerPlayerId!;
+    const shown=engine.getPrivateState(caller).myHand;
+    state.revealedHands[caller]=shown;
+    const actor=state.players.find(p=>p.id!==caller)!.id,priv=engine.getPrivateState(actor);
+    for(let seed=0;seed<30;seed++){
+      const world=sampleWorld(state,actor,priv.myHand,new Map(),priv,seededRandom(seed));
+      expect(world.lockedTrump).not.toBeNull();expect(shown.some(c=>c.id===world.lockedTrump!.id)).toBe(false);
+    }
   });
 });

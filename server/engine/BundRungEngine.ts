@@ -1901,6 +1901,10 @@ export class BundRungEngine extends BaseRungEngine {
   /** Referee reconstruction from a sanitized observation and a sampled world only.
    * No live engine or hidden server storage is passed to search. */
   public static fromObservation(state: PublicGameState, world: SimulationWorld): BundRungEngine {
+    if(state.phase !== 'TRICK_PLAYING' || state.players.length !== 4 || new Set(state.players.map(p=>p.id)).size !== 4)throw new Error('SIM_INVALID_PHASE_OR_PLAYERS');
+    if(state.trumpCardPlaced !== Boolean(world.lockedTrump))throw new Error('SIM_LOCKED_SLOT_MISMATCH');
+    if(world.lockedTrump && !world.get(state.trumpCallerPlayerId??'')?.some(c=>c.id===world.lockedTrump?.id))throw new Error('SIM_LOCKED_OWNER_MISMATCH');
+    if(state.isTrumpRevealed && world.trumpSuit !== state.trumpSuit)throw new Error('SIM_REVEALED_TRUMP_MISMATCH');
     const engine = new BundRungEngine();
     engine.players = structuredClone(state.players);
     engine.hands = Object.fromEntries(state.players.map(p => {
