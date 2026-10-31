@@ -138,3 +138,8 @@ Use unique output files: benchmark/capture writers refuse existing paths. CLI ou
 ## Remaining limitations
 
 Single-observer/model-based search retains determinization bias; the rollout opponent is simplistic. Low particle counts, a biased proposal distribution and limited behavioral calibration remain. Adaptive routing is heuristic, and its development ablation does not establish benefit. Public exact solving is intentionally rare. Learning uses a small linear baseline, with poor value/generalization results; value bootstrapping and stronger learned models are deferred rather than represented as validated. Soft deadlines, increased average computation and queue waits prevent claiming a production-ready stronger default. Preserve the baselines for review and future independent comparisons.
+
+
+## Subsequent search-focused refinement
+
+The results above remain historical. See [AI_V2_SEARCH_REFINEMENT.md](AI_V2_SEARCH_REFINEMENT.md) and [ai-v2-search-refinement.json](../benchmarks/ai-v2-search-refinement.json) for the later 256-test validation, allocation-equivalence probe, adversarial information-set regressions, fresh matched-time held-out comparison and direct rollout duel. These outcomes are not pooled with the earlier fixed-work or held-out sets. Both production and V2 rollout defaults remain unchanged.

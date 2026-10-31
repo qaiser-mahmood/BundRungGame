@@ -65,3 +65,8 @@ Default search parameters: 64 maximum iterations, 16 fresh proposal particles pe
 Complete-match diagnostics run twenty matches on ten paired initial seeds. Subsequent dealer/score/game trajectories legitimately diverge; they are not represented as identical later deals. Individual-hand tournaments are the primary controlled evidence. See the evaluation report for separate match results and small-sample limits.
 
 The preserved canonical network uses the existing 245-input / 52-output feature contract. V2's 144-feature linear policy/value checkpoint is intentionally incompatible and cannot be loaded through canonical persistence. Canonical training scripts and model selection are unchanged.
+
+
+## Search refinement
+
+The follow-up [search refinement report](AI_V2_SEARCH_REFINEMENT.md) documents decision-local compact-template reuse, direct sanitized information keys, lightweight rollout frames, concealed-metadata defenses and an optional control-aware rollout. `corrected-search` remains the live default and `legacy` remains the default V2 rollout. The new report separates fixed-work efficiency, matched 25 ms deployment configurations, exploratory larger-cap ceilings, and a direct per-team rollout duel. Neural models remain experimental and unchanged.
