@@ -1,3 +1,5 @@
+import { registerVoiceHandlers } from './transport/Voice';
+import { liveBotTurns } from './ai/RoomTurnQueue';
 import { sendGameState } from './transport/GameState';
 import express from 'express';
 import http from 'http';
@@ -221,12 +223,15 @@ function checkAndRunBotTurns(room: GameRoom): void {
         if (turnPlayer && turnPlayer.isBot) {
           const delay = publicState.currentTrick.trickNumber === 1 ? 1200 : 700;
           setTimeout(() => {
-            try {
-              if (room.engine.getPhase() === 'TRICK_PLAYING' && room.engine.getPublicState().currentTurnPlayerId === turnPlayer.id && !room.engine.getPublicState().faceDownLeadPending) {
-                BotPlayer.handleBotTurn(room.engine, turnPlayer.id, {roomId:room.id,learning:true});
+            liveBotTurns.enqueue(room.id, () => {
+              const now=room.engine.getPublicState();
+              if(now.phase==='TRICK_PLAYING'&&now.currentTurnPlayerId===turnPlayer.id&&!now.faceDownLeadPending&&
+                 now.gameIndex===publicState.gameIndex&&now.currentTrick.trickNumber===publicState.currentTrick.trickNumber&&
+                 now.currentTrick.cards.length===publicState.currentTrick.cards.length){
+                BotPlayer.handleBotTurn(room.engine,turnPlayer.id,{roomId:room.id,learning:true});
                 broadcastRoomState(room);
               }
-            } catch (e) {}
+            });
           }, delay);
           return;
         }
@@ -264,7 +269,7 @@ io.on('connection', (socket: Socket) => {
     const targetRoom = getOrCreateRoom(targetRoomId);
     if (room !== targetRoom) {
       const previousPlayer = room.socketMap[socket.id];
-      if (previousPlayer) { LiveLearningEngine.resetRoom(room.id); room.engine.removePlayer(previousPlayer); }
+      if (previousPlayer) { LiveLearningEngine.resetRoom(room.id); room.engine.removePlayer(previousPlayer); delete room.playerSocketMap[previousPlayer]; }
       delete room.socketMap[socket.id];
       room = targetRoom;
       currentRoomId = targetRoomId;
@@ -622,23 +627,8 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
-  // --- Voice Chat Streaming Handlers ---
-  socket.on('voiceStreamSend', ({ playerId, socketId, audioChunk, sampleRate }) => {
-    // Relay audio chunk to all other sockets, resolving sender identity reliably
-    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
-    socket.broadcast.emit('voiceStreamReceive', {
-      playerId: effectivePlayerId,
-      socketId: socketId || socket.id,
-      audioChunk,
-      sampleRate,
-    });
-  });
-
-  socket.on('voiceMuteStatusChanged', ({ playerId, isMuted }) => {
-    // Broadcast mute status to all clients
-    const effectivePlayerId = playerId || room.socketMap[socket.id] || socket.id;
-    io.emit('voiceMuteStatusUpdated', { playerId: effectivePlayerId, isMuted });
-  });
+  // Resolve the authoritative socket-room mapping for every voice event.
+  registerVoiceHandlers(socket,()=>room,socketId=>io.to(socketId));
 
   socket.on('disconnect', () => {
     const playerId = room.socketMap[socket.id];

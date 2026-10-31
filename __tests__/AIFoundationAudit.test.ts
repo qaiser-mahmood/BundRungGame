@@ -43,7 +43,7 @@ describe('AI audit: verified invariants',()=>{
     const before=JSON.stringify({state,hands,world:[...world]});
     const gen=vi.spyOn(MC,'generateConsistentWorld').mockReturnValue(world);
     const sim=vi.spyOn(MC,'simulateRollout');
-    MC.evaluateCandidates([card('H_2'),card('S_2')],'p0',[card('H_2'),card('S_2')],state,null,3);
+    MC.evaluateCandidates([card('H_2'),card('S_2')],'p0',[card('H_2'),card('S_2')],state,null,3,undefined,{timeMs:Infinity});
     expect(gen).toHaveBeenCalledTimes(3);
     expect(sim).toHaveBeenCalledTimes(6);
     expect(sim.mock.calls.every(call=>call[4]===world)).toBe(true);

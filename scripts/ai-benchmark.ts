@@ -125,9 +125,11 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
     const final = engine.getPublicState();
     const entry = final.scorecard.history.at(-1);
     const winner = final.phase === 'GAME_RESOLVED' || final.phase === 'MATCH_OVER' ? final.lastGameWinningTeam : null;
+    const delta={...searchStats};
+    for(const key of Object.keys(delta) as (keyof typeof delta)[])delta[key]-=initialStats[key];
     return {
       seed, candidateTeam, dealHash, winner,
-      search:{worlds:searchStats.worlds-initialStats.worlds,samplingFailures:searchStats.samplingFailures-initialStats.samplingFailures,fallbacks:searchStats.fallbacks-initialStats.fallbacks,neuralUses:searchStats.neuralUses-initialStats.neuralUses},
+      search:delta,
       revealActions, candidateWon: winner ? winner === candidateTeam : null,
       signedScoreAdjustment: entry ? entry.scoreAdjustment * (entry.dealerTeam === candidateTeam ? -1 : 1) : null,
       trickDifferential: (final.team1TricksWon - final.team2TricksWon) * (candidateTeam === 'TEAM_1' ? 1 : -1),

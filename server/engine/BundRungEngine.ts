@@ -29,7 +29,7 @@ export class BundRungEngine extends BaseRungEngine {
   private phase: GamePhase = 'WAITING_FOR_PLAYERS';
 
   private deck: Deck = new Deck();
-  private tossEngine: TossEngine = new TossEngine();
+  private tossEngine: TossEngine;
   private scoringEngine: ScoringEngine = new ScoringEngine();
 
   private dealerIndex: number = 0;
@@ -113,9 +113,10 @@ export class BundRungEngine extends BaseRungEngine {
   private pendingOpenRungSuit: Suit | null = null;
   private pendingOpenRungPlayerId: string | null = null;
 
-  constructor() {
+  constructor(simulation = false) {
     super('BUND_RUNG');
-    this.resetLobby();
+    this.tossEngine = new TossEngine(!simulation);
+    if (!simulation) this.resetLobby();
   }
 
   public resetLobby(): void {
@@ -1406,7 +1407,7 @@ export class BundRungEngine extends BaseRungEngine {
 
     if (currentTrickNum < 13) {
       this.resetCurrentTrick(currentTrickNum + 1, winner.id);
-      this.statusMessage = `${winner.name} won Trick ${currentTrickNum} with ${winningCard.card.rank} of ${winningCard.card.suit}.`;
+      this.statusMessage = this.visiblePlay(winningCard).card ? `${winner.name} won Trick ${currentTrickNum} with ${winningCard.card.rank} of ${winningCard.card.suit}.` : `${winner.name} won Trick ${currentTrickNum} with a concealed card.`;
       return { trickCompleted: true, trickWinner: winner };
     } else {
       // 13 tricks completed: If no team achieved 2 consecutive tricks streak, the team winning the final (13th) trick wins the game!
@@ -1711,17 +1712,38 @@ export class BundRungEngine extends BaseRungEngine {
   }
 
   // --- Client State Serialization ---
-  private visiblePlay(play: PlayedCard): VisiblePlayedCard {
-    const hidden = play.isFaceDown && !this.isTrumpRevealed ||
-      (this.faceDownLeadPending && this.faceDownLeadCardFaceDown || this.openTrumpModifier === 'FACE_DOWN_NO_PLAY' || this.bwinjiModifier === 'FACE_DOWN_NO_PLAY') && play.card.id === this.faceDownLeadCard?.id;
-    return { ...play, card: hidden ? null : { ...play.card }, isAceDowngraded:hidden && play.isAceDowngraded ? undefined : play.isAceDowngraded };
+  private visibleCard(card:Card):Card {
+    return {id:card.id,suit:card.suit,rank:card.rank,playValue:card.playValue,tossValue:card.tossValue};
+  }
+
+  private concealedCardIds():Set<string> {
+    const hidden=new Set<string>(),revealed=new Set(this.faceDownCallerCards.filter(c=>c.isRevealed).map(c=>c.card.id));
+    if(!this.isTrumpRevealed){
+      if(this.trumpCard)hidden.add(this.trumpCard.id);
+      for(const c of this.faceDownCallerCards)if(!c.isRevealed)hidden.add(c.card.id);
+      for(const play of [...this.currentTrick.cards,...this.completedTricks.flatMap(t=>t.cards),...(this.previousTrickCards??[])])
+        if(play.isFaceDown&&!revealed.has(play.card.id))hidden.add(play.card.id);
+    }
+    if(this.faceDownLeadCard && (this.faceDownLeadPending&&this.faceDownLeadCardFaceDown||
+        this.openTrumpModifier==='FACE_DOWN_NO_PLAY'||this.bwinjiModifier==='FACE_DOWN_NO_PLAY'))hidden.add(this.faceDownLeadCard.id);
+    return hidden;
+  }
+
+  private visiblePlay(play:PlayedCard,hidden=this.concealedCardIds()):VisiblePlayedCard {
+    const concealed=hidden.has(play.card.id);
+    return {playerId:play.playerId,playedAt:play.playedAt,isFaceDown:play.isFaceDown,trumpWasRevealed:play.trumpWasRevealed,
+      card:concealed?null:this.visibleCard(play.card),isAceDowngraded:concealed&&play.isAceDowngraded?undefined:play.isAceDowngraded};
   }
 
   public getPublicState(): PublicGameState {
+    const hidden=this.concealedCardIds();
+    const trick=(value:Trick):PublicGameState['currentTrick']=>({trickNumber:value.trickNumber,leadPlayerId:value.leadPlayerId,
+      leadSuit:value.leadSuit,winnerPlayerId:value.winnerPlayerId,winningTeam:value.winningTeam,cards:value.cards.map(c=>this.visiblePlay(c,hidden))});
     return {
       gameType: this.gameType,
       phase: this.phase,
-      players: this.players.map((p) => ({ ...p })),
+      players: this.players.map(p=>({id:p.id,name:p.name,seat:p.seat,team:p.team,isBot:p.isBot,isDealer:p.isDealer,
+        cardsInHandCount:p.cardsInHandCount,isConnected:p.isConnected})),
       teamNames: {
         TEAM_1: this.getTeamName('TEAM_1'),
         TEAM_2: this.getTeamName('TEAM_2'),
@@ -1734,15 +1756,15 @@ export class BundRungEngine extends BaseRungEngine {
           : this.phase === 'BIDDING_PHASE'
           ? this.players[this.biddingTurnPlayerIndex]?.id || null
           : null,
-      tossCardsRemaining: this.tossEngine.getRemainingCount(),
-      tossDraws: this.tossEngine.getLatestDraws(),
-      tossDrawHistory: this.tossEngine.getDrawHistory(),
-      tossDrawnThisRound: this.players.reduce((acc, p) => {
+      tossCardsRemaining: this.simulationToss?.tossCardsRemaining??this.tossEngine.getRemainingCount(),
+      tossDraws: Object.fromEntries(Object.entries(this.simulationToss?.tossDraws??this.tossEngine.getLatestDraws()).map(([id,c])=>[id,this.visibleCard(c)])),
+      tossDrawHistory: Object.fromEntries(Object.entries(this.simulationToss?.tossDrawHistory??this.tossEngine.getDrawHistory()).map(([id,cards])=>[id,cards.map(c=>this.visibleCard(c))])),
+      tossDrawnThisRound: this.simulationToss?{...this.simulationToss.tossDrawnThisRound}:this.players.reduce((acc, p) => {
         acc[p.id] = this.tossEngine.hasPlayerDrawnThisRound(p.id);
         return acc;
       }, {} as { [playerId: string]: boolean }),
-      tossRound: this.tossEngine.getRoundNumber(),
-      tiedPlayerIds: this.tossEngine.getActivePlayerIds(),
+      tossRound: this.simulationToss?.tossRound??this.tossEngine.getRoundNumber(),
+      tiedPlayerIds: this.simulationToss?[...this.simulationToss.tiedPlayerIds]:this.tossEngine.getActivePlayerIds(),
       cutOfferPlayerId: this.cutOfferPlayerId,
       cutDone: this.cutDone,
       shuffleCount: this.shuffleCount,
@@ -1752,7 +1774,7 @@ export class BundRungEngine extends BaseRungEngine {
       trumpCallerPlayerId: this.trumpCallerPlayerId,
       trumpCardPlaced: this.trumpCard !== null,
       trumpCardPlayerId: this.trumpCallerPlayerId,
-      revealedTrumpCard: this.isTrumpRevealed && this.trumpCard ? { ...this.trumpCard } : null,
+      revealedTrumpCard: this.isTrumpRevealed && this.trumpCard && !hidden.has(this.trumpCard.id) ? this.visibleCard(this.trumpCard) : null,
       openTrumpModifier: this.openTrumpModifier,
       bwinjiModifier: this.bwinjiModifier,
       firstRoundOpenTrumpAvailable:
@@ -1768,9 +1790,9 @@ export class BundRungEngine extends BaseRungEngine {
       faceDownLeadCardFaceDown: this.faceDownLeadCardFaceDown,
       opponentsInspectingCards: this.opponentsInspectingCards,
       faceDownChallengeVotes: Object.fromEntries(this.faceDownChallengeVotes.entries()),
-      faceDownCallerCards: this.faceDownCallerCards.map((c) => ({ ...c,
+      faceDownCallerCards: this.faceDownCallerCards.map((c) => ({ trickNumber:c.trickNumber,isRevealed:c.isRevealed,
         id: `concealed-${c.trickNumber}-${this.trumpCallerPlayerId}`,
-        card: c.isRevealed || this.isTrumpRevealed ? { ...c.card } : null,
+        card: !hidden.has(c.card.id) ? this.visibleCard(c.card) : null,
       })),
       isRungRevealPaused: this.isRungRevealPaused,
       isTrumpRevealPending: this.isTrumpRevealPending,
@@ -1782,9 +1804,9 @@ export class BundRungEngine extends BaseRungEngine {
       biddingPassCount: this.biddingPassCount,
       biddingStatus: { ...this.biddingStatus },
       gameIndex: this.gameIndex,
-      currentTrick: { ...this.currentTrick, cards: this.currentTrick.cards.map(c => this.visiblePlay(c)) },
-      previousTrickCards: this.previousTrickCards ? this.previousTrickCards.map(c => this.visiblePlay(c)) : null,
-      completedTricks: this.completedTricks.map(t => ({ ...t, cards: t.cards.map(c => this.visiblePlay(c)) })),
+      currentTrick: trick(this.currentTrick),
+      previousTrickCards: this.previousTrickCards ? this.previousTrickCards.map(c => this.visiblePlay(c,hidden)) : null,
+      completedTricks: this.completedTricks.map(trick),
       team1TricksWon: this.team1TricksWon,
       team2TricksWon: this.team2TricksWon,
       consecutiveTricksCount: this.consecutiveTricksCount,
@@ -1793,10 +1815,10 @@ export class BundRungEngine extends BaseRungEngine {
       rungRevealerPlayerId: this.rungRevealerPlayerId,
       lastTrickWinnerTeam: this.lastTrickWinnerTeam,
       lastTrickWinnerPlayerId: this.lastTrickWinnerPlayerId,
-      lastTrickWinningCard: this.lastTrickWinningCard ? { ...this.lastTrickWinningCard } : null,
+      lastTrickWinningCard: this.lastTrickWinningCard && !hidden.has(this.lastTrickWinningCard.id) ? this.visibleCard(this.lastTrickWinningCard) : null,
       revealedHands: Array.from(this.shownHandPlayerIds).reduce((acc, pid) => {
         if (this.hands[pid]) {
-          acc[pid] = this.hands[pid].map((c) => ({ ...c }));
+          acc[pid] = this.hands[pid].filter(c=>!hidden.has(c.id)).map(c=>this.visibleCard(c));
         }
         return acc;
       }, {} as { [playerId: string]: Card[] }),
@@ -1812,21 +1834,11 @@ export class BundRungEngine extends BaseRungEngine {
       isPostKhoti: this.isPostKhoti,
       hasSwappedSeats: this.hasSwappedSeats(),
       statusMessage: this.statusMessage,
-      ...structuredClone(this.simulationToss??{}),
     };
   }
 
-  public getPrivateState(playerId: string): PrivatePlayerState {
-    const player = this.players.find((p) => p.id === playerId);
-    const myHand = this.hands[playerId] || [];
-    const sortedHand = BundRungEngine.sortHand(myHand);
-    const isCaller = this.trumpCallerPlayerId === playerId;
-    const secretTrumpSuit = isCaller ? this.trumpSuit : null;
-    const myTrumpCard = isCaller && this.trumpCard ? { ...this.trumpCard } : null;
-    const legalCards = this.getLegalCardsForPlayer(playerId);
-    const isLastTurnForCaller = isCaller && myHand.length === 0 && Boolean(this.trumpCard);
-    const isMyTrumpCardPlayable = isCaller && this.trumpCard && (this.isTrumpRevealed || isLastTurnForCaller) ? legalCards.some((c) => c.id === this.trumpCard!.id) : false;
-
+  public getRevealPermissions(playerId:string):{canRequestRungReveal:boolean;canShowTrump:boolean} {
+    const player=this.players.find(p=>p.id===playerId),myHand=this.hands[playerId]??[];
     // Check if player can request Rung reveal:
     // Only opponent team can ask! Must be this player's turn, Rung unrevealed, not pending, not paused, leadSuit exists, and player is void in leadSuit
     const isCurrentTurn = this.phase === 'TRICK_PLAYING' && this.players[this.currentTurnPlayerIndex]?.id === playerId;
@@ -1850,12 +1862,39 @@ export class BundRungEngine extends BaseRungEngine {
       this.isTrumpRevealPending &&
       playerId === this.trumpCallerPlayerId;
 
+    return {canRequestRungReveal,canShowTrump};
+  }
+
+  /** Scalar turn data for referee rollouts; no history serialization or hidden cards. */
+  public getTurnStatus() {
+    const currentTurnPlayerId=this.phase==='TRICK_PLAYING'?this.players[this.currentTurnPlayerIndex]?.id??null:null;
+    const callerTeam=this.players.find(p=>p.id===this.faceDownLeadPlayerId)?.team;
+    return {phase:this.phase,currentTurnPlayerId,trumpCallerPlayerId:this.trumpCallerPlayerId,
+      isRungRevealPaused:this.isRungRevealPaused,faceDownLeadPending:this.faceDownLeadPending,
+      defendingPlayerIds:this.players.filter(p=>p.team!==callerTeam).map(p=>p.id),
+      canShowTrump:this.trumpCallerPlayerId?this.getRevealPermissions(this.trumpCallerPlayerId).canShowTrump:false,
+      canRequestRungReveal:currentTurnPlayerId?this.getRevealPermissions(currentTurnPlayerId).canRequestRungReveal:false};
+  }
+
+  public getPrivateState(playerId: string): PrivatePlayerState {
+    const player = this.players.find((p) => p.id === playerId);
+    const myHand = this.hands[playerId] || [];
+    const sortedHand = BundRungEngine.sortHand(myHand);
+    const isCaller = this.trumpCallerPlayerId === playerId;
+    const secretTrumpSuit = isCaller ? this.trumpSuit : null;
+    const myTrumpCard = isCaller && this.trumpCard ? this.visibleCard(this.trumpCard) : null;
+    const legalCards = this.getLegalCardsForPlayer(playerId);
+    const isLastTurnForCaller = isCaller && myHand.length === 0 && Boolean(this.trumpCard);
+    const isMyTrumpCardPlayable = isCaller && this.trumpCard && (this.isTrumpRevealed || isLastTurnForCaller) ? legalCards.some((c) => c.id === this.trumpCard!.id) : false;
+
+    const { canRequestRungReveal, canShowTrump } = this.getRevealPermissions(playerId);
+
     // Teammate face-down card (visible face-up to caller & teammate)
     let teammateFaceDownCard: Card | null = null;
     if (this.faceDownLeadPending && this.faceDownLeadCard && this.faceDownLeadPlayerId) {
       const caller = this.players.find((p) => p.id === this.faceDownLeadPlayerId);
       if (player && caller && player.team === caller.team) {
-        teammateFaceDownCard = { ...this.faceDownLeadCard };
+        teammateFaceDownCard = this.visibleCard(this.faceDownLeadCard);
       }
     }
 
@@ -1866,7 +1905,7 @@ export class BundRungEngine extends BaseRungEngine {
       if (caller && player.team !== caller.team) {
         const partner = this.players.find((p) => p.team === player.team && p.id !== player.id);
         if (partner && this.hands[partner.id]) {
-          partnerHand = BundRungEngine.sortHand(this.hands[partner.id]);
+          partnerHand = BundRungEngine.sortHand(this.hands[partner.id]).map(c=>this.visibleCard(c));
         }
       }
     }
@@ -1874,9 +1913,9 @@ export class BundRungEngine extends BaseRungEngine {
     return {
       knownConcealedCards: Object.fromEntries([...this.completedTricks, this.currentTrick].flatMap(t =>
         t.cards.filter(c => c.playerId === playerId && (c.isFaceDown || c.card.id === this.faceDownLeadCard?.id)).map(c =>
-          [`${t.trickNumber}:${c.playerId}`, { ...c.card }]))),
+          [`${t.trickNumber}:${c.playerId}`, this.visibleCard(c.card)]))),
       myPlayerId: playerId,
-      myHand: sortedHand,
+      myHand: sortedHand.map(c=>this.visibleCard(c)),
       myTrumpCard,
       isMyTrumpCardPlayable,
       secretTrumpSuit,
@@ -1900,18 +1939,11 @@ export class BundRungEngine extends BaseRungEngine {
 
   /** Referee reconstruction from a sanitized observation and a sampled world only.
    * No live engine or hidden server storage is passed to search. */
-  public static fromObservation(state: PublicGameState, world: SimulationWorld): BundRungEngine {
+  public static validateSimulationWorld(state:PublicGameState,world:SimulationWorld):void {
     if(state.phase !== 'TRICK_PLAYING' || state.players.length !== 4 || new Set(state.players.map(p=>p.id)).size !== 4)throw new Error('SIM_INVALID_PHASE_OR_PLAYERS');
     if(state.trumpCardPlaced !== Boolean(world.lockedTrump))throw new Error('SIM_LOCKED_SLOT_MISMATCH');
     if(world.lockedTrump && !world.get(state.trumpCallerPlayerId??'')?.some(c=>c.id===world.lockedTrump?.id))throw new Error('SIM_LOCKED_OWNER_MISMATCH');
     if(state.isTrumpRevealed && world.trumpSuit !== state.trumpSuit)throw new Error('SIM_REVEALED_TRUMP_MISMATCH');
-    const engine = new BundRungEngine();
-    engine.players = structuredClone(state.players);
-    engine.hands = Object.fromEntries(state.players.map(p => {
-      const cards = world.get(p.id);
-      if (!cards || cards.length !== p.cardsInHandCount) throw new Error('SIM_HAND_COUNT');
-      return [p.id, structuredClone(cards.filter(c => !(p.id === state.trumpCallerPlayerId && c.id === world.lockedTrump?.id)))];
-    }));
     const ids = [...world.values()].flat().map(c => c.id);
     for (const trick of [...state.completedTricks,state.currentTrick]) for (const pc of trick.cards) {
       const c = pc.card ?? world.concealed.get(`${trick.trickNumber}:${pc.playerId}`);
@@ -1919,6 +1951,19 @@ export class BundRungEngine extends BaseRungEngine {
       ids.push(c.id);
     }
     if (new Set(ids).size !== ids.length) throw new Error('SIM_DUPLICATE_CARD');
+    for(const player of state.players)if(world.get(player.id)?.length!==player.cardsInHandCount)throw new Error('SIM_HAND_COUNT');
+    for(const card of state.faceDownCallerCards)if(!card.card&&!world.concealed.has(`${card.trickNumber}:${state.trumpCallerPlayerId}`))throw new Error('SIM_ACCUMULATED_CARD_MISSING');
+  }
+
+  public static fromObservation(state: PublicGameState, world: SimulationWorld): BundRungEngine {
+    BundRungEngine.validateSimulationWorld(state,world);
+    const engine = new BundRungEngine(true);
+    engine.players = structuredClone(state.players);
+    engine.hands = Object.fromEntries(state.players.map(p => {
+      const cards = world.get(p.id);
+      if (!cards || cards.length !== p.cardsInHandCount) throw new Error('SIM_HAND_COUNT');
+      return [p.id, structuredClone(cards.filter(c => !(p.id === state.trumpCallerPlayerId && c.id === world.lockedTrump?.id)))];
+    }));
     const hydrate = (t: PublicGameState['currentTrick']): Trick => ({...t,cards:t.cards.map(pc => {
       const card = pc.card ?? world.concealed.get(`${t.trickNumber}:${pc.playerId}`);
       if (!card) throw new Error('SIM_CONCEALED_CARD_MISSING');

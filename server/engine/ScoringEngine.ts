@@ -46,10 +46,13 @@ export class ScoringEngine {
   }
 
   public getState(): ScorecardState {
-    return {
-      ...this.state,
-      history: [...this.state.history],
-    };
+    return {dealerScore:this.state.dealerScore,team1CumulativeKhotiPoints:this.state.team1CumulativeKhotiPoints,
+      team2CumulativeKhotiPoints:this.state.team2CumulativeKhotiPoints,history:this.state.history.map(entry=>({
+        gameIndex:entry.gameIndex,dealerPlayerId:entry.dealerPlayerId,dealerTeam:entry.dealerTeam,trumpMode:entry.trumpMode,
+        modifier:entry.modifier,colorChosenByTeam:entry.colorChosenByTeam,colorChosenByPlayerId:entry.colorChosenByPlayerId,
+        winningTeam:entry.winningTeam,scoreAdjustment:entry.scoreAdjustment,scorecardAfter:entry.scorecardAfter,
+        dealerTransferred:entry.dealerTransferred,notes:entry.notes,
+      }))};
   }
 
   public resetMatch(): void {

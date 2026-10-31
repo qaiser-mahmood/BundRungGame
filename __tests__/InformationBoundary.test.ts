@@ -47,3 +47,22 @@ describe('explicit face-down challenge disclosure',()=>{
     expect(engine.getPublicState().currentTrick.cards[0].card?.id??null).toBe(accept?selected.id:null);
   });
 });
+
+describe('legitimate private challenge views',()=>{
+  it('preserves the caller-team peek and defending partner inspection without giving them to spectators',()=>{
+    const engine=setupGame(1),state=engine.getPublicState(),caller=state.trumpCallerPlayerId!,selected=engine.getPrivateState(caller).myHand[0];
+    engine.declareBwinjiLead(caller,selected.id,true);
+    const team=state.players.find(p=>p.id===caller)!.team;
+    for(const p of state.players){
+      const privateState=engine.getPrivateState(p.id);
+      if(p.team===team)expect(privateState.teammateFaceDownCard?.id).toBe(selected.id);
+      else {
+        expect(privateState.teammateFaceDownCard).toBeNull();
+        const partner=state.players.find(other=>other.id!==p.id&&other.team===p.team)!;
+        expect(privateState.partnerHand).toEqual(engine.getPrivateState(partner.id).myHand);
+      }
+    }
+    const spectator=engine.getClientGameState('');expect(spectator.privateState.teammateFaceDownCard).toBeNull();
+    expect(spectator.privateState.partnerHand).toBeNull();expect(spectator.publicState.currentTrick.cards[0].card).toBeNull();
+  });
+});
