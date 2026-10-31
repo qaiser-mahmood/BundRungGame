@@ -4,6 +4,7 @@ import {setupGame} from '../scripts/ai-benchmark';
 import {ScoringEngine} from '../server/engine/ScoringEngine';
 import {fromObservation} from '../server/ai/v2/simulation/adapters';
 import {CARDS,indexOf,cloneState} from '../server/ai/v2/simulation/CompactState';
+import {terminalUtility} from '../server/ai/planning/MonteCarloPlanner';
 import {Action,apply,utility} from '../server/ai/v2/simulation/FastSimulator';
 function fixture(challenge=false,mode:'OPEN_TRUMP'|'BWINJI'='OPEN_TRUMP',score=0){
  const e=setupGame(2),p=e.getPlayers();p.forEach((x,i)=>x.team=i%2?'TEAM_2':'TEAM_1');
@@ -24,6 +25,11 @@ describe('AI v2 authoritative rule parity gate',()=>{
  for(const mode of ['OPEN_TRUMP','BWINJI'] as const)for(const accept of [true,false])it(`${mode} challenge ${accept?'accept':'surrender'} preserves scoring and vote transitions`,()=>{
   const e=fixture(true,mode,99),s=fromObservation(e.getPublicState(),oracleWorld(e));
   for(const seat of [1,3]){const a:Action={type:'challenge',seat,accept};applyAuthoritative(e,a);apply(s,a);compare(e,s);}
+ });
+ it('matches KHOTI terminal utility without replacing the scoring matrix',()=>{
+  const e=fixture(false,'BWINJI',-99),s=fromObservation(e.getPublicState(),oracleWorld(e));
+  for(const id of ['S_A','S_3','S_4','S_5','D_4','D_A','D_2','D_3']){const a:Action={type:'play',card:indexOf(id)};applyAuthoritative(e,a);apply(s,a);compare(e,s);}
+  expect(s.phase).toBe('MATCH_OVER');expect(utility(s,0)).toBe(terminalUtility(e.getPublicState(),e.getPlayers()[0].id));
  });
  it('matches downgraded Ace, individual streak and final-trick terminal score',()=>{
   const e=fixture(),s=fromObservation(e.getPublicState(),oracleWorld(e)),copy=cloneState(s);

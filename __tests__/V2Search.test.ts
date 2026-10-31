@@ -10,6 +10,7 @@ import {observe,informationKey} from '../server/ai/v2/simulation/observation';
 import {apply} from '../server/ai/v2/simulation/FastSimulator';
 import {oracleWorld} from '../scripts/v2-parity';
 import {BotPlayer} from '../server/ai/BotPlayer';
+import {CARDS,indexOf} from '../server/ai/v2/simulation/CompactState';
 import {defaultPolicy} from '../server/ai/DecisionPolicy';
 import {performance} from 'node:perf_hooks';
 function fixture(){const engine=setupGame(2),state=engine.getPublicState(),priv=engine.getPrivateState(state.currentTurnPlayerId!);return {engine,state,priv,cards:engine.getLegalCardsForPlayer(priv.myPlayerId)};}
@@ -40,6 +41,15 @@ describe('AI v2 information-set search and control',()=>{
  it('uses authoritative corrected-search on internal errors rather than censoring failed worlds',()=>{
   const f=fixture(),before=v2Stats.fallbacks,spy=vi.spyOn(BotPlayer,'chooseMasterCard').mockReturnValue(f.cards[0]);
   expect(decideV2(f.state,f.priv,f.cards,{timeMs:10},{particles:0})).toEqual(f.cards[0]);expect(spy.mock.calls[0][6]?.name).toBe('corrected-search');expect(v2Stats.fallbacks).toBe(before+1);
+ });
+ it('routes only publicly determined endgames to exact team minimax',()=>{
+  const f=fixture(),s=f.state,c=(id:string)=>CARDS[indexOf(id)];
+  Object.assign(s,{currentTurnPlayerId:'p0',activePlayerIndex:0,isTrumpRevealed:true,trumpSuit:'SPADES',trumpCallerPlayerId:'p0',trumpCardPlaced:false,revealedTrumpCard:null,
+   faceDownCallerCards:[],faceDownLeadPending:false,isRungRevealPaused:false,isTrumpRevealPending:false,trumpRevealRequesterId:null,completedTricks:[],previousTrickCards:null,lastTrickWinningCard:null,streakCount:0,streakWinnerPlayerId:null});
+  s.currentTrick={trickNumber:12,leadPlayerId:'p0',leadSuit:null,cards:[],winnerPlayerId:null,winningTeam:null};
+  s.revealedHands={p0:[c('H_A'),c('H_2')],p1:[c('H_K'),c('H_3')],p2:[c('H_4'),c('H_5')],p3:[c('H_6'),c('H_7')]};s.players.forEach(p=>p.cardsInHandCount=2);
+  const p={...f.priv,myPlayerId:'p0',myHand:s.revealedHands.p0,myTrumpCard:null},before=v2Stats.exact;
+  expect(decideV2(s,p,p.myHand,{timeMs:Infinity}).id).toBe('H_2');expect(v2Stats.exact).toBe(before+1);
  });
  it('enforces node and iteration caps independently of time',()=>{
   const f=fixture(),r=ismcts(f.state,f.priv,f.cards,{iterations:8,nodeLimit:1,timeMs:Infinity,random:seededRandom(1)});expect(r.nodes).toBe(1);expect(r.completed).toBe(8);
