@@ -15,7 +15,13 @@
     "benchmark:ai": "node --import tsx scripts/ai-benchmark.ts",
     "typecheck:ai": "tsc --noEmit -p tsconfig.ai.json",
     "benchmark:latency": "node --import tsx scripts/benchmark-ai-latency.ts",
-    "benchmark:tactics": "node --import tsx scripts/benchmark-ai-tactics.ts"
+    "benchmark:tactics": "node --import tsx scripts/benchmark-ai-tactics.ts",
+    "test:parity": "vitest run __tests__/V2RuleParity.test.ts",
+    "benchmark:v2": "node --import tsx scripts/v2-benchmark.ts",
+    "benchmark:v2:beliefs": "node --import tsx scripts/v2-belief-calibration.ts",
+    "benchmark:v2:cards": "node --import tsx scripts/benchmark-v2-cards.ts",
+    "benchmark:v2:throughput": "node --import tsx scripts/v2-throughput.ts",
+    "learn:v2": "node --import tsx scripts/v2-learning.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

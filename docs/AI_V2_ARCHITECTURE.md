@@ -57,3 +57,9 @@ Checkpoint paths are restricted to `server/ai/models/experiments/v2/`, with syml
 ## Frozen protocol
 
 Default search parameters: 64 maximum iterations, 16 fresh proposal particles per decision, 512 nodes, sqrt(2) UCT exploration, observation-only partnership continuation, adaptive routing, public exact solver, unweighted beliefs. Initial fixed-work smoke seeds 10000–10049; development 11000–11199. Ablations use 11000–11049; Phase 2 comparison uses 12000–12049. Matched 25 ms comparisons use 13000–13199. **Fresh final held-out seeds 700000–700999**, disjoint from Phase 2's held-out set and all development/training seeds. Parameters are not tuned after inspecting final outcomes. Teacher training uses 400000–400007; validation uses 400100+; neural evaluation uses 14000+. Complete-match diagnostics use 15000+. Results are reported separately, not pooled to manufacture significance.
+
+## Diagnostics and interpretation
+
+`SearchResult` exposes root visits, availability and estimated values, completed simulations, node count, deadlines, fallbacks, belief ESS/diversity and elapsed time. `v2-root-probe.ts` retains reproducible representative root traces. Game benchmark counters aggregate controller searches; the pre-existing shared one-card shortcut occurs before controller entry and is included in total per-policy decisions but not controller counters. It must not be interpreted as missing games or search failures.
+
+Complete-match diagnostics run twenty matches on ten paired initial seeds. Subsequent dealer/score/game trajectories legitimately diverge; they are not represented as identical later deals. Individual-hand tournaments are the primary controlled evidence. See the evaluation report for separate match results and small-sample limits.
