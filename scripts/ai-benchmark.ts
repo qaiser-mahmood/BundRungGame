@@ -57,6 +57,7 @@ export function setupGame(seed: number): BundRungEngine {
 export interface GameResult {
   seed: number;
   candidateTeam: TeamId;
+  candidatePlayerIds:string[];
   dealHash: string;
   winner: TeamId | null;
   terminal:{matchOver:boolean;matchWinner:TeamId|null};
@@ -74,7 +75,7 @@ export interface GameResult {
   decisions: { policy: Policy; playerId: string; milliseconds: number; cardId: string }[];
 }
 
-export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={},v2?:V2Options): GameResult {
+export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, baseline: Policy = 'heuristic', searchOptions:SearchOptions={iterations:16,timeMs:Infinity},strategy:StrategyOptions={},v2?:V2Options,baselineV2?:V2Options): GameResult {
   // Deserialize outside the seeded stream: loading allocates randomly initialized
   // tensors before replacing them with persisted weights.
   if (candidate !== 'heuristic' || baseline !== 'heuristic') ModelManager.getModel();
@@ -121,11 +122,12 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
             ? [...priv.myHand, priv.myTrumpCard] : priv.myHand;
           const legal = all.filter(c => priv.legalPlayableCardIds.includes(c.id));
           if (!legal.length) throw new Error(`No legal cards for ${id}`);
-          const policy = state.players.find(p => p.id === id)!.team === candidateTeam ? candidate : baseline;
+          const candidateRole=state.players.find(p => p.id === id)!.team===candidateTeam;
+          const policy=candidateRole?candidate:baseline;
           const priorSearch={...searchStats};
           const start = performance.now();
           const chosen = BotPlayer.chooseMasterCard({getPlayers:()=>state.players},id,legal,all,state,priv,
-            {name:policyName(policy),search:searchOptions,strategy,v2});
+            {name:policyName(policy),search:searchOptions,strategy,v2:candidateRole?v2:baselineV2??v2});
           const milliseconds = performance.now() - start;
           const policyStats=searchByPolicy[policy]??{...searchStats};
           if(!searchByPolicy[policy])for(const k of Object.keys(policyStats) as (keyof typeof searchStats)[])policyStats[k]=0;
@@ -136,7 +138,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const prior=BotPlayer.evaluateCurrentTrick(state.currentTrick,state.isTrumpRevealed?state.trumpSuit:null,id,state.players);
           try { engine.playCard(id, chosen.id);
             const next=engine.getPublicState();
-            if(prior.isPartnerWinning&&policy===candidate){
+            if(prior.isPartnerWinning&&candidateRole){
               const complete=next.completedTricks.find(t=>t.trickNumber===state.currentTrick.trickNumber);
               const trick=complete??next.currentTrick;
               const after=BotPlayer.evaluateCurrentTrick(trick,next.isTrumpRevealed?next.trumpSuit:null,id,state.players);
@@ -156,7 +158,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
     const delta={...searchStats};
     for(const key of Object.keys(delta) as (keyof typeof delta)[])delta[key]-=initialStats[key];
     return {
-      seed, candidateTeam, dealHash, winner, terminal:{matchOver:final.isMatchOver,matchWinner:final.matchWinnerTeam},
+      seed, candidateTeam, candidatePlayerIds:initial.players.filter(p=>p.team===candidateTeam).map(p=>p.id),dealHash, winner, terminal:{matchOver:final.isMatchOver,matchWinner:final.matchWinnerTeam},
       search:delta,partnership,searchByPolicy,
       advanced:Object.fromEntries(Object.entries(advancedStats).map(([k,v])=>[k,v-initialAdvanced[k as keyof typeof advancedStats]])) as typeof advancedStats,
       endgame:Object.fromEntries(Object.entries(endgameStats).map(([k,v])=>[k,v-initialEndgame[k as keyof typeof endgameStats]])) as typeof endgameStats,
