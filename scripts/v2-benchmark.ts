@@ -9,10 +9,12 @@ const args=process.argv.slice(2),get=(k:string,d:string)=>args.includes(k)?args[
 const seed=Number(get('--seed','10000')),pairs=Number(get('--pairs','50')),time=Number(get('--time-ms','Infinity'));
 const candidate=get('--candidate','ai-v2-ismcts') as Policy,baseline=get('--baseline','corrected-search') as Policy;
 const options:V2Options={iterations:Number(get('--iterations','64')),particles:Number(get('--particles','16')),weighted:get('--weighted','false')==='true',
+ rollout:get('--rollout','legacy') as V2Options['rollout'],safeProbability:Number(get('--safe-probability','.75')),reuseTemplates:get('--reuse-templates','true')==='true',lightRollouts:get('--light-rollouts','true')==='true',
  partnership:get('--partnership','true')==='true',adaptive:get('--adaptive','true')==='true',exact:true};
 if(![candidate,baseline].every(p=>['ai-v2-ismcts','corrected-search','advanced-search','heuristic','production-legacy','neural-direct','production','neural'].includes(p)))throw new Error('V2_UNKNOWN_POLICY');
-for(const flag of ['--weighted','--partnership','--adaptive'])if(!['true','false'].includes(get(flag,'false')))throw new Error('V2_BOOLEAN_CONFIG');
+for(const flag of ['--weighted','--partnership','--adaptive','--reuse-templates','--light-rollouts'])if(!['true','false'].includes(get(flag,'false')))throw new Error('V2_BOOLEAN_CONFIG');
 if(!Number.isSafeInteger(options.iterations)||options.iterations!<1||options.iterations!>10000||!Number.isSafeInteger(options.particles)||options.particles!<1||options.particles!>128)throw new Error('V2_SEARCH_CONFIG');
+if(!['legacy','control'].includes(options.rollout??'legacy')||!Number.isFinite(options.safeProbability)||(options.safeProbability??0)<0||(options.safeProbability??0)>1)throw new Error('V2_ROLLOUT_CONFIG');
 const checkpoint=get('--checkpoint',''),neuralMode=get('--neural-mode','guided');
 if(!['guided','policy'].includes(neuralMode)||checkpoint&&candidate!=='ai-v2-ismcts')throw new Error('V2_NEURAL_CONFIG');
 if(checkpoint){const model=loadCheckpoint(checkpoint);options.prior=(s,p,cards)=>model.predict(features(s,p),legalMask(cards)).policy;options.policyOnly=neuralMode==='policy';}

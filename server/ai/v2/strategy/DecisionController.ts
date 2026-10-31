@@ -6,7 +6,7 @@ import {SearchOptions} from '../../planning/MonteCarloPlanner';
 import {rankPartnershipActions} from '../../planning/PartnershipStrategy';
 import {solvePublicEndgame} from '../../planning/ExactEndgame';
 import {ismcts,V2Options} from '../search/ISMCTS';
-export const v2Stats={decisions:0,forced:0,obvious:0,searches:0,exact:0,iterations:0,nodes:0,invalidWorlds:0,fallbacks:0,deadlineStops:0,particles:0,ess:0,searchMs:0};
+export const v2Stats={decisions:0,forced:0,obvious:0,searches:0,exact:0,iterations:0,nodes:0,invalidWorlds:0,fallbacks:0,deadlineStops:0,particles:0,ess:0,searchMs:0,templateBuilds:0,fullObservations:0,lightObservations:0};
 export function decideV2(state:PublicGameState,priv:PrivatePlayerState,legal:Card[],search:SearchOptions={},options:V2Options={}):Card {
  const start=performance.now(),budget=options.timeMs??search.timeMs??25,base=options.iterations??64;
  if(!(budget>0)||!Number.isSafeInteger(base)||base<1||base>10000)throw new Error('V2_INVALID_BUDGET');
@@ -31,6 +31,7 @@ export function decideV2(state:PublicGameState,priv:PrivatePlayerState,legal:Car
   const iterations=options.adaptive===false?base:Math.max(1,Math.ceil(base*Math.max(.25,uncertainty)*branching));
   const remaining=deadline-performance.now();if(remaining<=0){v2Stats.deadlineStops++;return fallback();}
   const result=ismcts(state,priv,legal,{...options,rootPrior,iterations,timeMs:remaining,random:options.random??search.random});
+  v2Stats.templateBuilds+=result.efficiency.templateBuilds;v2Stats.fullObservations+=result.efficiency.fullObservations;v2Stats.lightObservations+=result.efficiency.lightObservations;
   v2Stats.searches++;v2Stats.iterations+=result.completed;v2Stats.nodes+=result.nodes;v2Stats.invalidWorlds+=result.invalidWorlds;
   v2Stats.deadlineStops+=result.deadlineStops;v2Stats.particles+=result.belief?.proposals??0;v2Stats.ess+=result.belief?.ess??0;v2Stats.searchMs+=result.milliseconds;
   options.onResult?.(result,state,priv);return result.fallback?fallback():result.card;

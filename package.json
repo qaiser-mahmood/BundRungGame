@@ -21,7 +21,8 @@
     "benchmark:v2:beliefs": "node --import tsx scripts/v2-belief-calibration.ts",
     "benchmark:v2:cards": "node --import tsx scripts/benchmark-v2-cards.ts",
     "benchmark:v2:throughput": "node --import tsx scripts/v2-throughput.ts",
-    "learn:v2": "node --import tsx scripts/v2-learning.ts"
+    "learn:v2": "node --import tsx scripts/v2-learning.ts",
+    "benchmark:v2:efficiency": "node --import tsx scripts/v2-efficiency.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
