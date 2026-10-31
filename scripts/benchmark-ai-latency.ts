@@ -13,6 +13,8 @@ const rooms=Number(value('--rooms','8')),rounds=Number(value('--rounds','24')),c
 if(![rooms,rounds,cadence].every(n=>Number.isSafeInteger(n)&&n>0)||rooms>64||rounds>500)throw new Error('Invalid load parameters');
 const hash=()=>createHash('sha256').update(readFileSync('server/ai/models/bund_rung_brain.json')).digest('hex');
 const queued=value('--scheduler','direct')==='queued',queue=queued?new(await import('../server/ai/RoomTurnQueue')).RoomTurnQueue():null,queueWaitMs:number[]=[];
+const policy=value('--policy','corrected-search');
+if(policy!=='corrected-search'&&policy!=='advanced-search')throw new Error('Invalid policy');
 const before=hash();
 const engines=Array.from({length:rooms},(_,i)=>setupGame(i+2));
 // Startup/checkpoint loading is measured separately from steady-state scheduling.
@@ -34,7 +36,7 @@ for(let round=0;round<rounds;round++){
         const state=engine.getPublicState(),id=state.currentTurnPlayerId!;
         const begin=performance.now();
         withRandom(seededRandom(round*rooms+i+1),()=>BotPlayer.handleBotTurn(engine,id,{roomId:`latency:${i}`,learning:true,
-          policy:{name:'corrected-search',search:{random:seededRandom(round*rooms+i+1)}}}));
+          policy:{name:policy,search:{random:seededRandom(round*rooms+i+1)}}}));
         decisionMs.push(performance.now()-begin);
       }
       // Approximate the real four-player broadcast serialization workload.
@@ -47,7 +49,7 @@ for(let round=0;round<rounds;round++){
 }
 await pause(30);clearInterval(heartbeat);histogram.disable();
 const distribution=(xs:number[])=>{const sorted=[...xs].sort((a,b)=>a-b);return {count:xs.length,meanMs:xs.reduce((a,b)=>a+b,0)/(xs.length||1),p95Ms:sorted[Math.ceil(xs.length*.95)-1]??0,maxMs:sorted.at(-1)??0};};
-const report={schemaVersion:1,label:value('--label',queued?'optimized-room-queue':'optimized-direct-timers'),scheduler:queued?'room-queue':'direct-timers',rooms,rounds,cadenceMs:cadence,node:process.version,startupMs,
+const report={schemaVersion:1,policy,label:value('--label',queued?'optimized-room-queue':'optimized-direct-timers'),scheduler:queued?'room-queue':'direct-timers',rooms,rounds,cadenceMs:cadence,node:process.version,startupMs,
   durationMs:performance.now()-started,decision:distribution(decisionMs),roomJob:distribution(jobMs),queueWait:distribution(queueWaitMs),heartbeatDelay:distribution(heartbeats),
   eventLoop:{p95Ms:histogram.percentile(95)/1e6,maxMs:histogram.max/1e6},search:{...searchStats},modelBefore:before,modelAfter:hash()};
 if(report.modelAfter!==before)throw new Error('Canonical model changed');
