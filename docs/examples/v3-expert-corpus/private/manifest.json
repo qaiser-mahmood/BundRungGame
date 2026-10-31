@@ -1,0 +1,529 @@
+{
+  "schema": "bundrung-v3-annotation-corpus/v1",
+  "featureSchema": "bundrung-v3-strategy-features/v1",
+  "generator": "official-engine-observable/v1",
+  "config": {
+    "seed": 1200000,
+    "trainDeals": 8,
+    "validationDeals": 4,
+    "holdoutDeals": 4,
+    "positionsPerDeal": 4,
+    "sourceCommit": "8c24b2adc4c5906e2c13df4ddc470fabb3ce1346"
+  },
+  "packetHash": "6b5f447ae36ea2e38002c7976e8ffde83cb7b3893fb2174b2aeb3963736612c6",
+  "sources": [
+    {
+      "packetId": "cf50d4cdea5e8322766292706b08be174b5f9846ba60265e42e775c84a9acc52",
+      "dealKey": "e2a2078e821801a6dd756dfe79dd32b8ddb8d21b80584418a6d64650a19ae8cc",
+      "observationHash": "0b9230f411a6a00eee114cdd817da5e93c01ce94e4b41b88c7339e3eb6d7d56c",
+      "seed": 1200000,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "ec5f3a5cbae3313feb70006ad673fa49182250ec0bb3659cb104ec3abf049574",
+      "dealKey": "e2a2078e821801a6dd756dfe79dd32b8ddb8d21b80584418a6d64650a19ae8cc",
+      "observationHash": "0cd07d5f95fd4603a7ff2d312f5706d8e4b2f61e9822fc5e25f3c28c2cc8f11c",
+      "seed": 1200000,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "2c6dc3238e318dca77e4e2f45840db8c554bdca0014dfa1901e6af0e386a034e",
+      "dealKey": "e2a2078e821801a6dd756dfe79dd32b8ddb8d21b80584418a6d64650a19ae8cc",
+      "observationHash": "438a7cf9a7cf59a90bdf958143047503ec86c8bd68a2bc95ba859e517fa9df3b",
+      "seed": 1200000,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "2f5c7136502a85fcab515e5e343644fb16461b548dd3b01aabf4017554f84fa7",
+      "dealKey": "e2a2078e821801a6dd756dfe79dd32b8ddb8d21b80584418a6d64650a19ae8cc",
+      "observationHash": "2cd01698be43cc6b1581da6ec94eae00570ac4dda94e9ef181eb691b99b6578f",
+      "seed": 1200000,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "61593fa264c1cbc455821d35f8204083ec5da2b94a11233e923e248bcc4a8423",
+      "dealKey": "db8ab5041bf76d7f985127da93a7580051103438ef55f290fff65b10adb8a73d",
+      "observationHash": "3304c8690576649872fcdac1fd4e97f080deb39800bf0cdf6d197964748389e0",
+      "seed": 1200001,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "65a3188841e05b11caf82289e692d02661036212571f17ef60469fa92bf9b6ce",
+      "dealKey": "db8ab5041bf76d7f985127da93a7580051103438ef55f290fff65b10adb8a73d",
+      "observationHash": "71ae5a4f19ba5c6038dd65a2c183b525efe9f3540e0050d8ade3b114aca7c63e",
+      "seed": 1200001,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "10e637fa4b8bb4927162dda491b5cd441ff53071930f42c009ac4b8d01364cf8",
+      "dealKey": "db8ab5041bf76d7f985127da93a7580051103438ef55f290fff65b10adb8a73d",
+      "observationHash": "af81bdfa90164cfecb96da904ace7ed09126818379b9deebb0688575574e2516",
+      "seed": 1200001,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "9f9d44c5370d8474ca6c88096efa488b9cb54717bec2e2c6958ee613298dfd5c",
+      "dealKey": "db8ab5041bf76d7f985127da93a7580051103438ef55f290fff65b10adb8a73d",
+      "observationHash": "79e8abc3d965e7cb60eac6e096853f36049c6421cfdb3ff6cff6df519b62095e",
+      "seed": 1200001,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "a40baccf717f6a6b7e286b8864ef6ad0edbca9c318e3ea784862d53225a1f975",
+      "dealKey": "c1be64c695b7f98ad628bb497694ddd0d8d847b5a5ad75f0dbc598da1cfbce02",
+      "observationHash": "fa553467f4d5e6225e03737a5e1c2758fda6ca9c80eee0479b13e08e86ae55d0",
+      "seed": 1200002,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "f3b1e40cb79c95e7775d9daea58d0e2b3bea09e3af70c49e8cf8304bd678c7ec",
+      "dealKey": "c1be64c695b7f98ad628bb497694ddd0d8d847b5a5ad75f0dbc598da1cfbce02",
+      "observationHash": "b8e8e2abbdf1f6165af1dff1ebd15d857f39e44ab44d751d1ac633d18ece093f",
+      "seed": 1200002,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "af63f437a55f9f8cb0cdd56f549cb9e6011c2e55384190c1a78b474c1eef044d",
+      "dealKey": "c1be64c695b7f98ad628bb497694ddd0d8d847b5a5ad75f0dbc598da1cfbce02",
+      "observationHash": "a60e92df235f36967322f2a108722291b2fa5434425994894fb42872e5861af5",
+      "seed": 1200002,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "d814973b2a2ca73abb9ede5d2cc37cdca1c937a66356936992b11dc57245a83e",
+      "dealKey": "c1be64c695b7f98ad628bb497694ddd0d8d847b5a5ad75f0dbc598da1cfbce02",
+      "observationHash": "de54face70ef865345ce385b723f54e638333dfb558b6a34dc69688a16fe66b3",
+      "seed": 1200002,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "485bd05a6be0b747a7a6c2e8ebe96289c9532636d5b0e956a8980e99ae153ceb",
+      "dealKey": "70426a41402a4c8664a380c736226422f636f75d50e8615d95afb9887d3baaf0",
+      "observationHash": "92c16fca3a911210283bc34c9842366d284bd10a5febec1093aa62ebc0ae450b",
+      "seed": 1200003,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "fae2fab1f5edb7fe7b01142fc0367e3330528ba5c05d64a6dfe52c6a010ca097",
+      "dealKey": "70426a41402a4c8664a380c736226422f636f75d50e8615d95afb9887d3baaf0",
+      "observationHash": "daaa13a304561fa19eebf92cf264a78192b0ab1aa1ef50e768ef9e83ae9a0975",
+      "seed": 1200003,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "20776a22c848f0bf0b24ccf7439bdbac61f2aa953752dd590cc8db9d20393a29",
+      "dealKey": "70426a41402a4c8664a380c736226422f636f75d50e8615d95afb9887d3baaf0",
+      "observationHash": "b394f239136d820495965f1bd98f7c26225b931179ef00e10b9066f5e3890651",
+      "seed": 1200003,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "50150d20a10b2593af22b884e3e3bfcbbbcac059faa305812fc9a38fb25284b4",
+      "dealKey": "70426a41402a4c8664a380c736226422f636f75d50e8615d95afb9887d3baaf0",
+      "observationHash": "a65b343481451c65a2684d23e1e605c85747f31cd817d7d7e821b194869046c6",
+      "seed": 1200003,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "08b54ce20927e3a51a5b7dd940052c117b320615b1d01732991c5d0e04209c28",
+      "dealKey": "02cde0d09ba376a981836c7702317eade65cb9dfaeb98f1e8e9d96ccc6377681",
+      "observationHash": "66dc52cee158689e0eda90e77c406aa7dcb839e5e8a53a1d19f040a4045e353f",
+      "seed": 1200004,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "6615edf6db7d31f717c6d83649f3b82319b7cb6fec55348ac3307c4dc3e7f6c4",
+      "dealKey": "02cde0d09ba376a981836c7702317eade65cb9dfaeb98f1e8e9d96ccc6377681",
+      "observationHash": "f9c5c839e48c7c0edde76e3c45dc2980cfc1e476b28b9f667f0584c82fe803ff",
+      "seed": 1200004,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "41662c132df16876709c13ff8a7e9a5914c1a68f220ad641ba3c56b491ec694b",
+      "dealKey": "02cde0d09ba376a981836c7702317eade65cb9dfaeb98f1e8e9d96ccc6377681",
+      "observationHash": "d24a29d04dc91ce7e25002e1d0bcb085d1dbd88cdf878b314e4fdba8bbd109c9",
+      "seed": 1200004,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "96a3f5463f3458a41c59f5b6d96205b4ed81f2be8fa3e217a755020e0a080f05",
+      "dealKey": "02cde0d09ba376a981836c7702317eade65cb9dfaeb98f1e8e9d96ccc6377681",
+      "observationHash": "342f09ef7a27140ce1cb89cc05d3fbe4018015aa86e3cc54986ca99a6cd92637",
+      "seed": 1200004,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "7570555c4fc7ace75811e574bdd0bc47838a16bfe8eda5f48dcc7244bc73bf18",
+      "dealKey": "8c146a2f3cd085834bcab656349b0e217f71a520136269941c8d94f9a22ba8a8",
+      "observationHash": "ada26077666b3da1d2c5346cbb43faf1dafa8f1666e65cabf87cc1d65ff49b83",
+      "seed": 1200005,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "079dda19b7a7a5d0bc867ef16fc48fbf510df5d52cdc8b065e1b7eb97890cf4f",
+      "dealKey": "8c146a2f3cd085834bcab656349b0e217f71a520136269941c8d94f9a22ba8a8",
+      "observationHash": "473cd0f937f065539b8f8132a9f2a0acd60d6ad3e371c6de5c77d15cbf11bf37",
+      "seed": 1200005,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "8a2d43109d894690c07809f8e4f5e73c9822e5909395248d757181931842566b",
+      "dealKey": "8c146a2f3cd085834bcab656349b0e217f71a520136269941c8d94f9a22ba8a8",
+      "observationHash": "13e45b6ed15fc229ee02d672869f71a610cbc05d936d83f144673c0fb13820c2",
+      "seed": 1200005,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "b31ba8ca6f9db08376809318ab02ea5304105f91dae7dbdeaec8bbba0ccc4e3a",
+      "dealKey": "8c146a2f3cd085834bcab656349b0e217f71a520136269941c8d94f9a22ba8a8",
+      "observationHash": "89b44f540cdbc00b094d5f2a4925ab4663458506b6b5303999da80c8db78ebf9",
+      "seed": 1200005,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "567cd78a3b60f3eb72b1b3af04099a84dc3fe1ee87c9f858b25d11d1d3339e5f",
+      "dealKey": "2b077fc8ce13a1f0843f5d8ef62c2ca31586f972ad18a44afa386ad5e82fb454",
+      "observationHash": "e0787e35ec14b1db0df3db2ebec6c1598eac3eb48f77f3df918161b4214c2a18",
+      "seed": 1200006,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "212ac99e3c52de23992c49077e1010da8620ad561647e036b7e6d444bb9a9751",
+      "dealKey": "2b077fc8ce13a1f0843f5d8ef62c2ca31586f972ad18a44afa386ad5e82fb454",
+      "observationHash": "c618d62bdb7be7a2e46226d00ad2e4d484eec350dbcf5a4e7067b910a19b4d76",
+      "seed": 1200006,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "62d29749a87408d194d795663950aa230c1f0cc4e103ccaed1a59b0400a46f3c",
+      "dealKey": "2b077fc8ce13a1f0843f5d8ef62c2ca31586f972ad18a44afa386ad5e82fb454",
+      "observationHash": "d1fbb2c8ff9555990738eafef5c48f5990a3f50a41123d785c32230b35d386af",
+      "seed": 1200006,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "18fe0a100a56d018d5e478f15612be474ed002ef8ca8b76905c92562c044159b",
+      "dealKey": "2b077fc8ce13a1f0843f5d8ef62c2ca31586f972ad18a44afa386ad5e82fb454",
+      "observationHash": "fdedce24123037441def220b2a6d281222addba77a62ade911ae7120f56e8587",
+      "seed": 1200006,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "5b2750a64828b29424693823bb44c68290376620e42f0d92855b28862516d2bb",
+      "dealKey": "6968cc04aef85db479e1ebb36a0d5d099bed88d7c1bfd2e4b1ab0757a44378c2",
+      "observationHash": "8e5648bc830aed9b01e8fae0dbee26a75abf03c5f8124c51159aeb4789a96f63",
+      "seed": 1200007,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "24203b3c8a1b0f0766e96904bc41badd8d8e9244817052d6a8e3bad51120f932",
+      "dealKey": "6968cc04aef85db479e1ebb36a0d5d099bed88d7c1bfd2e4b1ab0757a44378c2",
+      "observationHash": "b2a4aac146da73b9ca7f133209d644717cd9e93471a07ce41d1c66904b171006",
+      "seed": 1200007,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "1af6769c3949b253400f05efe4bae97f99d550bf4b89c0db416ca219e4c3311f",
+      "dealKey": "6968cc04aef85db479e1ebb36a0d5d099bed88d7c1bfd2e4b1ab0757a44378c2",
+      "observationHash": "c916c4b0f7701710268c13e51f099917384fe458789e1c64b7c319b4c457304c",
+      "seed": 1200007,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "d9902b118abe9248e58d2ff35f351bcec379d5172521bcd73fb14ac87ab4815f",
+      "dealKey": "6968cc04aef85db479e1ebb36a0d5d099bed88d7c1bfd2e4b1ab0757a44378c2",
+      "observationHash": "92b796370d981eb8302a8a65b4d1e75364ae259d00f55406379ad0742f1a2918",
+      "seed": 1200007,
+      "split": "train",
+      "opponentStyle": "lowest-legal"
+    },
+    {
+      "packetId": "ba47f60e65c23d5556b0697419d7fe43fa107792fa1b037d8d84b3971bd53570",
+      "dealKey": "925453af460051e79bd1ced460d78157e6b661b82fe3e31796da193aebdb37c6",
+      "observationHash": "88e668fe368976b8a0954c9ae3cdb7edabb7e5075b98df5c7d50df86f489f330",
+      "seed": 1200008,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "78d95b5ccc672fed7eac277698f2621e9e6a937a5637b1a7d9eaa85a4d1f0a10",
+      "dealKey": "925453af460051e79bd1ced460d78157e6b661b82fe3e31796da193aebdb37c6",
+      "observationHash": "a91a4b35e2618cc8634c3abe0746503ff9db40bc9dfadc437532572ec4d59b2d",
+      "seed": 1200008,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "320efc033f6ea7b068e84d7c236ba0b508d195aeaac4a09761041cc2cd4fca75",
+      "dealKey": "925453af460051e79bd1ced460d78157e6b661b82fe3e31796da193aebdb37c6",
+      "observationHash": "d9dfd04a4ec8f432d027d66012b099302e628a5710f43c10ea839adbc9e76e50",
+      "seed": 1200008,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "b0406b846ffa2c90fe7de40b32be1236e9d08736053a944175fb106cec9f8287",
+      "dealKey": "925453af460051e79bd1ced460d78157e6b661b82fe3e31796da193aebdb37c6",
+      "observationHash": "39cbb9c58861454643ac6884e4b559af90371a5703cc08ab45112ddec38974eb",
+      "seed": 1200008,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "70cf7b266dbecf53e42c1f014e6f0945e2ab57b39250d8c61ae40c85b192a515",
+      "dealKey": "46b632605041e1b9607d77feac91f18aeb91f84edf7f4f7a782c916da71123a8",
+      "observationHash": "197f5ffd9e57270262b2df6bd5be75ff8f127340d6aa463cfe526e721d9260ba",
+      "seed": 1200009,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "0adc5317cd92358db3304e25e0d015cd2ede800a189562b2a9b4aecd28ca3f51",
+      "dealKey": "46b632605041e1b9607d77feac91f18aeb91f84edf7f4f7a782c916da71123a8",
+      "observationHash": "4cdd4660aca607c4962bc6e15bafe31f51b99f35d4525066dc120db417042773",
+      "seed": 1200009,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "6d3a6d01ef8eab17299e919fafe726bfe6e309154583e07a04f3382bea6495d3",
+      "dealKey": "46b632605041e1b9607d77feac91f18aeb91f84edf7f4f7a782c916da71123a8",
+      "observationHash": "b45d7d45882789dce87f345b81b57608d0b0ea6b205ccf2ef3e923622ce9d7d5",
+      "seed": 1200009,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "5b78daf4335593b2ac5d20b4fdf8a0d270e4fb0b2b8ff75f9a08a2fd53963ce7",
+      "dealKey": "46b632605041e1b9607d77feac91f18aeb91f84edf7f4f7a782c916da71123a8",
+      "observationHash": "d1d9694a51b5105d4239150af4b8002a89a5663f772985f5bfea8dc83ffc46de",
+      "seed": 1200009,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "61029b8a92f9a1b65b5c0d074a24e9fa36351328499520d40e44d4633d901f85",
+      "dealKey": "1ccb28b7888c73dc39194619bf2f3af24937cdc9a0474a26bee7ecfc6b039d25",
+      "observationHash": "b6cc51bdb7993ff5db1f09f689d67770f6b434316c8ac6afb7122628fa2984f0",
+      "seed": 1200010,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "913182b6bb63ca91dc3cace8c1d8dd10e54952fa999885e1b2bab8ac4913ecfe",
+      "dealKey": "1ccb28b7888c73dc39194619bf2f3af24937cdc9a0474a26bee7ecfc6b039d25",
+      "observationHash": "54f3c8547b2e3d2c92098b5cd436d84b299763196ee950d2265112a1638ef305",
+      "seed": 1200010,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "f1a21ef9e87dc335386757b3b62f98063b889c2fd38e061412b3859065ae4929",
+      "dealKey": "1ccb28b7888c73dc39194619bf2f3af24937cdc9a0474a26bee7ecfc6b039d25",
+      "observationHash": "4319755d6de8f006d059acbc844753c14a68c616d09dd965015085beb3eed6ad",
+      "seed": 1200010,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "efa6ac15ecaefea6811a31dec7022f650dc30ee0c4450b765df80c7c0323f568",
+      "dealKey": "1ccb28b7888c73dc39194619bf2f3af24937cdc9a0474a26bee7ecfc6b039d25",
+      "observationHash": "80fa07a88ef648bf4e9a54d2e7e979b8d58769c3d993d7e4b93a6ea0b8c10e3a",
+      "seed": 1200010,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "616fd5ff31da02e485dcef815b49763d20effe33962004fbf533a75a77c85b48",
+      "dealKey": "f46a5349bf740920781974fc5c8635a252f997dbac3da113d1fad7ab60a8eeb3",
+      "observationHash": "56b2fc4f1e6cf65f14be02e4d6dd23cc6106b1f3b41783eaa6afb1b2f2d230f5",
+      "seed": 1200011,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "507d981093d10d9437e21cf090d009a0aca4ccc76e4c09c9a279b23eac2fc129",
+      "dealKey": "f46a5349bf740920781974fc5c8635a252f997dbac3da113d1fad7ab60a8eeb3",
+      "observationHash": "fadca054eb265853b6cf0169b96789a9ff7bd9e9717f649966944fd1fcdfa453",
+      "seed": 1200011,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "c738de3a238d370be07b1f0e158a9dd569f7dd3c7187fc699b4b346abe455510",
+      "dealKey": "f46a5349bf740920781974fc5c8635a252f997dbac3da113d1fad7ab60a8eeb3",
+      "observationHash": "4730a126d54f29aa1595349e2350149a2e210ea83f27c2879cad53e2830ed89a",
+      "seed": 1200011,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "3e8655f390eda13422145098d893bc0dd7d1d311b62778499a877184e27f35c9",
+      "dealKey": "f46a5349bf740920781974fc5c8635a252f997dbac3da113d1fad7ab60a8eeb3",
+      "observationHash": "59f813a12e51027b86093c933df580c6e6a41bb52cc014d767a749147aea3610",
+      "seed": 1200011,
+      "split": "validation",
+      "opponentStyle": "highest-legal"
+    },
+    {
+      "packetId": "0619615dce7ae7f96ee8645a1b0d0b8475e05aa34022efb78fb4f2d83beb2a9a",
+      "dealKey": "f2f10e23ba49d5b2001a64555baa0441a5bb3cd3d2fa7536c5ee6b0dd5c2c511",
+      "observationHash": "7cc4890f40a6f9181d6f3193b7d3e6736b37946f95efa4db16122cee9ca44a3b",
+      "seed": 1200012,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "0970b7b113affbf9243e3fa33bc22122ae4a9da669152c14805c70e66881708c",
+      "dealKey": "f2f10e23ba49d5b2001a64555baa0441a5bb3cd3d2fa7536c5ee6b0dd5c2c511",
+      "observationHash": "70734d0ee69bacd772fdf0eb7d5b112ec5e223901a5275b4c143618bc9b39bfb",
+      "seed": 1200012,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "8e6af3d5687c8d62c4415f20f0b33506564cd49fe9c85e729f3167d108620561",
+      "dealKey": "f2f10e23ba49d5b2001a64555baa0441a5bb3cd3d2fa7536c5ee6b0dd5c2c511",
+      "observationHash": "26596f77df6aec68bb2af8660d213acf66ceb850ea34ee36f79d2145f327ca42",
+      "seed": 1200012,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "e78d5a8e64585c3abc73a8fae4f2fe4c511ca2e8ab46a6172b3a69fc31ca8420",
+      "dealKey": "f2f10e23ba49d5b2001a64555baa0441a5bb3cd3d2fa7536c5ee6b0dd5c2c511",
+      "observationHash": "2265f3087683b9dec80e73f879fdaa66ba90239d173e71db9cecf1d2d6279fcc",
+      "seed": 1200012,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "a3fc04522a12f1e0847d93bb1a39ad37142e88e13f2b7bfbbc1549b5a86dca4a",
+      "dealKey": "e0ac27f81aac79a9db418bda03c428774da2768c7119a2cb340d2ecf8aae29cc",
+      "observationHash": "21b6254504420a8010e482bebd88533466b56e27bdf1654ec362ff592ea1e555",
+      "seed": 1200013,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "f4d2b31faf535ee38b4bc71932bea710c49d3e494403810f9d912705305e1a60",
+      "dealKey": "e0ac27f81aac79a9db418bda03c428774da2768c7119a2cb340d2ecf8aae29cc",
+      "observationHash": "197ff69473a9d642c292ac38212e480b4b12eae719c5102e860d872f900a0f5a",
+      "seed": 1200013,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "a60d3d07ecd4effc00503e48f944b7b9b34cc030b2f62c1aad89f2df732885f5",
+      "dealKey": "e0ac27f81aac79a9db418bda03c428774da2768c7119a2cb340d2ecf8aae29cc",
+      "observationHash": "72bb0a92d1d5b54cb65100ad26301dc87e120c9d362cd1587096f7dbc90f8e0b",
+      "seed": 1200013,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "cb5d821c8bc2545873e2537fc990af97582d76ded117f410df87dffa7f15073b",
+      "dealKey": "e0ac27f81aac79a9db418bda03c428774da2768c7119a2cb340d2ecf8aae29cc",
+      "observationHash": "beda1250022a3ef50d6845ea82b7682be3e784392fad3290f39fb0f7e54dd963",
+      "seed": 1200013,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "66594e16a6f713eda67bbd2428d3dd2797875ff4bceb71beecbbdc395700f2ef",
+      "dealKey": "b7c86a72ecc6ead417562618d25e49f357b9bc12fde8a4d261650a4dd3f41a7e",
+      "observationHash": "482a08477231cff84eb37285f61cab7348e1f865b1d5b722d870acb1c78fc702",
+      "seed": 1200014,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "bd9a0738304b0b5791c5422e5be32295d322d6396ca88c094a6ae154b87456dd",
+      "dealKey": "b7c86a72ecc6ead417562618d25e49f357b9bc12fde8a4d261650a4dd3f41a7e",
+      "observationHash": "b811c2680e2fe40f362e805a23c4d01b52e6953ca507d9c16739bfdcc0493c55",
+      "seed": 1200014,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "46ed9bf073b71c435f3d5ad4e339f7ab31a2abe35516ec211413d14dcd1de236",
+      "dealKey": "b7c86a72ecc6ead417562618d25e49f357b9bc12fde8a4d261650a4dd3f41a7e",
+      "observationHash": "c8b9f386000c613510cce3bffd723f1bb4e2b131b17a195e7306e23199560aba",
+      "seed": 1200014,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "1a8cb5ca9c2b8ddbd683fb0ebb49af37da6bd99419825fc68e4c7de71cff8228",
+      "dealKey": "b7c86a72ecc6ead417562618d25e49f357b9bc12fde8a4d261650a4dd3f41a7e",
+      "observationHash": "cfe3e62668d27ac24ae8211bdd55ecad7e2bb53e1170c61d12c9d71954b9fbb0",
+      "seed": 1200014,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "813e7a1b23cd4c498daaf5d573209df9881691bf0c6bed3e2a202f0ae5ffdbce",
+      "dealKey": "95b4f196857171bca92d8a0fa202081c936b1fbd212f541c8300fbca9aea2f04",
+      "observationHash": "6b3e8448ebb5e28162774bc83b5894c72218064d599c510e6ab95636b82e86c5",
+      "seed": 1200015,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "311d5d7310421d93634e365ccacbad91fc7b890beaa97d306d71f29a18aa01d8",
+      "dealKey": "95b4f196857171bca92d8a0fa202081c936b1fbd212f541c8300fbca9aea2f04",
+      "observationHash": "fc229346fc80c2ce20a360e472d0fb895b243e78db890a857fa42dfecad0987c",
+      "seed": 1200015,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "b6d871ad226f4e4128f3e218d719d23a6b3bebc05c7b5faa80a29079515290cc",
+      "dealKey": "95b4f196857171bca92d8a0fa202081c936b1fbd212f541c8300fbca9aea2f04",
+      "observationHash": "3eef4b46674bfa7c33d30a29ad0df9700b032704a07754db5bf069617b2a3c0c",
+      "seed": 1200015,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    },
+    {
+      "packetId": "09abdff263b7bed8caa6e72a66841235eacd5fb40b197a7f888ad49a66996d7f",
+      "dealKey": "95b4f196857171bca92d8a0fa202081c936b1fbd212f541c8300fbca9aea2f04",
+      "observationHash": "120412615dac841b0d6ee80aba369ab3e059f7eb6172b05610725aae3224a39f",
+      "seed": 1200015,
+      "split": "holdout",
+      "opponentStyle": "seeded-uniform"
+    }
+  ],
+  "manifestHash": "2f29d87fac94ac913ae429e1fdbaebf665692900382255a083c1558aef0597b4"
+}
