@@ -22,7 +22,9 @@
     "benchmark:v2:cards": "node --import tsx scripts/benchmark-v2-cards.ts",
     "benchmark:v2:throughput": "node --import tsx scripts/v2-throughput.ts",
     "learn:v2": "node --import tsx scripts/v2-learning.ts",
-    "benchmark:v2:efficiency": "node --import tsx scripts/v2-efficiency.ts"
+    "benchmark:v2:efficiency": "node --import tsx scripts/v2-efficiency.ts",
+    "v3:data": "node --import tsx scripts/v3-expert-data.ts",
+    "v3:audit-data": "node --import tsx scripts/v3-data-audit.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
