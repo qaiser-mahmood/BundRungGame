@@ -1,79 +1,55 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash, randomUUID } from 'node:crypto';
 import { NeuralNetwork } from './NeuralNetwork';
-import { StateVectorizer } from './StateVectorizer';
+import { FEATURE_COUNT } from './FeatureSchema';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const canonical = fileURLToPath(new URL('../models/bund_rung_brain.json', import.meta.url));
+const baselineHash = '66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3';
 export class ModelManager {
   private static cachedModel: NeuralNetwork | null = null;
-  private static lastLoadedMtime: number = 0;
-  private static readonly MODEL_PATH = path.resolve(__dirname, '../models/bund_rung_brain.json');
+  private static lastLoadedMtime = 0;
 
-  /**
-   * Retrieves the trained model. Automatically hot-reloads if the model file on disk was updated by training.
-   */
+  public static loadModel(filename: string): NeuralNetwork {
+    const raw = fs.readFileSync(filename,'utf8');
+    // Only the exact preserved baseline may omit schema metadata.
+    const legacy = fs.realpathSync(filename) === fs.realpathSync(canonical) &&
+      createHash('sha256').update(raw).digest('hex') === baselineHash;
+    const model = NeuralNetwork.fromJSON(JSON.parse(raw),legacy);
+    if (model.inputSize !== FEATURE_COUNT || model.outputSize !== 52) throw new Error('Incompatible policy dimensions');
+    return model;
+  }
   public static getModel(): NeuralNetwork | null {
     try {
-      if (fs.existsSync(this.MODEL_PATH)) {
-        const stat = fs.statSync(this.MODEL_PATH);
-        // If cached and disk file has not changed, return cached model immediately
-        if (this.cachedModel && stat.mtimeMs === this.lastLoadedMtime) {
-          return this.cachedModel;
-        }
-
-        // Disk model is new or was updated by external training process
-        const raw = fs.readFileSync(this.MODEL_PATH, 'utf-8');
-        const data = JSON.parse(raw);
-        if (data.inputSize !== StateVectorizer.FEATURE_COUNT) {
-          console.log(`[AI Brain] Stored model input size (${data.inputSize}) does not match new concept-rich feature count (${StateVectorizer.FEATURE_COUNT}). Initializing upgraded brain.`);
-          return null;
-        }
-        const isReload = this.cachedModel !== null;
-        this.cachedModel = NeuralNetwork.fromJSON(data);
-        this.lastLoadedMtime = stat.mtimeMs;
-        if (isReload) {
-          console.log('🔄 [AI Brain] Hot-Reload: Detected newly trained brain on disk! Upgraded live server weights seamlessly.');
-        } else {
-          console.log('[AI Brain] Loaded trained Bund Rung Neural Brain from disk.');
-        }
-        return this.cachedModel;
+      const mtime = fs.statSync(canonical).mtimeMs;
+      if (!this.cachedModel || mtime !== this.lastLoadedMtime) {
+        this.cachedModel = this.loadModel(canonical);
+        this.lastLoadedMtime = mtime;
       }
-    } catch (err) {
-      console.warn('[AI Brain] Error loading/reloading neural model:', err);
-      if (this.cachedModel) return this.cachedModel;
+      return this.cachedModel;
+    } catch (error) {
+      this.clearCache();
+      console.error(JSON.stringify({component:'model',reason:'CHECKPOINT_REJECTED',error:String(error)}));
+      return null;
     }
-
-    return this.cachedModel;
   }
-
-  /**
-   * Saves a trained network to disk
-   */
-  public static saveModel(network: NeuralNetwork): void {
+  /** Atomic exclusive publication of an experimental checkpoint; never promotion. */
+  public static saveModel(network: NeuralNetwork, outputPath?: string): void {
+    if (!outputPath) throw new Error('An explicit experimental checkpoint path is required');
+    const destination = path.resolve(outputPath);
+    fs.mkdirSync(path.dirname(destination),{recursive:true});
+    const realDestination = path.join(fs.realpathSync(path.dirname(destination)),path.basename(destination));
+    if (realDestination === fs.realpathSync(canonical)) throw new Error('Canonical checkpoint is read-only');
+    NeuralNetwork.fromJSON(network.toJSON());
+    if (network.inputSize !== FEATURE_COUNT || network.outputSize !== 52) throw new Error('Incompatible policy dimensions');
+    const temporary = path.join(path.dirname(destination),`.checkpoint-${randomUUID()}.tmp`);
     try {
-      const dir = path.dirname(this.MODEL_PATH);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      const json = JSON.stringify(network.toJSON());
-      fs.writeFileSync(this.MODEL_PATH, json, 'utf-8');
-      const stat = fs.statSync(this.MODEL_PATH);
-      this.lastLoadedMtime = stat.mtimeMs;
-      this.cachedModel = network;
-      console.log(`[AI Brain] Saved trained model to ${this.MODEL_PATH} (${(json.length / 1024).toFixed(1)} KB)`);
-    } catch (err) {
-      console.error('[AI Brain] Failed to save neural model:', err);
-    }
+      const fd = fs.openSync(temporary,'wx',0o600);
+      try {fs.writeFileSync(fd,JSON.stringify(network.toJSON()));fs.fsyncSync(fd);} finally {fs.closeSync(fd);}
+      // link is atomic and fails if target already exists (no check/write race).
+      fs.linkSync(temporary,destination);
+    } finally {if(fs.existsSync(temporary))fs.unlinkSync(temporary);}
   }
-
-  /**
-   * Clears in-memory cached model
-   */
-  public static clearCache(): void {
-    this.cachedModel = null;
-    this.lastLoadedMtime = 0;
-  }
+  public static clearCache(): void {this.cachedModel=null;this.lastLoadedMtime=0;}
 }

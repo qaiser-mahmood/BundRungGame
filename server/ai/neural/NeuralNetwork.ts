@@ -1,3 +1,4 @@
+import { FEATURE_COUNT, FEATURE_SCHEMA_VERSION, ARCHITECTURE_VERSION } from './FeatureSchema';
 export interface DuelingNetworkWeights {
   inputSize: number;
   sharedSize1: number;
@@ -46,7 +47,7 @@ export class NeuralNetwork {
   public b_adv2: Float32Array; // [outputSize]
 
   constructor(
-    inputSize: number = 241,
+    inputSize: number = FEATURE_COUNT,
     sharedSize1: number = 256,
     sharedSize2: number = 128,
     valHiddenSize: number = 64,
@@ -133,11 +134,23 @@ export class NeuralNetwork {
     return norm;
   }
 
+  private static layerNormBackward(input: Float32Array, upstream: Float32Array): Float32Array {
+    const n = input.length;
+    const mean = input.reduce((a,b) => a+b, 0) / n;
+    const variance = input.reduce((a,b) => a+(b-mean)**2, 0) / n;
+    const inv = 1 / Math.sqrt(variance + 1e-5);
+    const normalized = Array.from(input, x => (x-mean)*inv);
+    const avg = upstream.reduce((a,b) => a+b, 0) / n;
+    const projection = normalized.reduce((a,b,i) => a+b*upstream[i], 0) / n;
+    return Float32Array.from(upstream, (g,i) => inv*(g-avg-normalized[i]*projection));
+  }
+
   /**
    * Forward pass: computes Dueling Q-values:
    * Q(s, a) = V(s) + (A(s, a) - mean(A(s, a')))
    */
   public forward(input: Float32Array): Float32Array {
+    this.validateInput(input);
     // 1. Shared Layer 1 (input -> 256)
     const z1 = new Float32Array(this.sharedSize1);
     for (let j = 0; j < this.sharedSize1; j++) {
@@ -222,7 +235,7 @@ export class NeuralNetwork {
     legalActionIndices: number[],
     epsilon: number = 0
   ): number {
-    if (legalActionIndices.length === 0) return 0;
+    if (!legalActionIndices.length || legalActionIndices.some(a => !Number.isInteger(a) || a < 0 || a >= this.outputSize)) throw new Error('Invalid legal action mask');
     if (legalActionIndices.length === 1) return legalActionIndices[0];
 
     // Exploration
@@ -255,6 +268,11 @@ export class NeuralNetwork {
     actionMask: boolean[],
     learningRate: number = 0.001
   ): number {
+    this.validateInput(input);
+    if (targetQValues.length !== this.outputSize || actionMask.length !== this.outputSize ||
+        !Array.from(targetQValues).every(Number.isFinite) || !Number.isFinite(learningRate) || learningRate < 0) {
+      throw new Error('Invalid training target, mask or learning rate');
+    }
     // 1. Forward Pass with activation caching
     const z1 = new Float32Array(this.sharedSize1);
     for (let j = 0; j < this.sharedSize1; j++) {
@@ -336,7 +354,7 @@ export class NeuralNetwork {
         const diff = qOut[m] - targetQValues[m];
         const clipped = Math.max(-1.0, Math.min(1.0, diff));
         dQ[m] = clipped;
-        totalLoss += diff * diff;
+        totalLoss += Math.abs(diff) <= 1 ? .5*diff*diff : Math.abs(diff)-.5;
         maskedCount++;
       }
     }
@@ -354,15 +372,12 @@ export class NeuralNetwork {
     const dAdv = new Float32Array(this.outputSize);
     const mean_dQ = dVal / this.outputSize;
     for (let m = 0; m < this.outputSize; m++) {
-      if (actionMask[m]) {
-        dAdv[m] = dQ[m] - mean_dQ;
-      }
+      dAdv[m] = dQ[m] - mean_dQ;
     }
 
     // 4. Backprop through Advantage Stream
     const d_z_adv1 = new Float32Array(this.advHiddenSize);
     for (let m = 0; m < this.outputSize; m++) {
-      if (!actionMask[m]) continue;
       const grad = dAdv[m];
       this.b_adv2[m] -= learningRate * grad;
       const offset = m * this.advHiddenSize;
@@ -409,9 +424,11 @@ export class NeuralNetwork {
     }
 
     // 7. Backprop through Shared Layer 2
+    const dNorm2 = Float32Array.from(dH2, (g,k) => g * NeuralNetwork.leakyReluGrad(norm2[k]));
+    const dZ2 = NeuralNetwork.layerNormBackward(z2, dNorm2);
     const dH1 = new Float32Array(this.sharedSize1);
     for (let k = 0; k < this.sharedSize2; k++) {
-      const grad = dH2[k] * NeuralNetwork.leakyReluGrad(h2[k]);
+      const grad = dZ2[k];
       this.b_shared2[k] -= learningRate * grad;
       const offset = k * this.sharedSize1;
       for (let j = 0; j < this.sharedSize1; j++) {
@@ -421,8 +438,10 @@ export class NeuralNetwork {
     }
 
     // 8. Backprop through Shared Layer 1
+    const dNorm1 = Float32Array.from(dH1, (g,j) => g * NeuralNetwork.leakyReluGrad(norm1[j]));
+    const dZ1 = NeuralNetwork.layerNormBackward(z1, dNorm1);
     for (let j = 0; j < this.sharedSize1; j++) {
-      const grad = dH1[j] * NeuralNetwork.leakyReluGrad(h1[j]);
+      const grad = dZ1[j];
       this.b_shared1[j] -= learningRate * grad;
       const offset = j * this.inputSize;
       for (let i = 0; i < this.inputSize; i++) {
@@ -492,6 +511,9 @@ export class NeuralNetwork {
    */
   public toJSON(): object {
     return {
+      formatVersion: 1,
+      architecture: ARCHITECTURE_VERSION,
+      featureSchema: FEATURE_SCHEMA_VERSION,
       inputSize: this.inputSize,
       sharedSize1: this.sharedSize1,
       sharedSize2: this.sharedSize2,
@@ -516,30 +538,39 @@ export class NeuralNetwork {
   /**
    * Deserializes weights from JSON object
    */
-  public static fromJSON(data: any): NeuralNetwork {
-    const net = new NeuralNetwork(
-      data.inputSize || 241,
-      data.sharedSize1 || 256,
-      data.sharedSize2 || 128,
-      data.valHiddenSize || 64,
-      data.advHiddenSize || 64,
-      data.outputSize || 52
-    );
-    if (data.w_shared1) net.w_shared1.set(data.w_shared1);
-    if (data.b_shared1) net.b_shared1.set(data.b_shared1);
-    if (data.w_shared2) net.w_shared2.set(data.w_shared2);
-    if (data.b_shared2) net.b_shared2.set(data.b_shared2);
-
-    if (data.w_val1) net.w_val1.set(data.w_val1);
-    if (data.b_val1) net.b_val1.set(data.b_val1);
-    if (data.w_val2) net.w_val2.set(data.w_val2);
-    if (data.b_val2) net.b_val2.set(data.b_val2);
-
-    if (data.w_adv1) net.w_adv1.set(data.w_adv1);
-    if (data.b_adv1) net.b_adv1.set(data.b_adv1);
-    if (data.w_adv2) net.w_adv2.set(data.w_adv2);
-    if (data.b_adv2) net.b_adv2.set(data.b_adv2);
-
+  public static fromJSON(value: unknown, allowLegacy = false): NeuralNetwork {
+    if (!value || typeof value !== 'object') throw new Error('Checkpoint must be an object');
+    const data = value as Record<string, unknown>;
+    if (!(allowLegacy && data.formatVersion === undefined) &&
+        (data.formatVersion !== 1 || data.architecture !== ARCHITECTURE_VERSION || data.featureSchema !== FEATURE_SCHEMA_VERSION)) {
+      throw new Error('Unsupported checkpoint architecture or feature schema');
+    }
+    const dimension = (key: string): number => {
+      const n = data[key];
+      if (typeof n !== 'number' || !Number.isSafeInteger(n) || n < 1 || n > 4096) throw new Error(`Invalid dimension ${key}`);
+      return n;
+    };
+    const dims = ['inputSize','sharedSize1','sharedSize2','valHiddenSize','advHiddenSize','outputSize'].map(dimension);
+    const [input,h1,h2,v,a,out] = dims;
+    const lengths: Record<string, number> = {w_shared1:input*h1,b_shared1:h1,w_shared2:h1*h2,b_shared2:h2,
+      w_val1:h2*v,b_val1:v,w_val2:v,b_val2:1,w_adv1:h2*a,b_adv1:a,w_adv2:a*out,b_adv2:out};
+    for (const [key, length] of Object.entries(lengths)) {
+      const tensor = data[key];
+      if (!Array.isArray(tensor) || tensor.length !== length || !tensor.every(x => typeof x === 'number' && Number.isFinite(x) && Number.isFinite(Math.fround(x)))) {
+        throw new Error(`Invalid checkpoint tensor ${key}`);
+      }
+    }
+    const net = new NeuralNetwork(input,h1,h2,v,a,out);
+    for (const key of Object.keys(lengths)) {
+      // Tensor names are validated against the fixed architecture above.
+      const target = net[key as keyof NeuralNetwork];
+      if (!(target instanceof Float32Array)) throw new Error('Unsupported tensor');
+      target.set(data[key] as number[]);
+    }
     return net;
+  }
+
+  private validateInput(input: Float32Array): void {
+    if (input.length !== this.inputSize || !Array.from(input).every(Number.isFinite)) throw new Error('Invalid network input');
   }
 }
