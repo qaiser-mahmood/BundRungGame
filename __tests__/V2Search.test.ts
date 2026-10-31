@@ -1,3 +1,4 @@
+import * as likelihood from '../server/ai/v2/beliefs/OpponentLikelihood';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {setupGame,seededRandom} from '../scripts/ai-benchmark';
 import {ismcts,selectAction,Node} from '../server/ai/v2/search/ISMCTS';
@@ -62,6 +63,12 @@ describe('AI v2 information-set search and control',()=>{
   const w=normalizedWeights([-10000,-10001]);expect(w.reduce((a,b)=>a+b)).toBeCloseTo(1);expect(effectiveSampleSize(w)).toBeGreaterThan(1);
   const f=fixture(),pool=new ParticleSampler(new BeliefState(f.state,f.priv),seededRandom(5),true,16);expect(pool.diagnostics.ess).toBeGreaterThan(0);
   for(let i=0;i<16;i++){const s=fromObservation(f.state,pool.sample());expect(s.hands.reduce((n,h)=>n+h.length,0)+Number(s.locked>=0)).toBe(52);}
+ });
+ it('detects particle impoverishment and systematically resamples extreme weights',()=>{
+  const f=fixture();let n=0;vi.spyOn(likelihood,'opponentLogLikelihood').mockImplementation(()=>n++===0?0:-50);
+  const pool=new ParticleSampler(new BeliefState(f.state,f.priv),seededRandom(1),true,16);
+  expect(pool.diagnostics.ess).toBeCloseTo(1);expect(pool.diagnostics.impoverished).toBe(true);expect(pool.diagnostics.resampled).toBe(true);
+  const first=pool.sample();expect(pool.sample()).toBe(first);
  });
  it('retains the production default and rejects illegal compact plays',()=>{
   expect(defaultPolicy.name).toBe('corrected-search');const f=fixture(),s=fromObservation(f.state,oracleWorld(f.engine));expect(()=>apply(s,{type:'play',card:255})).toThrow('V2_ILLEGAL_CARD');

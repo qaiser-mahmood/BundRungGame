@@ -1,3 +1,4 @@
+import {v2Stats} from '../server/ai/v2/strategy/DecisionController';
 import {performance,monitorEventLoopDelay} from 'node:perf_hooks';
 import {writeFileSync,readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -51,7 +52,7 @@ await pause(30);clearInterval(heartbeat);histogram.disable();
 const distribution=(xs:number[])=>{const sorted=[...xs].sort((a,b)=>a-b);return {count:xs.length,meanMs:xs.reduce((a,b)=>a+b,0)/(xs.length||1),p95Ms:sorted[Math.ceil(xs.length*.95)-1]??0,maxMs:sorted.at(-1)??0};};
 const report={schemaVersion:1,policy,label:value('--label',queued?'optimized-room-queue':'optimized-direct-timers'),scheduler:queued?'room-queue':'direct-timers',rooms,rounds,cadenceMs:cadence,node:process.version,startupMs,
   durationMs:performance.now()-started,decision:distribution(decisionMs),roomJob:distribution(jobMs),queueWait:distribution(queueWaitMs),heartbeatDelay:distribution(heartbeats),
-  eventLoop:{p95Ms:histogram.percentile(95)/1e6,maxMs:histogram.max/1e6},search:{...searchStats},modelBefore:before,modelAfter:hash()};
+  eventLoop:{p95Ms:histogram.percentile(95)/1e6,maxMs:histogram.max/1e6},search:{...searchStats},v2:{...v2Stats},modelBefore:before,modelAfter:hash()};
 if(report.modelAfter!==before)throw new Error('Canonical model changed');
 writeFileSync(value('--output','/tmp/ai-latency.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
 console.log(JSON.stringify(report));

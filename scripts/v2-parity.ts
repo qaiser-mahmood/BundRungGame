@@ -17,13 +17,13 @@ export function compare(engine:BundRungEngine,s:CompactState):void {
  const p=engine.getPublicState(),ids=p.players.map(x=>x.id),seat=(id:string|null|undefined)=>ids.indexOf(id??'');
  const publicPlay=(x:typeof p.currentTrick.cards[number])=>[seat(x.playerId),x.card?.id??null,!!x.isFaceDown,!!x.isAceDowngraded];
  const compactPlay=(x:CompactState['plays'][number])=>[x.seat,x.hidden&&!s.revealed?null:CARDS[x.card].id,x.hidden,x.aceDown];
- const expected={plays:p.currentTrick.cards.map(publicPlay),history:p.completedTricks.flatMap(t=>t.cards.map(publicPlay)),phase:p.phase,actor:p.activePlayerIndex,dealer:p.dealerPlayerIndex,trick:p.currentTrick.trickNumber,
+ const expected={accumulated:p.faceDownCallerCards.map(c=>[c.trickNumber,c.card?.id??null,!c.isRevealed]),plays:p.currentTrick.cards.map(publicPlay),history:p.completedTricks.flatMap(t=>t.cards.map(publicPlay)),phase:p.phase,actor:p.activePlayerIndex,dealer:p.dealerPlayerIndex,trick:p.currentTrick.trickNumber,
   lead:p.currentTrick.leadSuit,revealed:p.isTrumpRevealed,locked:p.trumpCardPlaced,pending:p.isTrumpRevealPending,paused:p.isRungRevealPaused,
   challenge:p.faceDownLeadPending,counts:p.players.map(x=>x.cardsInHandCount),winner:p.lastGameWinningTeam,
   streak:p.streakCount,streakSeat:seat(p.streakWinnerPlayerId),last:seat(p.lastTrickWinnerPlayerId),teamTricks:[p.team1TricksWon,p.team2TricksWon],
   winners:p.completedTricks.map(t=>seat(t.winnerPlayerId)),score:p.scorecard,match:p.matchWinnerTeam,
   legal:ids.map(id=>engine.getLegalCardsForPlayer(id).map(c=>indexOf(c.id)).sort((a,b)=>a-b)),request:ids.map(id=>engine.getPrivateState(id).canRequestRungReveal),show:ids.map(id=>engine.getPrivateState(id).canShowTrump)};
- const actual={plays:s.plays.map(compactPlay),history:s.history.map(compactPlay),phase:s.phase,actor:s.actor,dealer:s.dealer,trick:s.trick,lead:s.lead<0?null:CARDS[s.lead*13].suit,revealed:s.revealed,locked:s.locked>=0,pending:s.pending,paused:s.paused,
+ const actual={accumulated:s.accumulated.map(c=>[c.trick,s.revealed||!c.hidden?CARDS[c.card].id:null,c.hidden]),plays:s.plays.map(compactPlay),history:s.history.map(compactPlay),phase:s.phase,actor:s.actor,dealer:s.dealer,trick:s.trick,lead:s.lead<0?null:CARDS[s.lead*13].suit,revealed:s.revealed,locked:s.locked>=0,pending:s.pending,paused:s.paused,
   challenge:s.challenge,counts:s.hands.map((h,i)=>h.length+Number(i===s.caller&&s.locked>=0)),winner:s.winner<0?null:s.winner===0?'TEAM_1':'TEAM_2',
   streak:s.streak,streakSeat:s.streakSeat,last:s.lastWinner,teamTricks:s.teamTricks,winners:s.winners,score:s.score,match:s.matchWinner<0?null:s.matchWinner===0?'TEAM_1':'TEAM_2',
   legal:ids.map((_,i)=>legalCards(s,i).sort((a,b)=>a-b)),request:ids.map((_,i)=>canRequest(s,i)),show:ids.map((_,i)=>canShow(s,i))};

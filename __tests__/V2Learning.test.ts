@@ -24,6 +24,7 @@ describe('AI v2 isolated experimental policy/value learning',()=>{
   try{
    const f=fixture(),m=ExperimentalModel.create(7,seededRandom(7));m.train([f.example]);saveCheckpoint(dir+'/checkpoint.json',m);const loaded=loadCheckpoint(dir+'/checkpoint.json');expect(loaded.weights).toEqual(m.weights);
    loaded.train([f.example]);expect(loaded.weights.steps).toBe(2);expect(()=>saveCheckpoint(canonical,m)).toThrow('V2_EXPERIMENT_PATH_ONLY');
+   const incompatible=JSON.parse(readFileSync(dir+'/checkpoint.json','utf8'));incompatible.weights.featureSchema='future';writeFileSync(dir+'/incompatible.json',JSON.stringify(incompatible));expect(()=>loadCheckpoint(dir+'/incompatible.json')).toThrow('V2_CHECKPOINT_SCHEMA');
    const bad=JSON.parse(readFileSync(dir+'/checkpoint.json','utf8'));bad.weights.policy[0]+=1;writeFileSync(dir+'/bad.json',JSON.stringify(bad));expect(()=>loadCheckpoint(dir+'/bad.json')).toThrow('V2_CHECKPOINT_HASH');
    symlinkSync(process.cwd()+'/server/ai/models',dir+'/alias','dir');expect(()=>saveCheckpoint(dir+'/alias/bund_rung_brain.json',m)).toThrow('V2_SYMLINK_PATH');expect(hash()).toBe(before);
   }finally{rmSync(dir,{recursive:true,force:true});}
