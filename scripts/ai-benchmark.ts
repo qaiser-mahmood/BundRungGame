@@ -125,7 +125,8 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           const chosen = BotPlayer.chooseMasterCard({getPlayers:()=>state.players},id,legal,all,state,priv,
             {name:policyName(policy),search:searchOptions,strategy});
           const milliseconds = performance.now() - start;
-          const policyStats=searchByPolicy[policy]??Object.fromEntries(Object.keys(searchStats).map(k=>[k,0])) as typeof searchStats;
+          const policyStats=searchByPolicy[policy]??{...searchStats};
+          if(!searchByPolicy[policy])for(const k of Object.keys(policyStats) as (keyof typeof searchStats)[])policyStats[k]=0;
           for(const k of Object.keys(searchStats) as (keyof typeof searchStats)[])policyStats[k]+=searchStats[k]-priorSearch[k];
           searchByPolicy[policy]=policyStats;
           if (!chosen || !legal.some(c => c.id === chosen.id)) { invalidMoves++; throw new Error('Policy selected illegal card'); }

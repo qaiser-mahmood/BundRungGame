@@ -2,7 +2,7 @@ import {livePolicyFromEnvironment} from '../server/ai/LivePolicy';
 import {describe,it,expect,vi,afterEach} from 'vitest';
 import {performance} from 'node:perf_hooks';
 import {setupGame,seededRandom} from '../scripts/ai-benchmark';
-import {tacticalFixtures,card} from '../scripts/ai-tactical-fixtures';
+import {tacticalFixtures,tacticalLegalCards,card} from '../scripts/ai-tactical-fixtures';
 import {OpponentBeliefs} from '../server/ai/planning/OpponentBeliefs';
 import {rankPartnershipActions} from '../server/ai/planning/PartnershipStrategy';
 import {advancedSearch} from '../server/ai/planning/AdvancedSearch';
@@ -13,7 +13,7 @@ import {defaultPolicy} from '../server/ai/DecisionPolicy';
 function fixture(){const engine=setupGame(2),state=engine.getPublicState(),priv=engine.getPrivateState(state.currentTurnPlayerId!);return {engine,state,priv,legal:engine.getLegalCardsForPlayer(priv.myPlayerId)};}
 afterEach(()=>vi.restoreAllMocks());
 describe('advanced observation-only policy',()=>{
-  for(const f of tacticalFixtures())it(f.name,()=>expect(rankPartnershipActions(f.state,f.priv,f.legal)[0].card.id).toBe(f.expected));
+  for(const f of tacticalFixtures())it(f.name,()=>{expect(f.legal.map(c=>c.id).sort()).toEqual(tacticalLegalCards(f).map(c=>c.id).sort());expect(rankPartnershipActions(f.state,f.priv,f.legal)[0].card.id).toBe(f.expected);});
   it('enables an explicit server opt-in without changing the default',()=>{expect(livePolicyFromEnvironment(undefined).name).toBe('corrected-search');expect(livePolicyFromEnvironment('advanced-search').name).toBe('advanced-search');expect(()=>livePolicyFromEnvironment('unknown')).toThrow('INVALID_BOT_DECISION_POLICY');});
   it('keeps the corrected baseline as default',()=>expect(defaultPolicy.name).toBe('corrected-search'));
   it('conditions particles on own ownership and exact hand counts',()=>{
@@ -79,6 +79,16 @@ describe('advanced observation-only policy',()=>{
   it('does not solve private-only or sampled endgames as if public knowledge',()=>{
     const f=fixture();f.state.players.forEach(p=>p.cardsInHandCount=1);
     expect(solvePublicEndgame(f.state,f.priv,f.legal,Infinity)).toBeNull();
+  });
+  it('sacrifices trick 12 to win the authoritative final trick',()=>{
+    const f=fixture(),s=f.state;
+    Object.assign(s,{currentTurnPlayerId:'p0',activePlayerIndex:0,isTrumpRevealed:true,trumpSuit:'SPADES',trumpCallerPlayerId:'p0',trumpCardPlaced:false,revealedTrumpCard:null,
+      faceDownCallerCards:[],faceDownLeadPending:false,isRungRevealPaused:false,isTrumpRevealPending:false,trumpRevealRequesterId:null,completedTricks:[],previousTrickCards:null,lastTrickWinningCard:null,streakCount:0,streakWinnerPlayerId:null});
+    s.currentTrick={trickNumber:12,leadPlayerId:'p0',leadSuit:null,cards:[],winnerPlayerId:null,winningTeam:null};
+    s.revealedHands={p0:[card('H_A'),card('H_2')],p1:[card('H_K'),card('H_3')],p2:[card('H_4'),card('H_5')],p3:[card('H_6'),card('H_7')]};
+    s.players.forEach(p=>p.cardsInHandCount=2);
+    const priv={...f.priv,myPlayerId:'p0',myHand:s.revealedHands.p0,myTrumpCard:null};
+    expect(solvePublicEndgame(s,priv,priv.myHand,Infinity)?.id).toBe('H_2');
   });
   it('solves a real publicly shown endgame through the authoritative engine',()=>{
     let solved=false;
