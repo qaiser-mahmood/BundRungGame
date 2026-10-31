@@ -349,7 +349,7 @@ export class BotPlayer {
     const players = publicState.players;
     const pick = (cards:Card[],_state:PublicGameState,_private:PrivatePlayerState,_id:string,_players:Player[],_hand?:Card[],_secret?:Suit|null) =>
       selectCandidate(cards,publicState,privateState,botPlayerId,players,policy);
-    if(policy.name === 'neural-direct') return selectCandidate(legalCards,publicState,privateState,botPlayerId,players,policy);
+    if(policy.name === 'neural-direct'||policy.name === 'advanced-search') return selectCandidate(legalCards,publicState,privateState,botPlayerId,players,policy);
     const me = players.find((p) => p.id === botPlayerId)!;
     const partner = players.find((p) => p.team === me.team && p.id !== me.id);
     const partnerId = partner?.id || '';

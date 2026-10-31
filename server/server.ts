@@ -1,3 +1,4 @@
+import {livePolicyFromEnvironment} from './ai/LivePolicy';
 import { registerVoiceHandlers } from './transport/Voice';
 import { liveBotTurns } from './ai/RoomTurnQueue';
 import { sendGameState } from './transport/GameState';
@@ -25,6 +26,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const livePolicy=livePolicyFromEnvironment(process.env.BOT_DECISION_POLICY);
 // Enable autonomous neural network AI policy for live games
 // Corrected search is the default; neural-direct is evaluation-only.
 
@@ -102,7 +104,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
 
       if (activeBotIds.length > 0) {
         const nextBotId = activeBotIds[0];
-        BotPlayer.handleBotTurn(room.engine, nextBotId, {roomId:room.id,learning:true});
+        BotPlayer.handleBotTurn(room.engine, nextBotId, {roomId:room.id,learning:true,policy:livePolicy});
         botActionTaken = true;
       }
     }
@@ -133,7 +135,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
     else if (phase === 'PRE_DEAL_SHUFFLE') {
       const dealer = players[publicState.dealerPlayerIndex];
       if (dealer && dealer.isBot) {
-        BotPlayer.handleBotTurn(room.engine, dealer.id, {roomId:room.id,learning:true});
+        BotPlayer.handleBotTurn(room.engine, dealer.id, {roomId:room.id,learning:true,policy:livePolicy});
         botActionTaken = true;
       }
     }
@@ -142,7 +144,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
     else if (phase === 'PRE_DEAL_CUT' && publicState.cutOfferPlayerId) {
       const cutPlayer = players.find((p) => p.id === publicState.cutOfferPlayerId);
       if (cutPlayer && cutPlayer.isBot) {
-        BotPlayer.handleBotTurn(room.engine, cutPlayer.id, {roomId:room.id,learning:true});
+        BotPlayer.handleBotTurn(room.engine, cutPlayer.id, {roomId:room.id,learning:true,policy:livePolicy});
         botActionTaken = true;
       }
     }
@@ -154,7 +156,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
         setTimeout(() => {
           try {
             if (room.engine.getPhase() === 'BIDDING_PHASE' && room.engine.getPublicState().biddingTurnPlayerId === bidder.id) {
-              BotPlayer.handleBotTurn(room.engine, bidder.id, {roomId:room.id,learning:true});
+              BotPlayer.handleBotTurn(room.engine, bidder.id, {roomId:room.id,learning:true,policy:livePolicy});
               broadcastRoomState(room);
             }
           } catch (e) {}
@@ -228,7 +230,7 @@ function checkAndRunBotTurns(room: GameRoom): void {
               if(now.phase==='TRICK_PLAYING'&&now.currentTurnPlayerId===turnPlayer.id&&!now.faceDownLeadPending&&
                  now.gameIndex===publicState.gameIndex&&now.currentTrick.trickNumber===publicState.currentTrick.trickNumber&&
                  now.currentTrick.cards.length===publicState.currentTrick.cards.length){
-                BotPlayer.handleBotTurn(room.engine,turnPlayer.id,{roomId:room.id,learning:true});
+                BotPlayer.handleBotTurn(room.engine,turnPlayer.id,{roomId:room.id,learning:true,policy:livePolicy});
                 broadcastRoomState(room);
               }
             });

@@ -9,6 +9,7 @@ export interface SearchDiagnostic {
   count:number;attempts:number;completedComparisons:number;scoresUsed:boolean;
 }
 export interface SearchOptions {iterations?:number;legacyIterations?:number;timeMs?:number;random?:()=>number;
+  worldFactory?:()=>SimulationWorld;rolloutPolicy?:(state:PublicGameState,priv:PrivatePlayerState,legal:Card[])=>Card;
   diagnostic?:(reason:string)=>void;onDiagnostic?:(event:SearchDiagnostic)=>void;}
 export interface SearchStats {
   worlds:number;attempts:number;samplingFailures:number;invalidWorlds:number;transitionFailures:number;internalFailures:number;
@@ -46,7 +47,7 @@ export class MonteCarloPlanner {
     _secret?:Suit|null,privateState?:PrivatePlayerState,random:()=>number=Math.random):SimulationWorld {
     return sampleWorld(state,actor,hand,voids,privateState,random);
   }
-  public static rollout(state:PublicGameState,actor:string,first:Card,world:SimulationWorld,deadline=Infinity):PublicGameState {
+  public static rollout(state:PublicGameState,actor:string,first:Card,world:SimulationWorld,deadline=Infinity,policy?:SearchOptions['rolloutPolicy']):PublicGameState {
     checkDeadline(deadline);
     const engine=BundRungEngine.fromObservation(state,world);
     checkDeadline(deadline);
@@ -59,18 +60,18 @@ export class MonteCarloPlanner {
       if(!s.currentTurnPlayerId)throw new Error('ROLLOUT_NO_TURN');
       const legal=engine.getLegalCardsForPlayer(s.currentTurnPlayerId);
       if(!legal.length)throw new Error('ROLLOUT_NO_LEGAL_ACTION');
-      const chosen=[...legal].sort((a,b)=>a.playValue-b.playValue||a.id.localeCompare(b.id))[0];
+      const chosen=policy?policy(engine.getPublicState(),engine.getPrivateState(s.currentTurnPlayerId),legal):[...legal].sort((a,b)=>a.playValue-b.playValue||a.id.localeCompare(b.id))[0];
       engine.playCard(s.currentTurnPlayerId,chosen.id);
     }
     throw new Error('ROLLOUT_STEP_BUDGET');
   }
   public static simulateRollout(state:PublicGameState,actor:string,hand:Card[],first:Card,
-    hands:Map<string,Card[]>,trump:Suit|null,deadline=Infinity):number {
+    hands:Map<string,Card[]>,trump:Suit|null,deadline=Infinity,policy?:SearchOptions['rolloutPolicy']):number {
     const world=new SimulationWorld(hands);
     if(hands instanceof SimulationWorld){world.concealed=new Map(hands.concealed);world.lockedTrump=hands.lockedTrump;world.trumpSuit=hands.trumpSuit;}
     if(!world.has(actor))world.set(actor,hand);
     if(!world.trumpSuit)world.trumpSuit=trump;
-    return terminalUtility(this.rollout(state,actor,first,world,deadline),actor);
+    return terminalUtility(this.rollout(state,actor,first,world,deadline,policy),actor);
   }
   public static evaluateCandidates(candidates:Card[],actor:string,hand:Card[],state:PublicGameState,
     _secret?:Suit|null,iterations=16,privateState?:PrivatePlayerState,options:SearchOptions={}):Card {
@@ -94,7 +95,7 @@ export class MonteCarloPlanner {
       try {
         checkDeadline(deadline);attempts++;searchStats.attempts++;
         try {
-          world=this.generateConsistentWorld(state,actor,hand,voids,_secret,privateState,options.random);
+          world=options.worldFactory?options.worldFactory():this.generateConsistentWorld(state,actor,hand,voids,_secret,privateState,options.random);
         } catch(error) {
           if(!(error instanceof SamplingError))throw error;
           // Rejection is independent of candidate utilities. Keep previous full
@@ -110,7 +111,7 @@ export class MonteCarloPlanner {
         stage='transition';
         for(const card of candidates){
           checkDeadline(deadline);
-          const value=this.simulateRollout(state,actor,hand,card,world,world.trumpSuit,deadline);
+          const value=this.simulateRollout(state,actor,hand,card,world,world.trumpSuit,deadline,options.rolloutPolicy);
           if(!Number.isFinite(value))throw new Error('NONFINITE_UTILITY');
           values.push(value);
         }

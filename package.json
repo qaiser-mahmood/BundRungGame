@@ -14,7 +14,8 @@
     "train:imitate": "node --import tsx scripts/train_expert_imitation.ts",
     "benchmark:ai": "node --import tsx scripts/ai-benchmark.ts",
     "typecheck:ai": "tsc --noEmit -p tsconfig.ai.json",
-    "benchmark:latency": "node --import tsx scripts/benchmark-ai-latency.ts"
+    "benchmark:latency": "node --import tsx scripts/benchmark-ai-latency.ts",
+    "benchmark:tactics": "node --import tsx scripts/benchmark-ai-tactics.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
