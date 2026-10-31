@@ -1,3 +1,5 @@
+import { setupGame } from '../scripts/ai-benchmark';
+import { sendGameState } from '../server/transport/GameState';
 import { describe,it,expect } from 'vitest';
 import { BundRungEngine } from '../server/engine/BundRungEngine';
 import { CardTracker,ALL_52_CARDS } from '../server/ai/planning/CardTracker';
@@ -15,7 +17,8 @@ describe('viewer serialization boundary',()=>{
     internals.completedTricks=[{...internals.currentTrick,trickNumber:1}];internals.previousTrickCards=internals.currentTrick.cards;
     internals.faceDownCallerCards=[{id:secret.id,card:secret,trickNumber:1,isRevealed:false}];
     for(const id of ['p1','p2','p3','']) {
-      const payload=engine.getClientGameState(id);
+      let payload=engine.getClientGameState(id);
+      sendGameState({emit:(event,state)=>{expect(event).toBe('gameStateUpdated');payload=state;}},engine,id);
       expect(JSON.stringify(payload)).not.toContain('D_5');expect(JSON.stringify(payload)).not.toContain('D_A');
       expect(payload.publicState.currentTrick.cards).toHaveLength(1);
       expect(payload.publicState.currentTrick.cards[0].card).toBeNull();
@@ -28,5 +31,19 @@ describe('viewer serialization boundary',()=>{
     expect(engine.getPublicState().completedTricks[0].cards[0].card).toEqual(secret);
     const snapshot=engine.getPublicState();snapshot.currentTrick.cards[0].card!.rank='2';
     expect(engine.getPublicState().currentTrick.cards[0].card?.rank).toBe('5');
+  });
+});
+
+describe('explicit face-down challenge disclosure',()=>{
+  it.each([true,false])('discloses the challenge card only on acceptance=%s',(accept)=>{
+    // Seed 1 is a real Bwinji setup; use the public API to conceal its lead.
+    const engine=setupGame(1),s=engine.getPublicState(),caller=s.trumpCallerPlayerId!;
+    expect(s.trumpMode).toBe('BWINJI');
+    const selected=engine.getPrivateState(caller).myHand[0];engine.declareBwinjiLead(caller,selected.id,true);
+    const hidden=engine.getPublicState();expect(hidden.currentTrick.cards[0].card).toBeNull();
+    expect(engine.getPrivateState(caller).knownConcealedCards?.[`1:${caller}`]?.id).toBe(selected.id);
+    const team=s.players.find(p=>p.id===caller)!.team;
+    for(const defender of s.players.filter(p=>p.team!==team))engine.respondToFaceDownRung(defender.id,accept);
+    expect(engine.getPublicState().currentTrick.cards[0].card?.id??null).toBe(accept?selected.id:null);
   });
 });

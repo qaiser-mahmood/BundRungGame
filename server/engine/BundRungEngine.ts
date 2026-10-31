@@ -1,3 +1,4 @@
+import { SimulationWorld } from './SimulationWorld';
 import {
   Card,
   Player,
@@ -22,6 +23,7 @@ import { ScoringEngine, ScoreCalculationInput } from './ScoringEngine';
 import { BaseRungEngine } from './BaseRungEngine';
 
 export class BundRungEngine extends BaseRungEngine {
+  private simulationToss?: Pick<PublicGameState, 'tossCardsRemaining' | 'tossDraws' | 'tossDrawHistory' | 'tossDrawnThisRound' | 'tossRound' | 'tiedPlayerIds'>;
   private players: Player[] = [];
   private hands: { [playerId: string]: Card[] } = {};
   private phase: GamePhase = 'WAITING_FOR_PLAYERS';
@@ -1193,6 +1195,7 @@ export class BundRungEngine extends BaseRungEngine {
       card: playedCard,
       playedAt: Date.now(),
       isFaceDown: isCallerVoidFaceDown,
+      trumpWasRevealed: this.isTrumpRevealed,
       isAceDowngraded: isConsecutiveLeadAce,
     });
 
@@ -1710,8 +1713,8 @@ export class BundRungEngine extends BaseRungEngine {
   // --- Client State Serialization ---
   private visiblePlay(play: PlayedCard): VisiblePlayedCard {
     const hidden = play.isFaceDown && !this.isTrumpRevealed ||
-      this.faceDownLeadPending && this.faceDownLeadCardFaceDown && play.card.id === this.faceDownLeadCard?.id;
-    return { ...play, card: hidden ? null : { ...play.card } };
+      (this.faceDownLeadPending && this.faceDownLeadCardFaceDown || this.openTrumpModifier === 'FACE_DOWN_NO_PLAY' || this.bwinjiModifier === 'FACE_DOWN_NO_PLAY') && play.card.id === this.faceDownLeadCard?.id;
+    return { ...play, card: hidden ? null : { ...play.card }, isAceDowngraded:hidden && play.isAceDowngraded ? undefined : play.isAceDowngraded };
   }
 
   public getPublicState(): PublicGameState {
@@ -1785,6 +1788,9 @@ export class BundRungEngine extends BaseRungEngine {
       team1TricksWon: this.team1TricksWon,
       team2TricksWon: this.team2TricksWon,
       consecutiveTricksCount: this.consecutiveTricksCount,
+      streakWinnerPlayerId: this.playerConsecutiveTricksWinnerId,
+      streakCount: this.playerConsecutiveTricksCount,
+      rungRevealerPlayerId: this.rungRevealerPlayerId,
       lastTrickWinnerTeam: this.lastTrickWinnerTeam,
       lastTrickWinnerPlayerId: this.lastTrickWinnerPlayerId,
       lastTrickWinningCard: this.lastTrickWinningCard ? { ...this.lastTrickWinningCard } : null,
@@ -1806,6 +1812,7 @@ export class BundRungEngine extends BaseRungEngine {
       isPostKhoti: this.isPostKhoti,
       hasSwappedSeats: this.hasSwappedSeats(),
       statusMessage: this.statusMessage,
+      ...structuredClone(this.simulationToss??{}),
     };
   }
 
@@ -1866,7 +1873,7 @@ export class BundRungEngine extends BaseRungEngine {
 
     return {
       knownConcealedCards: Object.fromEntries([...this.completedTricks, this.currentTrick].flatMap(t =>
-        t.cards.filter(c => c.playerId === playerId && c.isFaceDown).map(c =>
+        t.cards.filter(c => c.playerId === playerId && (c.isFaceDown || c.card.id === this.faceDownLeadCard?.id)).map(c =>
           [`${t.trickNumber}:${c.playerId}`, { ...c.card }]))),
       myPlayerId: playerId,
       myHand: sortedHand,
@@ -1889,6 +1896,75 @@ export class BundRungEngine extends BaseRungEngine {
       publicState: this.getPublicState(),
       privateState: this.getPrivateState(playerId),
     };
+  }
+
+  /** Referee reconstruction from a sanitized observation and a sampled world only.
+   * No live engine or hidden server storage is passed to search. */
+  public static fromObservation(state: PublicGameState, world: SimulationWorld): BundRungEngine {
+    const engine = new BundRungEngine();
+    engine.players = structuredClone(state.players);
+    engine.hands = Object.fromEntries(state.players.map(p => {
+      const cards = world.get(p.id);
+      if (!cards || cards.length !== p.cardsInHandCount) throw new Error('SIM_HAND_COUNT');
+      return [p.id, structuredClone(cards.filter(c => !(p.id === state.trumpCallerPlayerId && c.id === world.lockedTrump?.id)))];
+    }));
+    const ids = [...world.values()].flat().map(c => c.id);
+    for (const trick of [...state.completedTricks,state.currentTrick]) for (const pc of trick.cards) {
+      const c = pc.card ?? world.concealed.get(`${trick.trickNumber}:${pc.playerId}`);
+      if (!c) throw new Error('SIM_CONCEALED_CARD_MISSING');
+      ids.push(c.id);
+    }
+    if (new Set(ids).size !== ids.length) throw new Error('SIM_DUPLICATE_CARD');
+    const hydrate = (t: PublicGameState['currentTrick']): Trick => ({...t,cards:t.cards.map(pc => {
+      const card = pc.card ?? world.concealed.get(`${t.trickNumber}:${pc.playerId}`);
+      if (!card) throw new Error('SIM_CONCEALED_CARD_MISSING');
+      return {...pc,card:structuredClone(card)};
+    })});
+    engine.gameType=state.gameType??'BUND_RUNG';
+    engine.simulationToss={tossCardsRemaining:state.tossCardsRemaining,tossDraws:state.tossDraws,
+      tossDrawHistory:state.tossDrawHistory,tossDrawnThisRound:state.tossDrawnThisRound,
+      tossRound:state.tossRound,tiedPlayerIds:state.tiedPlayerIds};
+    engine.cutDone=state.cutDone;engine.cutOfferPlayerId=state.cutOfferPlayerId;engine.shuffleCount=state.shuffleCount;
+    engine.biddingPassCount=state.biddingPassCount;engine.biddingStatus={...state.biddingStatus};
+    engine.phase=state.phase;
+    engine.currentTurnPlayerIndex=state.activePlayerIndex;
+    engine.dealerIndex=state.dealerPlayerIndex;
+    engine.gameIndex=state.gameIndex;
+    engine.trumpMode=state.trumpMode;
+    engine.trumpSuit=world.trumpSuit;
+    engine.trumpCallerPlayerId=state.trumpCallerPlayerId;
+    engine.trumpCard=structuredClone(world.lockedTrump);
+    engine.chosenTrumpCard=structuredClone(world.lockedTrump);
+    engine.isTrumpRevealed=state.isTrumpRevealed;
+    engine.openTrumpModifier=state.openTrumpModifier;
+    engine.bwinjiModifier=state.bwinjiModifier;
+    engine.statusMessage=state.statusMessage;
+    engine.customTeamNames={...state.teamNames};
+    engine.shownHandPlayerIds=new Set(Object.keys(state.revealedHands));
+    engine.surrenderVotes={TEAM_1:new Set(state.surrenderVotes.TEAM_1),TEAM_2:new Set(state.surrenderVotes.TEAM_2)};
+    engine.openTrumpDeclaredInRound1=!state.firstRoundOpenTrumpAvailable;
+    engine.currentTrick=hydrate(state.currentTrick);
+    engine.completedTricks=state.completedTricks.map(hydrate);
+    engine.previousTrickCards=state.previousTrickCards ? structuredClone(engine.completedTricks.at(-1)?.cards??[]) : null;
+    engine.team1TricksWon=state.team1TricksWon;engine.team2TricksWon=state.team2TricksWon;
+    engine.lastTrickWinnerTeam=state.lastTrickWinnerTeam;engine.lastTrickWinnerPlayerId=state.lastTrickWinnerPlayerId;
+    engine.lastTrickWinningCard=structuredClone(state.lastTrickWinningCard);
+    engine.consecutiveTricksCount=state.consecutiveTricksCount;
+    engine.playerConsecutiveTricksCount=state.streakCount??0;engine.playerConsecutiveTricksWinnerId=state.streakWinnerPlayerId??null;
+    engine.rungRevealerPlayerId=state.rungRevealerPlayerId??null;
+    engine.trumpRevealRequesterId=state.trumpRevealRequesterId;
+    engine.isTrumpRevealPending=state.isTrumpRevealPending;engine.isRungRevealPaused=state.isRungRevealPaused;
+    engine.faceDownLeadPending=state.faceDownLeadPending;engine.faceDownLeadPlayerId=state.faceDownLeadPlayerId;
+    engine.faceDownLeadCardFaceDown=state.faceDownLeadCardFaceDown;
+    engine.faceDownLeadCard=engine.currentTrick.cards.find(c=>c.playerId===state.faceDownLeadPlayerId)?.card??null;
+    engine.faceDownChallengeVotes=new Map(Object.entries(state.faceDownChallengeVotes??{}));
+    engine.faceDownCallerCards=state.faceDownCallerCards.map(c=>{
+      const card=c.card??world.concealed.get(`${c.trickNumber}:${state.trumpCallerPlayerId}`);
+      if(!card)throw new Error('SIM_ACCUMULATED_CARD_MISSING');
+      return {...c,id:card.id,card:structuredClone(card)};
+    });
+    engine.scoringEngine=new ScoringEngine(state.scorecard);
+    return engine;
   }
 
   public getPlayers(): Player[] {

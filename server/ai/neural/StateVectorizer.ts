@@ -1,3 +1,5 @@
+import { FEATURE_GROUPS, FEATURE_COUNT } from './FeatureSchema';
+import { CardTracker } from '../planning/CardTracker';
 import { isVisiblePlay } from '../../../shared/visibility';
 import { Card, Suit, Rank, PublicGameState, PrivatePlayerState, Player } from '../../../shared/types';
 
@@ -5,15 +7,11 @@ export const ALL_SUITS: Suit[] = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
 export const ALL_RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
 export class StateVectorizer {
-  public static readonly BASE_FEATURE_COUNT = 52 + 52 + 52 + 4 + 5 + 16 + 2; // 183 base features
-  public static readonly TACTICAL_FEATURE_COUNT = 9 + 10 + 9 + 2 + 3 + 5 + 4 + 4; // 46 concept-rich features
-  public static readonly PLANNING_TEAMWORK_FEATURE_COUNT = 4 + 4 + 4; // 12 whole-game planning & teamwork features
-  public static readonly TRUMP_CONTROL_FEATURE_COUNT = 4; // 4 Trump Control & Opening Lead features
-  public static readonly FEATURE_COUNT =
-    StateVectorizer.BASE_FEATURE_COUNT +
-    StateVectorizer.TACTICAL_FEATURE_COUNT +
-    StateVectorizer.PLANNING_TEAMWORK_FEATURE_COUNT +
-    StateVectorizer.TRUMP_CONTROL_FEATURE_COUNT; // 245 features
+  public static readonly BASE_FEATURE_COUNT = FEATURE_GROUPS.base; // 183 base features
+  public static readonly TACTICAL_FEATURE_COUNT = FEATURE_GROUPS.tactical; // 46 concept-rich features
+  public static readonly PLANNING_TEAMWORK_FEATURE_COUNT = FEATURE_GROUPS.planning; // 12 whole-game planning & teamwork features
+  public static readonly TRUMP_CONTROL_FEATURE_COUNT = FEATURE_GROUPS.trumpControl; // 4 Trump Control & Opening Lead features
+  public static readonly FEATURE_COUNT = FEATURE_COUNT;
 
   /**
    * Maps a card to a unique index from 0 to 51
@@ -99,19 +97,10 @@ export class StateVectorizer {
     }
     offset += 5;
 
-    // 6. Inferred Voids (16 binary: 4 players x 4 suits)
-    for (let pIdx = 0; pIdx < Math.min(players.length, 4); pIdx++) {
-      const player = players[pIdx];
-      for (const trick of publicState.completedTricks) {
-        if (!trick.leadSuit) continue;
-        const playedByP = trick.cards.find((c) => c.playerId === player.id);
-        if (playedByP && playedByP.card && playedByP.card.suit !== trick.leadSuit) {
-          const leadSuitIdx = ALL_SUITS.indexOf(trick.leadSuit);
-          if (leadSuitIdx !== -1) {
-            features[offset + pIdx * 4 + leadSuitIdx] = 1.0;
-          }
-        }
-      }
+    // 6. Inferred Voids share the planner's locked-trump-aware information boundary.
+    const inferredVoids=CardTracker.getVoidMatrix(publicState);
+    for(let pIdx=0;pIdx<Math.min(players.length,4);pIdx++)for(const suit of inferredVoids.get(players[pIdx].id)??[]) {
+      features[offset+pIdx*4+ALL_SUITS.indexOf(suit)]=1;
     }
     offset += 16;
 
@@ -211,7 +200,7 @@ export class StateVectorizer {
       }
     }
 
-    const playedIdsInTrick = new Set(currentTrickCards.map((c) => c.playerId));
+    const playedIdsInTrick = new Set(publicState.currentTrick.cards.map((c) => c.playerId));
     playedIdsInTrick.add(botPlayerId);
     const opponentsBehindMe = players.filter((p) => p.team !== myTeam && !playedIdsInTrick.has(p.id)).length;
     const opponentsBehindMeNorm = opponentsBehindMe / 2.0;

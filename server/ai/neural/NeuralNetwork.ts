@@ -235,6 +235,7 @@ export class NeuralNetwork {
     legalActionIndices: number[],
     epsilon: number = 0
   ): number {
+    this.validateInput(input);
     if (!legalActionIndices.length || legalActionIndices.some(a => !Number.isInteger(a) || a < 0 || a >= this.outputSize)) throw new Error('Invalid legal action mask');
     if (legalActionIndices.length === 1) return legalActionIndices[0];
 

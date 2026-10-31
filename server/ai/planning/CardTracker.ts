@@ -86,6 +86,10 @@ export class CardTracker {
       if (!trick.leadSuit) continue;
       const leadSuit = trick.leadSuit;
       for (const pc of trick.cards) {
+        // A pre-reveal discard proves absence from the ordinary hand, not from
+        // the caller's separately locked slot. Later flips must not change that.
+        if (pc.playerId === publicState.trumpCallerPlayerId && publicState.trumpCardPlaced &&
+            (pc.trumpWasRevealed === false || publicState.revealedTrumpCard?.suit === leadSuit)) continue;
         if (pc.card && pc.card.suit !== leadSuit && !pc.isFaceDown) {
           voids.get(pc.playerId)?.add(leadSuit);
         }

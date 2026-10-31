@@ -72,6 +72,7 @@ export interface PlayedCard {
   card: Card;
   playedAt: number;
   isFaceDown?: boolean;
+  trumpWasRevealed?: boolean; // Public reveal status at play time, preserved through later flips
   isAceDowngraded?: boolean; // When player won previous trick with an Ace and leads this trick with an Ace, it is treated as value 2
 }
 
@@ -172,6 +173,9 @@ export interface PublicGameState {
   team1TricksWon: number;
   team2TricksWon: number;
   consecutiveTricksCount: number;
+  streakWinnerPlayerId?: string | null;
+  streakCount?: number;
+  rungRevealerPlayerId?: string | null;
   lastTrickWinnerTeam: TeamId | null;
   lastTrickWinnerPlayerId: string | null;
   lastTrickWinningCard: Card | null;

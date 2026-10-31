@@ -32,8 +32,8 @@ export interface ScoreCalculationResult {
 export class ScoringEngine {
   private state: ScorecardState;
 
-  constructor() {
-    this.state = this.getInitialState();
+  constructor(state?: ScorecardState) {
+    this.state = state ? structuredClone(state) : this.getInitialState();
   }
 
   public getInitialState(): ScorecardState {
