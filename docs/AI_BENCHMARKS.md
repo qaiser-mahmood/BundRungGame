@@ -114,14 +114,14 @@ All runs use seeds 1–20, 20 pairs / 40 games against `heuristic`.
 
 | Candidate | Wins–losses | Aborts / invalid moves | Signed point total | Mean / p95 / max selection ms |
 | --- | --- | --- | --- | --- |
-| production | 20–20 | 0 / 0 | +117 | 6.164 / 49.806 / 151.611 |
-| neural (direct ablation) | 10–30 | 0 / 0 | -390 | .151 / .272 / 5.314 |
+| production | 20–20 | 0 / 0 | +117 | 5.804 / 46.494 / 160.762 |
+| neural (direct ablation) | 10–30 | 0 / 0 | -390 | .140 / .250 / 4.620 |
 
 Full per-game/per-decision files:
 [production](../benchmarks/ai-baseline-production.json) and
-[neural](../benchmarks/ai-baseline-neural.json). The production run recorded 842
-candidate decisions; neural recorded 896. Opposing heuristic means were .028 ms
-and .035 ms respectively. The four-game default smoke also completed with no
+[neural](../benchmarks/ai-baseline-neural.json). The production run recorded 816
+candidate decisions; neural recorded 888. Opposing heuristic means were .028 ms
+and .034 ms respectively. The four-game default smoke also completed with no
 invalid moves. A larger 1,000-pair tournament was not run.
 
 These seeds are a small reproducible starting sample, not a statistically
@@ -136,7 +136,7 @@ modified to improve these figures.
 ## Validation and outstanding failures
 
 Application TypeScript validation (`npx tsc --noEmit`) and the added benchmark
-script check pass. The focused suites contain 12 ordinary passing tests and 12
+script check pass. The focused suites contain 13 ordinary passing tests and 12
 explicit expected failures for the audit's unresolved defects. The original
 109 tests remain separate from those expected failures.
 

@@ -105,7 +105,10 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
           if (!id) throw new Error('No current player');
           const priv = engine.getPrivateState(id);
           if (priv.canRequestRungReveal) { engine.requestTrumpReveal(id); continue; }
-          const all = [...priv.myHand, ...(priv.myTrumpCard ? [priv.myTrumpCard] : [])];
+          // Match handleBotTurn's production hand boundary, including its
+          // exclusion of the caller's locked trump until playable.
+          const all = priv.myTrumpCard && priv.isMyTrumpCardPlayable
+            ? [...priv.myHand, priv.myTrumpCard] : priv.myHand;
           const legal = all.filter(c => priv.legalPlayableCardIds.includes(c.id));
           if (!legal.length) throw new Error(`No legal cards for ${id}`);
           const policy = state.players.find(p => p.id === id)!.team === candidateTeam ? candidate : baseline;

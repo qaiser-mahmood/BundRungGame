@@ -26,6 +26,21 @@ describe('seeded AI benchmark',()=>{
       expect(a.signedScoreAdjustment).toBe(-b.signedScoreAdjustment!);
     }
   });
+  it('passes the same available hand as handleBotTurn, excluding locked trump',()=>{
+    const choose=BotPlayer.chooseMasterCard;
+    let lockedObservations=0;
+    const spy=vi.spyOn(BotPlayer,'chooseMasterCard').mockImplementation((...args)=>{
+      const [, , , hand, , priv]=args;
+      const expected=priv.myTrumpCard && priv.isMyTrumpCardPlayable ? [...priv.myHand,priv.myTrumpCard] : priv.myHand;
+      expect(hand).toEqual(expected);
+      if(priv.myTrumpCard && !priv.isMyTrumpCardPlayable)lockedObservations++;
+      return choose(...args);
+    });
+    try {
+      const result=runGame(2,'TEAM_1','production');
+      expect(result.error).toBeNull();expect(lockedObservations).toBeGreaterThan(0);
+    } finally {spy.mockRestore();}
+  });
   it('restores adapters when a policy throws',()=>{
     const random=Math.random,pick=BotPlayer.pickBestFromCandidates;
     expect(()=>withRandom(seededRandom(1),()=>withHeuristic(()=>{throw new Error('test');}))).toThrow('test');
