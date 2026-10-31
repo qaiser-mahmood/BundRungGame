@@ -59,6 +59,7 @@ export interface GameResult {
   candidateTeam: TeamId;
   dealHash: string;
   winner: TeamId | null;
+  terminal:{matchOver:boolean;matchWinner:TeamId|null};
   candidateWon: boolean | null;
   signedScoreAdjustment: number | null;
   trickDifferential: number;
@@ -155,7 +156,7 @@ export function runGame(seed: number, candidateTeam: TeamId, candidate: Policy, 
     const delta={...searchStats};
     for(const key of Object.keys(delta) as (keyof typeof delta)[])delta[key]-=initialStats[key];
     return {
-      seed, candidateTeam, dealHash, winner,
+      seed, candidateTeam, dealHash, winner, terminal:{matchOver:final.isMatchOver,matchWinner:final.matchWinnerTeam},
       search:delta,partnership,searchByPolicy,
       advanced:Object.fromEntries(Object.entries(advancedStats).map(([k,v])=>[k,v-initialAdvanced[k as keyof typeof advancedStats]])) as typeof advancedStats,
       endgame:Object.fromEntries(Object.entries(endgameStats).map(([k,v])=>[k,v-initialEndgame[k as keyof typeof endgameStats]])) as typeof endgameStats,

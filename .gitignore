@@ -32,3 +32,6 @@ lerna-debug.log*
 *.sln
 *.sw?
 Thumbs.db
+
+# Isolated AI v2 experimental checkpoints (never canonical weights)
+server/ai/models/experiments/v2/

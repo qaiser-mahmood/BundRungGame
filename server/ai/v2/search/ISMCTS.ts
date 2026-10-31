@@ -12,7 +12,7 @@ export interface Node {visits:number;edges:Map<number,Edge>;}
 export interface SearchResult {card:Card;completed:number;nodes:number;deadlineStops:number;invalidWorlds:number;fallback:boolean;
  root:{cardId:string;visits:number;available:number;value:number}[];belief:ParticleDiagnostics|null;milliseconds:number;}
 export interface V2Options {iterations?:number;particles?:number;nodeLimit?:number;timeMs?:number;random?:()=>number;weighted?:boolean;likelihoodStrength?:number;
- partnership?:boolean;adaptive?:boolean;exact?:boolean;exploration?:number;rootPrior?:number[];onResult?:(result:SearchResult)=>void;}
+ partnership?:boolean;adaptive?:boolean;exact?:boolean;exploration?:number;rootPrior?:number[];prior?:(state:PublicGameState,priv:PrivatePlayerState,cards:Card[])=>number[];policyOnly?:boolean;onResult?:(result:SearchResult,state:PublicGameState,priv:PrivatePlayerState)=>void;}
 export function selectAction(node:Node,legal:number[],random:()=>number,exploration:number,prior?:number[]):number {
  const unvisited=legal.filter(c=>!node.edges.get(c)?.visits);if(unvisited.length)return unvisited[Math.floor(random()*unvisited.length)];
  return legal.reduce((best,c)=>{
