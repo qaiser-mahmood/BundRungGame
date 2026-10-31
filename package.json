@@ -24,7 +24,8 @@
     "learn:v2": "node --import tsx scripts/v2-learning.ts",
     "benchmark:v2:efficiency": "node --import tsx scripts/v2-efficiency.ts",
     "v3:data": "node --import tsx scripts/v3-expert-data.ts",
-    "v3:audit-data": "node --import tsx scripts/v3-data-audit.ts"
+    "v3:audit-data": "node --import tsx scripts/v3-data-audit.ts",
+    "v3:train": "node --import tsx scripts/v3-train-baseline.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
