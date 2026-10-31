@@ -169,3 +169,36 @@ transitions/candidate calls and a per-room timer queue prevents timer bursts.
 They are still soft limits. The original 200-pair report remains historical; the
 refinement removes incidental toss RNG consumption during rollouts and should
 not be pooled with its finite-world outcomes.
+
+## Phase 2 advanced-search evaluation
+
+The earlier repair results above are historical. Phase 2 uses schema v3, adding
+per-policy search counters, advanced continuation counts, public endgame solver
+usage and observed candidate-team partnership outcomes. `worlds` counts completed
+atomic candidate comparisons. `protectPartner`/`contest`/`streak` count **simulated
+continuation preferences**, not successful real-game tactics. `partnership`
+records real decisions when partner was winning, whether the candidate overtook,
+and whether its team eventually won that trick. These are observational,
+confounded counts, not causal proof that conserving or overtaking is better.
+
+Reproduce strength separately from latency:
+
+```sh
+npm run benchmark:tactics
+npm run benchmark:ai -- --seed 1 --pairs 50 --candidate advanced-search --baseline corrected-search --output /tmp/smoke.json
+npm run benchmark:ai -- --seed 201 --pairs 200 --candidate advanced-search --baseline corrected-search --output /tmp/development.json
+npm run benchmark:ai -- --seed 200000 --pairs 1000 --candidate advanced-search --baseline corrected-search --output /tmp/heldout.json
+npm run benchmark:latency -- --policy corrected-search --scheduler queued --output /tmp/corrected-latency.json
+npm run benchmark:latency -- --policy advanced-search --scheduler queued --output /tmp/advanced-latency.json
+```
+
+Fixed-work strength defaults: corrected 16 iterations; advanced at most four
+worlds (two ordinary), four candidates, safety probability 0.75. Time is infinite
+for seeded strength reproduction, not for deployment. `--safe-partner` and
+`--advanced-worlds` permit development sensitivity experiments. Live latency uses
+25 ms, eight concurrent rooms, 24 rounds and the existing yielding room queue.
+Paired bootstrap resamples entire two-position deals (5,000 replicates). Report
+raw wins, paired intervals, signed authoritative adjustments, invalid/aborted
+hands, failures/fallbacks and latency; do not equate puzzle accuracy with strength.
+See [ADVANCED_AI_REPORT.md](ADVANCED_AI_REPORT.md) and committed machine-readable
+summary artifacts for measurements, execution versions and model hashes.

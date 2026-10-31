@@ -146,3 +146,21 @@ recovery, atomic comparison retention, scalar rollout status access, room-turn
 scheduling, all-field adversarial serialization tests and socket-derived voice
 room isolation. The canonical model and authoritative gameplay rules remain
 unchanged. The 25 ms deadline is cooperative, not hard preemption.
+
+## Phase 2 experimental policy
+
+`advanced-search` is available through `DecisionPolicy`, with `corrected-search`
+still the default. `BOT_DECISION_POLICY=advanced-search` opts a test server in;
+no socket contract selects the policy. Advanced-search ranks all legal actions
+before a bounded shortlist, then reuses the corrected planner's atomic shared
+world comparisons, diagnostic classification and authoritative terminal utility.
+Its continuation hook receives only the simulated actor's observations. The
+baseline keeps its existing tactical tree and lowest-card continuation.
+
+New decision-local modules are `OpponentBeliefs` (hard constraints through the
+existing sampler, empirical/analytic soft estimates), `PartnershipStrategy`
+(conditional team conservation/control), and `ExactEndgame` (bounded team
+minimax only for publicly known ownership). No neural model is replaced or
+retrained. See [ADVANCED_AI_STRATEGY.md](ADVANCED_AI_STRATEGY.md) for rules,
+approximation limits and frozen evaluation protocol, and
+[ADVANCED_AI_REPORT.md](ADVANCED_AI_REPORT.md) for independent results.
