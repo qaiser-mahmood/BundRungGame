@@ -26,6 +26,7 @@ export function selectAction(node:Node,legal:number[],random:()=>number,explorat
 export function ismcts(state:PublicGameState,priv:PrivatePlayerState,cards:Card[],options:V2Options={}):SearchResult {
  const start=performance.now(),time=options.timeMs??25,iterations=options.iterations??64,nodeLimit=options.nodeLimit??512,random=options.random??Math.random,exploration=options.exploration??Math.SQRT2;
  if(!(time>0)||!Number.isSafeInteger(iterations)||iterations<1||iterations>10000||!Number.isSafeInteger(nodeLimit)||nodeLimit<1||nodeLimit>100000||!Number.isFinite(exploration)||exploration<0||exploration>10)throw new Error('V2_INVALID_BUDGET');
+ if(options.rollout==='control'&&options.partnership===false)throw new Error('V2_ROLLOUT_CONFIG');
  if(!['legacy','control'].includes(options.rollout??'legacy')||!Number.isFinite(options.safeProbability??.75)||(options.safeProbability??.75)<0||(options.safeProbability??.75)>1)throw new Error('V2_ROLLOUT_CONFIG');
  if(!cards.length)throw new Error('V2_NO_LEGAL_CARD');
  const deadline=start+time,rootActor=state.players.findIndex(p=>p.id===priv.myPlayerId),tree=new Map<string,Node>();

@@ -46,8 +46,8 @@ describe('search efficiency and adversarial information sets',()=>{
    }
    if(e.getPhase()!=='TRICK_PLAYING')continue;
    const state=e.getPublicState(),id=state.currentTurnPlayerId!,priv=e.getPrivateState(id),cards=e.getLegalCardsForPlayer(id);if(!cards.length)continue;
-   const run=(optimized:boolean)=>ismcts(state,priv,cards,{iterations:32,timeMs:Infinity,random:seededRandom(seed),reuseTemplates:optimized,lightRollouts:optimized});
-   const old=run(false),fast=run(true);expect(fast.root).toEqual(old.root);expect(fast.nodes).toBe(old.nodes);expect(fast.efficiency.templateBuilds).toBeLessThanOrEqual(16);
+   for(const rollout of ['legacy','control'] as const){const run=(optimized:boolean)=>ismcts(state,priv,cards,{rollout,iterations:32,timeMs:Infinity,random:seededRandom(seed),reuseTemplates:optimized,lightRollouts:optimized});
+   const old=run(false),fast=run(true);expect(fast.root).toEqual(old.root);expect(fast.nodes).toBe(old.nodes);expect(fast.efficiency.templateBuilds).toBeLessThanOrEqual(16);}
   }
  });
  it('does not mutate compact templates or sibling clones',()=>{
@@ -74,6 +74,7 @@ describe('search efficiency and adversarial information sets',()=>{
   for(let seed=2;seed<16;seed++){const {s}=fixture(seed);
    for(let step=0;step<160&&s.phase==='TRICK_PLAYING';step++){
     expect(stateInformationKey(s)).toBe(informationKey(observe(s)));
+    expect(controlSummary(observe(s))).toEqual(controlSummary(observe(s,s.actor,false,true)));
     const forced=forcedAction(s);if(forced)apply(s,forced);else apply(s,{type:'play',card:legalCards(s)[0]});
    }
   }
@@ -115,5 +116,5 @@ describe('search efficiency and adversarial information sets',()=>{
  for(const f of tacticalFixtures())it('control rollout: '+f.name,()=>{
   const legal=tacticalLegalCards(f).map(c=>indexOf(c.id)),choice=controlRollout(puzzle(f),legal);expect(legal).toContain(choice);expect(CARDS[choice].id).toBe(f.expected);
  });
- it('keeps original rollout available as an explicit ablation',()=>{const f=tacticalFixtures()[0],o=puzzle(f),legal=f.legal.map(c=>indexOf(c.id));expect(rolloutAction(o,legal)).toBe(indexOf(f.expected));});
+ it('keeps original rollout available as an explicit ablation',()=>{const e=setupGame(2),s=e.getPublicState(),p=e.getPrivateState(s.currentTurnPlayerId!);expect(()=>ismcts(s,p,e.getLegalCardsForPlayer(p.myPlayerId),{rollout:'control',partnership:false})).toThrow('V2_ROLLOUT_CONFIG');const f=tacticalFixtures()[0],o=puzzle(f),legal=f.legal.map(c=>indexOf(c.id));expect(rolloutAction(o,legal)).toBe(indexOf(f.expected));});
 });
