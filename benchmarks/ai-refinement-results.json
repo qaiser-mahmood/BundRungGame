@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-31",
+  "baseCommit": "253525b80feb2b182ab479c9e2863145526e47ef",
+  "provenance": "Measurements captured during refinement before the execution-service interruption; files persisted and were verified after reconnection.",
+  "loadProfiles": [
+    {
+      "schemaVersion": 1,
+      "label": "direct-timer-baseline",
+      "rooms": 8,
+      "rounds": 24,
+      "cadenceMs": 700,
+      "node": "v24.19.0",
+      "startupMs": 89.40158800000003,
+      "durationMs": 17984.92071,
+      "decision": {
+        "count": 178,
+        "meanMs": 6.3346520617978275,
+        "p95Ms": 29.31489499999998,
+        "maxMs": 39.28653599999984
+      },
+      "roomJob": {
+        "count": 192,
+        "meanMs": 5.974012489583348,
+        "p95Ms": 29.03721500000006,
+        "maxMs": 39.34120699999994
+      },
+      "heartbeatDelay": {
+        "count": 14866,
+        "meanMs": 0.21616863480425097,
+        "p95Ms": 0.16258899999991172,
+        "maxMs": 227.15761400000008
+      },
+      "eventLoop": {
+        "p95Ms": 1.164287,
+        "maxMs": 228.196351
+      },
+      "search": {
+        "worlds": 261,
+        "samplingFailures": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "modelBefore": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "modelAfter": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3"
+    },
+    {
+      "schemaVersion": 1,
+      "label": "optimized-direct-timers",
+      "scheduler": "direct-timers",
+      "rooms": 8,
+      "rounds": 24,
+      "cadenceMs": 700,
+      "node": "v24.19.0",
+      "startupMs": 72.46877,
+      "durationMs": 17398.556877,
+      "decision": {
+        "count": 178,
+        "meanMs": 3.06573585955055,
+        "p95Ms": 16.954680999999255,
+        "maxMs": 28.807311000000027
+      },
+      "roomJob": {
+        "count": 192,
+        "meanMs": 2.9341897552083402,
+        "p95Ms": 16.738657999999987,
+        "maxMs": 29.124018999999976
+      },
+      "queueWait": {
+        "count": 192,
+        "meanMs": 0.005758598958317762,
+        "p95Ms": 0.02430599999934202,
+        "maxMs": 0.1265560000001642
+      },
+      "heartbeatDelay": {
+        "count": 15012,
+        "meanMs": 0.16399616959765534,
+        "p95Ms": 0.134052000000338,
+        "maxMs": 134.89708999999993
+      },
+      "eventLoop": {
+        "p95Ms": 1.135615,
+        "maxMs": 135.921663
+      },
+      "search": {
+        "worlds": 599,
+        "attempts": 600,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "deadlineStops": 1,
+        "partialComparisonsDiscarded": 1,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "modelBefore": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "modelAfter": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3"
+    },
+    {
+      "schemaVersion": 1,
+      "label": "optimized-room-queue",
+      "scheduler": "room-queue",
+      "rooms": 8,
+      "rounds": 24,
+      "cadenceMs": 700,
+      "node": "v24.19.0",
+      "startupMs": 70.41617,
+      "durationMs": 17986.834924,
+      "decision": {
+        "count": 178,
+        "meanMs": 3.2453064382022228,
+        "p95Ms": 19.286973000000216,
+        "maxMs": 28.83041400000002
+      },
+      "roomJob": {
+        "count": 192,
+        "meanMs": 3.136773869791632,
+        "p95Ms": 18.21477099999902,
+        "maxMs": 29.128223999999932
+      },
+      "queueWait": {
+        "count": 192,
+        "meanMs": 22.340326661458363,
+        "p95Ms": 78.03121900000042,
+        "maxMs": 117.82072600000004
+      },
+      "heartbeatDelay": {
+        "count": 15570,
+        "meanMs": 0.15942632157996212,
+        "p95Ms": 0.15515599999980623,
+        "maxMs": 29.44946399999992
+      },
+      "eventLoop": {
+        "p95Ms": 1.156095,
+        "maxMs": 35.553279
+      },
+      "search": {
+        "worlds": 596,
+        "attempts": 598,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 2,
+        "partialComparisonsDiscarded": 2,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "modelBefore": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "modelAfter": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3"
+    }
+  ],
+  "targetedGames": [
+    {
+      "schemaVersion": 2,
+      "seed": 1,
+      "pairs": 50,
+      "candidate": "corrected-search",
+      "baseline": "heuristic",
+      "nodeVersion": "v24.19.0",
+      "modelSha256": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "modelSha256After": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "searchOptions": {
+        "iterations": 16,
+        "legacyIterations": 100,
+        "timeMs": null
+      },
+      "summary": {
+        "candidateWinRate95CI": [
+          0.43,
+          0.55
+        ],
+        "completed": 100,
+        "aborted": 0,
+        "candidateWins": 49,
+        "baselineWins": 51,
+        "invalidMoves": 0,
+        "search": {
+          "worlds": 5776,
+          "attempts": 5776,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        },
+        "signedScoreAdjustment": 78,
+        "latency": {
+          "corrected-search": {
+            "count": 2082,
+            "meanMs": 2.4645554178674365,
+            "p95Ms": 16.188490999999885,
+            "maxMs": 49.96694600000001
+          },
+          "heuristic": {
+            "count": 2082,
+            "meanMs": 0.03813830643612623,
+            "p95Ms": 0.14499400000022433,
+            "maxMs": 3.094290000000001
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "seed": 1,
+      "pairs": 50,
+      "candidate": "corrected-search",
+      "baseline": "production-legacy",
+      "nodeVersion": "v24.19.0",
+      "modelSha256": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "modelSha256After": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+      "searchOptions": {
+        "iterations": 16,
+        "legacyIterations": 100,
+        "timeMs": null
+      },
+      "summary": {
+        "candidateWinRate95CI": [
+          0.43,
+          0.55
+        ],
+        "completed": 100,
+        "aborted": 0,
+        "candidateWins": 49,
+        "baselineWins": 51,
+        "invalidMoves": 0,
+        "search": {
+          "worlds": 5168,
+          "attempts": 5168,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        },
+        "signedScoreAdjustment": -39,
+        "latency": {
+          "corrected-search": {
+            "count": 1946,
+            "meanMs": 2.0671400847893184,
+            "p95Ms": 13.085264999999708,
+            "maxMs": 58.58468500000001
+          },
+          "production-legacy": {
+            "count": 1946,
+            "meanMs": 6.298836044193238,
+            "p95Ms": 44.161503000000266,
+            "maxMs": 365.03140299999905
+          }
+        }
+      }
+    }
+  ]
+}

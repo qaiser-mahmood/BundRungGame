@@ -74,7 +74,7 @@ Comparison budgets: corrected search 16 worlds with deterministic iteration
 budget, no wall-clock cutoff; legacy 100 approximate worlds. These are **not equal
 computational budgets**. Legacy iterations are separate from corrected iterations
 and default to 100. The default live corrected policy instead has a soft 25 ms
-limit checked between complete comparisons. `--time-ms` can enable a benchmark
+limit checked between transitions and candidate calls. `--time-ms` can enable a benchmark
 time cutoff, but the resulting world counts/outcomes need not replay exactly.
 Iterations are capped at 1,000; each corrected rollout at 160 engine transitions.
 
@@ -158,3 +158,14 @@ already exercised 1,200 complete hands; extrapolated larger fixed-budget work
 would add several minutes. Full multi-hand continuation, worker-thread hard
 preemption, bidding posterior calibration and stronger-model claims remain
 outside this correctness repair. See `AI_AUDIT.md` for unresolved limitations.
+
+## Pre-merge latency and recovery refinement
+
+See [AI_REFINEMENT_REVIEW.md](AI_REFINEMENT_REVIEW.md) and
+[ai-refinement-results.json](../benchmarks/ai-refinement-results.json) for the
+eight-room direct/queued load experiments, two 50-pair targeted comparisons,
+recovery counters and commands. Live deadlines now check between engine
+transitions/candidate calls and a per-room timer queue prevents timer bursts.
+They are still soft limits. The original 200-pair report remains historical; the
+refinement removes incidental toss RNG consumption during rollouts and should
+not be pooled with its finite-world outcomes.

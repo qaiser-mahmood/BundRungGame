@@ -173,3 +173,15 @@ or neural checkpoint promotion is requested.
 - `shared/visibility.ts`
 - `src/components/TableLayout.tsx`
 - `tsconfig.ai.json`
+
+## Pre-merge refinement follow-up
+
+The existing repair branch now includes the fixes and measurements in
+[AI_REFINEMENT_REVIEW.md](AI_REFINEMENT_REVIEW.md): classified fair search
+recovery; inside-rollout deadline checks; reduced serialization/toss overhead;
+yielding room-turn scheduling; all-field adversarial privacy guards; and
+server-derived, room-scoped voice relay with a real four-client transport test.
+Final validation is 178 passing tests across 21 files, both TypeScript checks and
+the production build. Earlier tables/counts in this original PR description
+describe the initial repair; the follow-up report is authoritative for refinement
+results and soft-latency limitations. No model weights were changed.

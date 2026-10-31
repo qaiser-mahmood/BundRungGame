@@ -110,7 +110,7 @@ training. No stronger-model claim or production promotion follows.
    and actual KHOTI are exact; optimal multi-hand continuation after transfer is
    not solved. The +/-1000 match utility and tactical candidate pruning are
    explicit evaluation choices, not new authoritative rules.
-4. Decision deadlines are cooperative between complete comparisons, not hard
+4. Decision deadlines are cooperative between transitions/candidate calls, not hard
    preemption. Bounded iterations/graph/transition counts prevent indefinite
    search, but individual comparisons or GC can exceed 25 ms. Worker isolation
    and hard real-time latency remain future work.
@@ -128,3 +128,12 @@ No known critical/high-priority original audit defect remains in the corrected
 path. The retained legacy path and limitations above must stay visible in review.
 See `AI_BENCHMARKS.md` and the committed machine-readable comparison for results,
 commands, confidence intervals and latency evidence.
+
+## Pre-merge review follow-up
+
+[AI_REFINEMENT_REVIEW.md](AI_REFINEMENT_REVIEW.md) records the additional recovery,
+concurrent latency, secondary-field privacy and cross-room voice fixes. All 178
+tests and both TypeScript checks pass. The review includes real Socket.IO
+isolation coverage and preserved model checksums; hard latency bounds remain an
+explicit limitation. Earlier 200-pair results above are historical evidence, not
+results of the refined sampling stream.
