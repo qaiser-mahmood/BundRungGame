@@ -55,6 +55,16 @@ describe('advanced observation-only policy',()=>{
     vi.spyOn(performance,'now').mockImplementation(()=>now+(calls++?100:0));
     expect(f.legal).toContain(advancedSearch(f.state,f.priv,f.legal,{timeMs:1}));
   });
+  it('never assigns remembered concealed cards or partially disclosed ownership elsewhere',()=>{
+    const f=fixture(),other=f.state.players.find(p=>p.id!==f.priv.myPlayerId)!.id;
+    const remembered=card('C_A'),disclosed=card('D_A');
+    const priv={...f.priv,myHand:f.priv.myHand.filter(c=>c.id!==remembered.id&&c.id!==disclosed.id),knownConcealedCards:{'1:p0':remembered}};
+    const s={...f.state,revealedHands:{[other]:[disclosed]}};
+    const b=new OpponentBeliefs(s,priv),target=f.state.players.find(p=>p.id!==other&&p.id!==priv.myPlayerId)!.id;
+    expect(b.probability(target,c=>c.id===remembered.id)).toBe(0);
+    expect(b.probability(target,c=>c.id===disclosed.id)).toBe(0);
+    expect(b.probability(other,c=>c.id===disclosed.id)).toBe(1);
+  });
   it('honors legitimate inspected ownership and replaces stale revealed beliefs',()=>{
     const f=fixture(),partner=f.state.players.find(p=>p.id!==f.priv.myPlayerId&&p.team===f.state.players.find(x=>x.id===f.priv.myPlayerId)!.team)!;
     const hand=f.engine.getPrivateState(partner.id).myHand;

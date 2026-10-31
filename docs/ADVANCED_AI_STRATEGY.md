@@ -38,6 +38,8 @@ Opt in on a test server using `BOT_DECISION_POLICY=advanced-search`; absent conf
 
 ## Frozen evaluation protocol
 
-Default strategy: safety probability 0.75, four maximum worlds (two ordinary), four maximum candidates; corrected baseline: 16 iterations. Strength tournaments use infinite time with bounded fixed work for reproducibility. Live latency uses the 25 ms budget separately. Development smoke seeds 1–50 and initial seeds 201–400 are disjoint from final seeds 100000–100999. Safety sensitivity uses 0.6 and 0.9 on development seeds 201–250. No reward weights are added. Retain 0.75 unless development evidence is compelling; final held-out results must never be used to tune it.
+Default strategy: safety probability 0.75, four maximum worlds (two ordinary), four maximum candidates; corrected baseline: 16 iterations. Strength tournaments use infinite time with bounded fixed work for reproducibility. Live latency uses the 25 ms budget separately. Development smoke seeds 1–50 and initial seeds 201–400 are disjoint from final seeds 200000–200999. Safety sensitivity uses 0.6 and 0.9 on development seeds 201–250. No reward weights are added. Retain 0.75 unless development evidence is compelling; final held-out results must never be used to tune it.
 
 Promotion requires preferably >=55% held-out wins, paired 95% interval excluding 50%, and no material score, reliability or latency deterioration. Results and limitations are recorded in the accompanying Phase 2 report. No automatic promotion or merge occurs.
+
+A pre-result review corrected analytic exclusion of remembered concealed cards and partial ownership disclosures. The first held-out process (100000–100999) was stopped before producing or inspecting results; final evaluation restarts on 200000–200999 with identical strategy parameters. Earlier development results are labelled exploratory.

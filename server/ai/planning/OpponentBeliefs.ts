@@ -18,26 +18,30 @@ export class OpponentBeliefs {
     return world;
   }
   get sampleCount():number{return this.particles.length;}
-  knownHand(id:string):Card[]|null {
-    if(id===this.privateState.myPlayerId)return [...this.privateState.myHand,...(this.privateState.myTrumpCard?[this.privateState.myTrumpCard]:[])];
+  knownCards(id:string):Card[] {
     const partner=this.state.players.find(p=>p.id!==this.privateState.myPlayerId&&p.team===this.state.players.find(x=>x.id===this.privateState.myPlayerId)?.team);
-    if(partner?.id===id&&this.privateState.partnerHand)return this.privateState.partnerHand;
-    const shown=this.state.revealedHands[id];
-    const locked=id===this.state.trumpCallerPlayerId?this.state.revealedTrumpCard:null;
-    const cards=[...(shown??[]),...(locked&&!shown?.some(c=>c.id===locked.id)?[locked]:[])];
+    const shown=id===this.privateState.myPlayerId?this.privateState.myHand:partner?.id===id&&this.privateState.partnerHand?this.privateState.partnerHand:this.state.revealedHands[id]??[];
+    const locked=id===this.privateState.myPlayerId?this.privateState.myTrumpCard:id===this.state.trumpCallerPlayerId?this.state.revealedTrumpCard:null;
+    return [...shown,...(locked&&!shown.some(c=>c.id===locked.id)?[locked]:[])];
+  }
+  knownHand(id:string):Card[]|null {
+    const cards=this.knownCards(id);
     return cards.length===this.state.players.find(p=>p.id===id)?.cardsInHandCount?cards:null;
   }
   /** Probability of at least one matching held card. Analytic fallback is a
    * marginal approximation, never a new ownership or void constraint. */
   probability(id:string,predicate:(card:Card)=>boolean):number {
     const known=this.knownHand(id);if(known)return Number(known.some(predicate));
+    if(this.knownCards(id).some(predicate))return 1;
     if(this.particles.length)return this.particles.filter(w=>w.get(id)?.some(predicate)).length/this.particles.length;
     let eligible=this.eligibleCache.get(id);
-    if(!eligible){eligible=CardTracker.getUnseenCards(this.state,[...this.privateState.myHand,...(this.privateState.myTrumpCard?[this.privateState.myTrumpCard]:[])])
-      .filter(c=>!this.voids.get(id)?.has(c.suit)&&!this.state.players.some(p=>p.id!==id&&this.knownHand(p.id)?.some(k=>k.id===c.id)));
+    if(!eligible){
+      const reserved=new Set([...this.state.players.flatMap(p=>this.knownCards(p.id)),...Object.values(this.privateState.knownConcealedCards??{}),...(this.privateState.teammateFaceDownCard?[this.privateState.teammateFaceDownCard]:[])].map(c=>c.id));
+      eligible=CardTracker.getUnseenCards(this.state,[...this.privateState.myHand,...(this.privateState.myTrumpCard?[this.privateState.myTrumpCard]:[])])
+      .filter(c=>!this.voids.get(id)?.has(c.suit)&&!reserved.has(c.id));
       this.eligibleCache.set(id,eligible);
     }
-    const count=this.state.players.find(p=>p.id===id)?.cardsInHandCount??0;
+    const count=Math.max(0,(this.state.players.find(p=>p.id===id)?.cardsInHandCount??0)-this.knownCards(id).length);
     const hits=eligible.filter(predicate).length;
     let miss=1;for(let i=0;i<Math.min(count,eligible.length);i++)miss*=Math.max(0,eligible.length-hits-i)/(eligible.length-i);
     return 1-miss;
