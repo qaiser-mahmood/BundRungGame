@@ -21,6 +21,7 @@ export class ReviewStore {
  }
  private flush(records:ReviewRecord[]){const temp=this.filename+'.'+randomUUID()+'.tmp';try{writeFileSync(temp,JSON.stringify({bundleHash:this.bundle.hash,recordsHash:digest(records),records},null,2)+'\n',{flag:'wx',mode:0o600});renameSync(temp,this.filename);}finally{if(existsSync(temp))unlinkSync(temp);}}
  latest(actor:string,packetId:string){return this.records.filter(r=>r.annotatorId===actor&&r.packetId===packetId).at(-1);}
+ request(actor:string,packetId:string,requestId:string){this.packet(packetId);return this.records.find(r=>r.annotatorId===actor&&r.packetId===packetId&&r.submission.requestId===requestId);}
  packet(id:string){const p=this.assigned.find(p=>p.id===id);if(!p)throw new Error('EVALUATION_UNKNOWN_ASSIGNED_PACKET');return p;}
  // Explicit DTO: never serialize the private bundle, predictions, seeds or split ledger.
  case(actor:string,id:string){const p=this.packet(id),last=this.latest(actor,id);return {id:p.id,observationHash:p.observationHash,observation:p.observation,publicWinner:publicWinningPlay(p.observation),context:this.bundle.context[id],revision:last?.revision??0,previous:last?{status:last.submission.status,selected:last.submission.selected,reasoning:last.submission.reasoning,signals:last.submission.signals,uncertainty:last.submission.uncertainty,confidence:last.submission.confidence,rankedAlternatives:last.submission.rankedAlternatives,principles:last.submission.principles}:null};}

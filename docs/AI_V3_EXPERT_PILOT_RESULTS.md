@@ -40,3 +40,14 @@ One `V2_INTERNAL_FAILURE` diagnostic occurred during preparation and tests. The 
 Owner instructions, including exact PowerShell setup/private token/ACL commands, resume, backup and export, are in [AI_V3_EXPERT_PILOT.md](AI_V3_EXPERT_PILOT.md). All 15 inputs and saved revisions are persistent and reproducible. The server resumes the first untouched case; old AI-exposed edits cannot replace independent labels. Authentication and loopback-only serving are retained; no hosting infrastructure added.
 
 Windows/PowerShell and manual browser usability have **not** been executed in this Linux environment (PowerShell is unavailable). Automated HTTP/privacy/persistence checks are not a substitute for that human pilot. The public bidding information is a final-status/pass-count summary, not a full transcript. Qualification, keeping reference seeds/bundles away from blind review and cross-study overlap checks remain curator responsibilities. Broader expert data, baseline quality, learned V3 strength and statistical improvement remain unverified.
+
+
+## PR #8 workflow corrections
+
+Progress now separates completed expert decisions from not-reviewed, skipped, ambiguous and insufficient cases. The first untouched case remains the resume target; an all-visited summary reports unresolved/skipped totals explicitly. Skip-to-decision revisions retain history and stay blind until the genuine saved submission.
+
+The client journals exact pending request bytes/ID in browser storage before sending, and restores/reconciles on refresh. A new authenticated own-request lookup returns only the saved submission/receipt/comparison, or found=false with no AI data. Absence permits an identical idempotent retry; uncertain outcomes block new submissions/navigation. Explicit pre-save rejection differs from network/internal-server uncertainty, including failures after commit. No training/export contract or production API changes.
+
+Browser storage must remain available at the original origin/profile while intent is pending. Saved server labels do not depend on it. Manual Windows/browser testing remains outstanding; focused tests exercise the actual client recovery module and real local authenticated HTTP rather than heavy browser automation.
+
+Correction validation: **78 focused tests across 6 files passed** (11 recovery/state tests plus the existing 67 pilot/evaluation/control/data/observation checks). Both `npm run typecheck:ai` and `npx tsc --noEmit` passed. Both review-client JavaScript modules passed syntax checks; referenced element IDs were checked against the HTML. The existing V2 fallback diagnostic still appears in the pilot fixture and remains disclosed above. No new model training, heavy browser automation or production changes.

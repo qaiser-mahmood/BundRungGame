@@ -54,7 +54,7 @@ Bidding information is a **public status summary** (caller, forcedness, precedin
 3. Explain the decision; distinguish observed partner signals from uncertain deductions. Supply confidence only if you intend to do so.
 4. Mark ambiguous/insufficient with a reason or uncertainty explanation, or clear choices and skip. No forced label is generated.
 5. **Save and compare**. The server validates the legal mask and durably records the revision before returning AI comparisons. The next case remains blind.
-6. Continue with Next. The saved counter and case picker show progress. There are exactly 15 assigned cases.
+6. Continue with Next. The progress indicator and picker distinguish Not reviewed, Completed decision, Skipped, Ambiguous and Insufficient information. Skips and unresolved answers are never counted as completed decisions. There are exactly 15 assigned cases.
 
 Navigation is disabled during requests so an old response cannot overwrite a different case. Unsaved edits prompt before leaving; only saved decisions are durable. Reopened cases restore saved values, not AI recommendations. Later corrections are retained, but cannot replace the first independent decision in metrics/training export. No confidence is borrowed from an AI-exposed revision. A skip can be revisited; an ambiguous/insufficient non-skip response has already unlocked comparison and cannot later become an independent label.
 
@@ -66,11 +66,22 @@ Wait for the Saved message, then stop the server with **Ctrl+C**. In a new Power
 npm run expert:review -- serve --data .expert-review/pilot-01 --users-file .expert-review/pilot-01/users.local.json --port 4318
 ```
 
-Use the same token from the same private file (copy it again using the `Get-Content`/`Set-Clipboard` commands above). Login resumes at the first untouched case, based on server records, including after browser refresh or application restart. Use the picker to revisit a saved or skipped case. Completed skipped cases count as addressed, not as expert action labels. All-15-addressed sessions retain the full picker for quality review.
+Use the same token from the same private file (copy it again using the `Get-Content`/`Set-Clipboard` commands above). Login resumes at the first untouched case, based on server records, including after browser refresh or application restart. Use the picker to revisit a saved or skipped case. If all 15 have been visited, the page shows separate totals for completed decisions, skips, ambiguous and insufficient answers; it does not claim 15 completed decisions. The full picker remains available. Reopening a saved non-skip answer reads its existing comparison without creating another submission. A skipped case may later receive a genuine decision without losing its original revision or unlocking AI early.
 
 **Do not rerun preparation, delete reviews.json, change the bundle or recreate credentials to resume.** Preparation refuses existing directories and access initialization refuses overwriting a token. Keep the same annotator identity. Back up the entire private directory with the server stopped. `reviews.json` retains every revision; frozen inputs/predictions live in `bundle.json`. POSIX private file modes are set; Windows uses the ACL step above.
 
 After an abnormal crash, `writer.lock` may remain. Read only that file's PID and use `Get-Process -Id PID` to verify the old server is gone before deleting that specific lock. Never remove a lock from a running server. A second server writer is rejected; startup acquires the lock before loading records, avoiding stale writer snapshots. If port 4318 is occupied, stop the conflicting local process or choose another explicit local port.
+
+## If a save response is lost
+
+The exact request ID and JSON payload are written to this browser's local storage **before** sending. No token is stored in that pending journal. While the outcome is uncertain, fields and navigation are blocked; retyping or double-clicking cannot start another request. On refresh/login the pending case is reopened first and an authenticated lookup checks only that same reviewer/case/request ID.
+
+- If the server saved it, the original revision and its comparison are restored; no second POST is needed.
+- If absent, use **Retry original request**. This sends the same request ID and exact frozen payload, never a freshly assembled decision. The server's idempotency/revision guards still apply.
+- If lookup fails, use **Check save outcome** later; the pending journal stays intact. Do not clear it or create a new assignment as a recovery shortcut.
+- A named pre-save validation/revision rejection is shown separately. It cannot overwrite existing history; the latest server copy is reloaded before a new explicit submission, and the rejected draft is shown read-only for copying notes. Server errors after persistence are treated as uncertain, not as proof the save failed.
+
+Use the same browser profile and **exact URL** (host/port) until a pending save is resolved. Browser-local pending intent cannot survive clearing site storage, private-mode closure or switching profiles/origins. Saved server decisions remain durable independently. Keep one review tab open; concurrent tabs remain protected by server revisions, but use refresh/reconciliation if a journal-change warning appears. If local storage is unavailable/full, the client refuses to send a new save rather than risk losing its request identity. Close/reopen or Lock retains unresolved pending intent; authenticate with the same reviewer identity to recover it.
 
 ## Export and data quality review
 
