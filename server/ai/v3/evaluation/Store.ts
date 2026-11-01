@@ -1,3 +1,5 @@
+import {pilotPackets} from './PilotSelection';
+import {publicWinningPlay} from './Coverage';
 import {existsSync,readFileSync,writeFileSync,renameSync,mkdirSync,unlinkSync} from 'node:fs';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
@@ -12,8 +14,8 @@ const text=(x:unknown)=>typeof x==='string'&&x.length<=4000;
 export class ReviewStore {
  readonly assigned:DecisionPacket[];private records:ReviewRecord[]=[];private filename:string;
  constructor(readonly directory:string,readonly bundle:EvaluationBundle,readonly principleIds:string[]){
-  verifyCorpus(bundle.corpus);const {hash,...base}=bundle;if(hash!==digest(base))throw new Error('EVALUATION_BUNDLE_INTEGRITY');this.assigned=assignmentPackets(bundle.corpus);
-  for(const p of this.assigned){const predictions=bundle.predictions[p.id];if(!predictions||predictions.v2.policy!=='ai-v2-ismcts'||predictions.v2.version!==bundle.corpus.manifest.config.sourceCommit||predictions.v3.policy!=='ai-v3-partnership'||predictions.v2.status!=='available'||predictions.v2.action===null||!p.mask[predictions.v2.action]||predictions.v3.status!=='not_available'||predictions.v3.action!==null)throw new Error('EVALUATION_MODEL_IDENTITY');}
+  verifyCorpus(bundle.corpus);const {hash,...base}=bundle;if(hash!==digest(base))throw new Error('EVALUATION_BUNDLE_INTEGRITY');this.assigned=bundle.pilot?pilotPackets(bundle.corpus,bundle.pilot):assignmentPackets(bundle.corpus);
+  for(const p of this.assigned){if(bundle.pilot&&(!bundle.context[p.id]?.bidding||bundle.context[p.id].bidding!.seatStatuses.length!==4))throw new Error('PILOT_ESSENTIAL_CONTEXT_REQUIRED');const predictions=bundle.predictions[p.id];if(!predictions||predictions.v2.policy!=='ai-v2-ismcts'||predictions.v2.version!==bundle.corpus.manifest.config.sourceCommit||predictions.v3.policy!=='ai-v3-partnership'||predictions.v2.status!=='available'||predictions.v2.action===null||!p.mask[predictions.v2.action]||predictions.v3.status!=='not_available'||predictions.v3.action!==null)throw new Error('EVALUATION_MODEL_IDENTITY');}
   mkdirSync(directory,{recursive:true,mode:0o700});this.filename=join(directory,'reviews.json');
   if(existsSync(this.filename)){const saved=JSON.parse(readFileSync(this.filename,'utf8'));if(saved.bundleHash!==hash||digest(saved.records)!==saved.recordsHash)throw new Error('EVALUATION_STORE_INTEGRITY');this.records=saved.records;}
  }
@@ -21,7 +23,7 @@ export class ReviewStore {
  latest(actor:string,packetId:string){return this.records.filter(r=>r.annotatorId===actor&&r.packetId===packetId).at(-1);}
  packet(id:string){const p=this.assigned.find(p=>p.id===id);if(!p)throw new Error('EVALUATION_UNKNOWN_ASSIGNED_PACKET');return p;}
  // Explicit DTO: never serialize the private bundle, predictions, seeds or split ledger.
- case(actor:string,id:string){const p=this.packet(id),last=this.latest(actor,id);return {id:p.id,observationHash:p.observationHash,observation:p.observation,context:this.bundle.context[id],revision:last?.revision??0,previous:last?{status:last.submission.status,selected:last.submission.selected,reasoning:last.submission.reasoning,signals:last.submission.signals,uncertainty:last.submission.uncertainty,confidence:last.submission.confidence,rankedAlternatives:last.submission.rankedAlternatives,principles:last.submission.principles}:null};}
+ case(actor:string,id:string){const p=this.packet(id),last=this.latest(actor,id);return {id:p.id,observationHash:p.observationHash,observation:p.observation,publicWinner:publicWinningPlay(p.observation),context:this.bundle.context[id],revision:last?.revision??0,previous:last?{status:last.submission.status,selected:last.submission.selected,reasoning:last.submission.reasoning,signals:last.submission.signals,uncertainty:last.submission.uncertainty,confidence:last.submission.confidence,rankedAlternatives:last.submission.rankedAlternatives,principles:last.submission.principles}:null};}
  submit(actor:string,id:string,body:Submission):ReviewRecord {
   const p=this.packet(id);if(!/^[A-Za-z0-9_-]{3,64}$/.test(actor)||actor==='UNASSIGNED')throw new Error('EVALUATION_ACTOR');
   const fields=['requestId','expectedRevision','status','selected','rankedAlternatives','reasoning','signals','uncertainty','confidence','principles'];
@@ -32,6 +34,7 @@ export class ReviewStore {
   if(!Array.isArray(body.rankedAlternatives)||body.rankedAlternatives.some(g=>!Array.isArray(g)||!g.length))throw new Error('EVALUATION_RANKING');
   const ranked=body.rankedAlternatives.flat();if(new Set(ranked).size!==ranked.length||ranked.some(c=>!Number.isSafeInteger(c)||!p.mask[c]||c===body.selected)||ranked.length&&body.selected===null)throw new Error('EVALUATION_RANKING');
   if(body.status==='reviewed'&&(body.selected===null||!body.reasoning.trim()))throw new Error('EVALUATION_REASONED_ACTION_REQUIRED');
+  if(['ambiguous','insufficient'].includes(body.status)&&!body.reasoning.trim()&&!body.uncertainty.trim())throw new Error('EVALUATION_EXPLAIN_ABSTENTION');
   if(body.status==='skipped'&&(body.selected!==null||ranked.length))throw new Error('EVALUATION_SKIP_ACTION');
   const revision=(latest?.revision??0)+1;
   const annotation:Annotation|null=body.status==='reviewed'&&body.confidence!==null?{packetId:p.id,observationHash:p.observationHash,revision,coverage:'partial',rankedActions:[[body.selected!],...body.rankedAlternatives],actionConfidence:body.confidence,reasoning:body.reasoning,latent:{shortage:[null,null,null,null],returnSuit:null,leadControl:null,strategyPhase:null}}:null;

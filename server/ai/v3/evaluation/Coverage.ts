@@ -2,7 +2,7 @@ import type {DecisionObservation} from '../data/Observation';
 import type {EvaluationBundle} from './Prepare';
 import {winningPlay} from '../../v2/simulation/FastSimulator';
 import {suit} from '../../v2/simulation/CompactState';
-export function publicControl(o:DecisionObservation):'unknown-or-leading'|'partner'|'self'|'opponent'{
+export function publicWinningPlay(o:DecisionObservation):{seat:number;card:number;effectivePower:number}|null{
  const plays=o.history.filter(p=>p.trick===o.currentTrick);
  // Do not guess from incomplete history, concealed identities or unknown Ace flags.
  // An unrevealed suit is ignored even if an invalid caller supplied that field.
@@ -12,13 +12,16 @@ export function publicControl(o:DecisionObservation):'unknown-or-leading'|'partn
     plays.some(p=>p.card===null||!Number.isInteger(p.card)||p.card<0||p.card>=52||typeof p.aceDown!=='boolean'||!Number.isInteger(p.seat)||p.seat<0||p.seat>3)||
     new Set(plays.map(p=>p.card)).size!==plays.length||new Set(plays.map(p=>p.seat)).size!==plays.length||
     suit(plays[0].card!)!==o.currentLead||o.teams.length!==4||o.teams[0]!==0||
-    o.teams.some(t=>t!==0&&t!==1)||!Number.isInteger(o.partner)||o.partner<1||o.partner>3||o.teams[o.partner]!==0)return 'unknown-or-leading';
+    o.teams.some(t=>t!==0&&t!==1)||!Number.isInteger(o.partner)||o.partner<1||o.partner>3||o.teams[o.partner]!==0)return null;
  // winningPlay is the existing compact equivalent of BundRungEngine.resolveTrick:
  // lead-suit filtering, revealed trump priority, effective Ace power and strict >
  // comparisons (earlier play retains equal power). It only reads card/seat/aceDown.
  const winner=winningPlay(plays.map(p=>({seat:p.seat,card:p.card!,aceDown:p.aceDown!,hidden:false,
-  revealed:p.trumpRevealedAtPlay??false,trick:p.trick})),o.currentLead,o.trumpRevealed?o.publicTrump!:-1).seat;
- return winner===o.partner?'partner':o.teams[winner]===0?'self':'opponent';
+  revealed:p.trumpRevealedAtPlay??false,trick:p.trick})),o.currentLead,o.trumpRevealed?o.publicTrump!:-1);
+ return {seat:winner.seat,card:winner.card,effectivePower:winner.aceDown?2:winner.card%13+2};
+}
+export function publicControl(o:DecisionObservation):'unknown-or-leading'|'partner'|'self'|'opponent'{
+ const winner=publicWinningPlay(o);return winner===null?'unknown-or-leading':winner.seat===o.partner?'partner':o.teams[winner.seat]===0?'self':'opponent';
 }
 export function collectionCoverage(bundle:EvaluationBundle){
  const counts:Record<string,number>={};const add=(k:string)=>counts[k]=(counts[k]??0)+1;
