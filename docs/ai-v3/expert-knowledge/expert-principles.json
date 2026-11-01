@@ -5,7 +5,7 @@
     "id": "expert-task-2026-11-01",
     "path": "expert-source.md",
     "sha256": "81c930ad7012cad4197c60b0767b9655643e6370fb54e66b9cc961c76be7ec91",
-    "provenance": "User-supplied consolidation of prior expert discussions; original question-by-question transcripts were not supplied. Quotes refer to this consolidation, not independently recovered transcripts."
+    "provenance": "User-supplied consolidated discussion summary, not the original interview transcript. Evidence quotes reproduce that summary verbatim. Principle text is editorial paraphrase except separately cited engine-review findings. SHA256 checks byte integrity, not factual correctness or expert authorship. See README.md#evidence-and-provenance."
   },
   "principles": [
     {
@@ -879,11 +879,13 @@
       "preconditions": [
         "Current opponent of caller is void in established lead suit, rung hidden, not pending or paused, TRICK_PLAYING."
       ],
-      "preferredAction": "Reveal permission arises; engine blocks playing a hand card before reveal. After reveal a revealer with trump must play trump when void in lead suit.",
-      "reasoning": "Official permission and legal-card checks.",
+      "preferredAction": "getRevealPermissions advertises reveal for a current opponent actor void in lead suit while hidden and not pending/paused. getLegalCardsForPlayer blocks that void opponent before reveal, then requires trump if available after reveal (following lead suit takes priority). Direct requestTrumpReveal does not enforce the turn/void predicates.",
+      "reasoning": "Permission, request and legal-card paths are separate; their conditions are not identical.",
       "expectedBenefit": "Explain strategic reveal opportunities without changing mechanics.",
       "exceptions": [
-        "A suspected void is not permission; same-team caller partner cannot request via this condition; leading a suit alone is insufficient."
+        "A suspected void does not satisfy the advertised permission; caller-team players cannot request via the ordinary opponent path.",
+        "Existing defect: requestTrumpReveal checks phase, reveal/pending/pause, player existence and opposing team but omits turn, lead-suit existence and void validation. See ENGINE_REVIEW.md; no engine fix in this PR.",
+        "showTrumpCard requires a pending request and caller identity; only then is rung revealed. A revealer follows lead suit if available; otherwise must play trump if available, or any legal card if none."
       ],
       "certainty": "engine_verified",
       "classification": "verified_game_mechanic",
@@ -900,9 +902,9 @@
       "mechanicVerification": {
         "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
         "path": "server/engine/BundRungEngine.ts",
-        "symbol": "getRevealPermissions / getLegalCardsForPlayer",
-        "lines": "1840–1865; 1093–1112",
-        "finding": "Actor/team/void/reveal-state checks; trump obligation follows matching suit."
+        "symbol": "getRevealPermissions / requestTrumpReveal / showTrumpCard / getLegalCardsForPlayer",
+        "lines": "1840–1865; 1217–1260; 1062–1112",
+        "finding": "Permission predicates and legal-card obligations verified separately from direct request, which lacks turn/void checks. See focused reproduction and separate future-engine issue in ENGINE_REVIEW.md."
       }
     },
     {

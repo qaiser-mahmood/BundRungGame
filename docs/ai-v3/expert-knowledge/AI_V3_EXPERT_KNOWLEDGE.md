@@ -1,6 +1,6 @@
 # Bund Rung expert partnership strategy guide
 
-Knowledge version 1.0.0. This guide summarizes the supplied human discussion consolidation. Preferences remain conditional; inferred signals are uncertain. See [source and limitations](README.md), [corrections](corrections-and-ambiguities.md) and [raw source](expert-source.md). No runtime policy is implemented.
+Knowledge version 1.0.0. This guide editorially summarizes the supplied consolidated discussion summary, not original interview transcripts. Preferences remain conditional; inferred signals are uncertain. See [source and limitations](README.md), [corrections](corrections-and-ambiguities.md) and [raw source](expert-source.md). No runtime policy is implemented.
 
 ## Verified mechanics, separately from strategy
 
@@ -20,7 +20,7 @@ Classification: `verified_game_mechanic`; phase: `next_trick_lead`; certainty: `
 
 **Engine:** `server/engine/BundRungEngine.ts` — `playCard / resolveTrick`, lines 1184–1200; 1302. Boolean lead/winner/rank conditions and getCardPower downgrade.
 
-**Evidence:** source C: “Verify the exact conditions and implementation in the official engine.”
+**Consolidated-summary excerpt:** section C: “Verify the exact conditions and implementation in the official engine.”
 
 ## GM-FORCED: mechanics
 
@@ -36,7 +36,7 @@ Classification: `verified_game_mechanic`; phase: `bidding`; certainty: `engine_v
 
 **Engine:** `server/engine/BundRungEngine.ts` — `submitBid`, lines 572–587. Fourth bidder PASS throws; strength is not verified by this rule.
 
-**Evidence:** source A1: “If the rung caller is also the dealer and must call, their hand may be weak.”
+**Consolidated-summary excerpt:** section A1: “If the rung caller is also the dealer and must call, their hand may be weak.”
 
 ## GM-FOLLOW: mechanics
 
@@ -52,23 +52,19 @@ Classification: `verified_game_mechanic`; phase: `following`; certainty: `engine
 
 **Engine:** `server/engine/BundRungEngine.ts` — `getLegalCardsForPlayer`, lines 1062–1106. Includes revealed locked trump or last caller turn, matching-suit filter and reveal gating.
 
-**Evidence:** source 5: “An opponent failing to follow suit may establish a confirmed void, subject to official rules.”
+**Consolidated-summary excerpt:** section 5: “An opponent failing to follow suit may establish a confirmed void, subject to official rules.”
 
 ## GM-REVEAL: mechanics
 
-Classification: `verified_game_mechanic`; phase: `hidden_trump`; certainty: `engine_verified`.
+Classification: `verified_game_mechanic`; phase: `hidden_trump`; certainty: `engine_verified` for the scoped implementation findings below.
 
-**Context:** Current opponent of caller is void in established lead suit, rung hidden, not pending or paused, TRICK_PLAYING.
+`getRevealPermissions` advertises reveal only for a current opponent of the caller, void in an established lead suit, while hidden and not pending/paused. Legal-card filtering blocks the void opponent before reveal. After reveal, following lead suit has priority; otherwise a revealer with trump must play trump, and without trump may play any available card. `showTrumpCard` requires pending reveal and caller identity.
 
-**Preference or mechanic:** Reveal permission arises; engine blocks playing a hand card before reveal. After reveal a revealer with trump must play trump when void in lead suit.
+**Important implementation boundary:** direct `requestTrumpReveal` checks phase, hidden/pending/pause, player existence and opposing team, but omits turn, lead-suit existence and void validation. Do not describe the advertised permission as universally enforced. See [independent engine review and separate defect](ENGINE_REVIEW.md). No engine behavior is changed here.
 
-**Reasoning:** Official permission and legal-card checks. Intended benefit: Explain strategic reveal opportunities without changing mechanics.
+**Engine:** `BundRungEngine.ts`: `getLegalCardsForPlayer` 1062–1112; `requestTrumpReveal`/`showTrumpCard` 1217–1260; `getRevealPermissions` 1840–1865, at the pinned base commit.
 
-**Limits:** A suspected void is not permission; same-team caller partner cannot request via this condition; leading a suit alone is insufficient.
-
-**Engine:** `server/engine/BundRungEngine.ts` — `getRevealPermissions / getLegalCardsForPlayer`, lines 1840–1865; 1093–1112. Actor/team/void/reveal-state checks; trump obligation follows matching suit.
-
-**Evidence:** source G: “if that creates an opportunity to force reveal.”
+**Consolidated-summary excerpt:** section G: “if that creates an opportunity to force reveal.” This is the discussion motivation; engine findings come from source review, not that quotation.
 
 ## GM-STREAK: mechanics
 
@@ -84,7 +80,7 @@ Classification: `verified_game_mechanic`; phase: `post_reveal`; certainty: `engi
 
 **Engine:** `server/engine/BundRungEngine.ts` — `resolveTrick`, lines 1354–1416. Individual tracking/reset and isOpponentEarlyWin; final-trick fallback.
 
-**Evidence:** source J4: “Record the actual scoring consequences using the official scoring engine, not assumptions.”
+**Consolidated-summary excerpt:** section J4: “Record the actual scoring consequences using the official scoring engine, not assumptions.”
 
 ## GM-SCORE: mechanics
 
@@ -100,7 +96,7 @@ Classification: `verified_game_mechanic`; phase: `resolution`; certainty: `engin
 
 **Engine:** `server/engine/ScoringEngine.ts` — `calculateAdjustment / applyGameResult`, lines 64–128; 136–215. Close trump: dealer called => dealer win -13 / loss +26; other team called => dealer win -26 / loss +13; different matrices for open/Bwinji. Adjustment is dealer-score convention, not generic team utility.
 
-**Evidence:** source J4: “Record the actual scoring consequences using the official scoring engine, not assumptions.”
+**Consolidated-summary excerpt:** section J4: “Record the actual scoring consequences using the official scoring engine, not assumptions.”
 
 ## EK-A1: caller strength
 
@@ -114,7 +110,7 @@ Classification: `probabilistic_inference`; phase: `bidding`; certainty: `uncerta
 
 **Limits:** Voluntary does not prove strength; forced does not prove weakness.
 
-**Evidence:** source A1: “This is probabilistic evidence, not certainty.”
+**Consolidated-summary excerpt:** section A1: “This is probabilistic evidence, not certainty.”
 
 Open: How strongly should this prior vary by bidding mode and five-card declaration information?
 
@@ -130,7 +126,7 @@ Classification: `expert_strategic_preference`; phase: `any_trick`; certainty: `c
 
 **Limits:** Exceptional circumstances may justify taking control; not an absolute command.
 
-**Evidence:** source A2: “Do not unnecessarily overtake a winning partner.”
+**Consolidated-summary excerpt:** section A2: “Do not unnecessarily overtake a winning partner.”
 
 Related: EK-K1, EK-J4.
 
@@ -146,7 +142,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** Not a universal highest-card rule; Ace downgrade, trump and public history still matter.
 
-**Evidence:** source B1: “Expert prefers A♦ because 10♦ could be beaten by the remaining opponent.”
+**Consolidated-summary excerpt:** section B1: “Expert prefers A♦ because 10♦ could be beaten by the remaining opponent.”
 
 Related: EK-B2, EK-C1.
 
@@ -164,7 +160,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** Future suit control and Ace interaction can change the choice.
 
-**Evidence:** source B2: “This is context-sensitive.”
+**Consolidated-summary excerpt:** section B2: “This is context-sensitive.”
 
 Related: EK-C1, EK-N1.
 
@@ -182,7 +178,7 @@ Classification: `expert_strategic_preference`; phase: `any_trick`; certainty: `c
 
 **Limits:** A♦/K♦ example differs from A♦/J♦ example; Q♦ may be interchangeable after K♦ played.
 
-**Evidence:** source C1: “The expert treats avoiding a double-Ace disadvantage as a preventive consideration, not the overriding objective.”
+**Consolidated-summary excerpt:** section C1: “The expert treats avoiding a double-Ace disadvantage as a preventive consideration, not the overriding objective.”
 
 Related: GM-ACE, EK-N1.
 
@@ -202,7 +198,7 @@ Classification: `expert_strategic_preference`; phase: `leading`; certainty: `con
 
 **Limits:** Untouched-suit exploration with 3♠ is also preferred in another context; neither is unconditional.
 
-**Evidence:** source D1: “Avoid spending strong cards merely to demonstrate strength.”
+**Consolidated-summary excerpt:** section D1: “Avoid spending strong cards merely to demonstrate strength.”
 
 Related: EK-H1, EK-J4.
 
@@ -222,7 +218,7 @@ Classification: `expert_strategic_preference`; phase: `any_trick`; certainty: `c
 
 **Limits:** Partner coverage is uncertain unless established publicly; never inspect hidden hands.
 
-**Evidence:** source E1: “A suit that is weak for one partner may still be strong for the team if the other partner can cover it.”
+**Consolidated-summary excerpt:** section E1: “A suit that is weak for one partner may still be strong for the team if the other partner can cover it.”
 
 Related: EK-F1, EK-I1.
 
@@ -238,7 +234,7 @@ Classification: `probabilistic_inference`; phase: `after_partner_lead`; certaint
 
 **Limits:** 2♣ does not prove partner had only one club; concealed/remaining cards are unknown.
 
-**Evidence:** source F1: “Partner wins with A♥ and then leads 2♣: expert interprets this as a possible indication that partner is now void in clubs, not hearts.”
+**Consolidated-summary excerpt:** section F1: “Partner wins with A♥ and then leads 2♣: expert interprets this as a possible indication that partner is now void in clubs, not hearts.”
 
 Related: EK-L1, EK-E1.
 
@@ -258,7 +254,7 @@ Classification: `probabilistic_inference`; phase: `hidden_trump`; certainty: `un
 
 **Limits:** Caller can still have spade trump; win/lead may have been forced or natural.
 
-**Evidence:** source F2: “evidence that spades may not be trump.”
+**Consolidated-summary excerpt:** section F2: “evidence that spades may not be trump.”
 
 Related: EK-F1, EK-A1.
 
@@ -276,7 +272,7 @@ Classification: `expert_strategic_preference`; phase: `hidden_trump`; certainty:
 
 **Limits:** Suspected shortage is weaker evidence; a known void alone does not justify overtaking a winning partner.
 
-**Evidence:** source G1: “A suspected shortage is less decisive than a confirmed void.”
+**Consolidated-summary excerpt:** section G1: “A suspected shortage is less decisive than a confirmed void.”
 
 Related: GM-REVEAL, GM-FOLLOW, EK-K1, EK-H1.
 
@@ -294,7 +290,7 @@ Classification: `expert_strategic_preference`; phase: `hidden_trump`; certainty:
 
 **Limits:** Unknown holder identities remain estimates.
 
-**Evidence:** source G2: “Count outstanding cards and estimate who may hold them.”
+**Consolidated-summary excerpt:** section G2: “Count outstanding cards and estimate who may hold them.”
 
 Related: EK-M1, EK-N1.
 
@@ -310,7 +306,7 @@ Classification: `expert_strategic_preference`; phase: `leading`; certainty: `con
 
 **Limits:** Untouched does not guarantee safety; another context prefers exploring a different suit.
 
-**Evidence:** source H1: “This is a strategic preference, not a guarantee that an untouched suit is safe.”
+**Consolidated-summary excerpt:** section H1: “This is a strategic preference, not a guarantee that an untouched suit is safe.”
 
 Related: EK-D1, EK-M1.
 
@@ -330,7 +326,7 @@ Classification: `expert_strategic_preference`; phase: `hidden_trump`; certainty:
 
 **Limits:** An inferred request is not a confirmed void.
 
-**Evidence:** source I1: “A partner's signal is relevant but does not automatically override this danger.”
+**Consolidated-summary excerpt:** section I1: “A partner's signal is relevant but does not automatically override this danger.”
 
 Related: EK-E1, EK-G1, EK-L1.
 
@@ -346,7 +342,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** Unknown remaining player/trump/history could change a fully specified case.
 
-**Evidence:** source J1: “Expert plays 3♠, allowing partner to win and preserving K♠.”
+**Consolidated-summary excerpt:** section J1: “Expert plays 3♠, allowing partner to win and preserving K♠.”
 
 Related: EK-A2, EK-K1.
 
@@ -364,7 +360,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** A currently winning K may not win against a later player or trump.
 
-**Evidence:** source J2: “Expert plays K♠ to take control.”
+**Consolidated-summary excerpt:** section J2: “Expert plays K♠ to take control.”
 
 Related: EK-B1, EK-J3.
 
@@ -382,7 +378,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** Ace downgrade and any remaining player must be checked in a real state.
 
-**Evidence:** source J3: “Expert plays A♣.”
+**Consolidated-summary excerpt:** section J3: “Expert plays A♣.”
 
 Related: EK-J2, GM-ACE.
 
@@ -400,7 +396,7 @@ Classification: `expert_strategic_preference`; phase: `post_reveal`; certainty: 
 
 **Limits:** Qualification depends on caller side, same individual, reveal and trick index; caller-team streaks do not trigger that early-win condition.
 
-**Evidence:** source J4: “the expert strongly prefers stopping them when a winning card is available.”
+**Consolidated-summary excerpt:** section J4: “the expert strongly prefers stopping them when a winning card is available.”
 
 Related: GM-STREAK, GM-SCORE, EK-D1.
 
@@ -416,7 +412,7 @@ Classification: `expert_strategic_preference`; phase: `following`; certainty: `c
 
 **Limits:** A prior suggested take-control exception was not equally endorsed; extraordinary exceptions still need explicit context.
 
-**Evidence:** source K1: “the expert subsequently clarified a strong preference for leaving control with the partner.”
+**Consolidated-summary excerpt:** section K1: “the expert subsequently clarified a strong preference for leaving control with the partner.”
 
 Related: EK-A2, EX-K1, EK-G1.
 
@@ -434,7 +430,7 @@ Classification: `conditional_exception`; phase: `following`; certainty: `unresol
 
 **Limits:** Requires a new explicit expert-supported case; a confirmed void is insufficient by itself.
 
-**Evidence:** source K1: “A previously discussed possible exception involved taking control to prevent a dangerous next lead”
+**Consolidated-summary excerpt:** section K1: “A previously discussed possible exception involved taking control to prevent a dangerous next lead”
 
 Related: EK-K1.
 
@@ -452,7 +448,7 @@ Classification: `expert_strategic_preference`; phase: `opponent_called`; certain
 
 **Limits:** Not automatic; team coverage, opponent voids and alternatives may override.
 
-**Evidence:** source L1: “the expert may return 4♣ to exploit that shortage.”
+**Consolidated-summary excerpt:** section L1: “the expert may return 4♣ to exploit that shortage.”
 
 Related: EK-F1, EK-I1, GM-REVEAL.
 
@@ -470,7 +466,7 @@ Classification: `expert_strategic_preference`; phase: `repeated_leads`; certaint
 
 **Limits:** Several commanding highs can justify repetition; five outstanding is an example, never a universal threshold.
 
-**Evidence:** source M1: “generally not with only Q♣ and 4♣.”
+**Consolidated-summary excerpt:** section M1: “generally not with only Q♣ and 4♣.”
 
 Related: EK-H1, EK-N1.
 
@@ -490,7 +486,7 @@ Classification: `expert_strategic_preference`; phase: `any_trick`; certainty: `c
 
 **Limits:** No exact plan is mandated without full observable state and legal actions.
 
-**Evidence:** source N1: “The expert regularly plans more than one trick ahead.”
+**Consolidated-summary excerpt:** section N1: “The expert regularly plans more than one trick ahead.”
 
 Related: EK-C1, EK-D1, EK-M1, GM-STREAK.
 

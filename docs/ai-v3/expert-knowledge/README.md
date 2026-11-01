@@ -11,6 +11,12 @@ The source is [the user's consolidated discussion summary](expert-source.md), pr
 - [JSON Schema](knowledge-schema.json)
 - [Interview template](interview-template.json)
 
+## Evidence and provenance
+
+The primary source is a user-supplied **consolidated summary**, not independently verified original expert speech. Each `evidence.quote` is an exact excerpt of that summary; `sourceId` in scenarios resolves to the source record in `expert-principles.json`. Preferred actions, reasons, benefits, caveats and scenario responses are editorial paraphrases of the supplied material, not newly authenticated quotations. Engine findings are separately attributed through `mechanicVerification` and [the engine review](ENGINE_REVIEW.md). Editorial legality/privacy cautions are not additional expert demonstrations.
+
+SHA256 verifies that source bytes match the recorded file; it does **not** establish factual correctness, expertise, authorship or original-transcript provenance. The supplied `expert-source.md` wording is preserved unchanged. No original scenario numbers beyond 21 or numerical confidence scores have been recovered or invented.
+
 ## Classification and trust
 
 Every principle has a stable ID, category/phase, preconditions, preferred action, reasoning, intended benefit, exceptions, qualitative certainty, evidence, cross-references and open questions. Benefits are intended effects, not measured outcomes. `verified_game_mechanic` is reserved for findings checked in the official engine, with path/symbol/line anchors and source commit. The other classes are `expert_strategic_preference`, `probabilistic_inference`, `conditional_exception` and `unverified_hypothesis`. A schema accepting these categories does not establish their truth.
@@ -25,6 +31,10 @@ Scenario 21 is unanswered: post-reveal strategy with diamonds as trump. No respo
 
 Maintain semantic versions: patch for spelling/anchors, minor for additive knowledge/corrections, major for incompatible schema semantics. Never reuse an ID. To retire a principle, set `superseded`, point to active replacements, update correction references and preserve evidence. Rejected statements live only in the correction ledger, not as active principles. Document and source future expert revisions; do not silently resolve conflicts.
 
+## Contribution checklist
+
+For each new response, first check whether it supports an existing principle. Attach evidence to that principle when it clarifies existing reasoning. If it contradicts prior knowledge, preserve the correction and supersession history rather than silently editing away the earlier claim. Create a new principle only for genuinely distinct reasoning, not another example of the same preference. Preserve unresolved uncertainty and never manufacture a complete observable state from narrative details. Keep the interview template as a collection aid, not an interview application or a training-data importer.
+
 ## Validation and scope
 
 ```sh
@@ -33,7 +43,7 @@ npx vitest run __tests__/ExpertKnowledge.test.ts
 npm run typecheck:ai
 ```
 
-The dependency-free validator implements the limited JSON Schema vocabulary used here and fails on unsupported keywords. It checks shape/enums/IDs, source hashes and literal quotes, references, active/superseded consistency, mechanic evidence, missing observations, public-only structured card fields and Scenario 21's unanswered state. Automated validation cannot establish expert credentials, prove every prose sentence true, verify a narrative's reachability or replace human review. Schema additions require matching interpreter support and tests.
+The dependency-free validator implements the [documented restricted subset](SCHEMA_VALIDATION.md), not full JSON Schema compliance. It preflights every schema branch/definition before inspecting data and fails on unsupported keywords or malformed schemas. No established validator is a direct project dependency; adding Ajv solely for this small offline package was not necessary for the bounded subset. It checks shape/enums/IDs, source hashes and literal quotes, references, active/superseded consistency, mechanic evidence, missing observations, public-only structured card fields and Scenario 21's unanswered state. Automated validation cannot establish expert credentials, prove every prose sentence true, verify a narrative's reachability or replace human review. Schema additions require matching interpreter support and tests.
 
 ## Existing V3 pipeline
 
