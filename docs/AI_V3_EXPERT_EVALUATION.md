@@ -2,6 +2,8 @@
 
 PR #6 (rung reveal eligibility) is merged into `feature/ai-v3-partnership-learning`. PR #7 now targets that V3 branch and contains only evaluation-harness changes. It is a separate, authenticated local Express interface using the official engine, V3 observations, corpus splits and annotation importer. It neither changes the production application nor registers a V3 policy. Start commands run from the repository root.
 
+For the first targeted 15-case owner session, use [the Windows-ready pilot workflow](AI_V3_EXPERT_PILOT.md). The original `prepare` command below remains available for untargeted assignments.
+
 ## Prepare a private assignment
 
 ```sh
