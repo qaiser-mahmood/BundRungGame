@@ -1,0 +1,23 @@
+{
+  "assigned": 12,
+  "counts": {
+    "phase:middle": 6,
+    "rung:revealed": 7,
+    "position:1": 5,
+    "call:voluntary": 4,
+    "control:unknown-or-leading": 5,
+    "public-void-evidence": 7,
+    "eligible-opponent-streak-context": 3,
+    "after-reveal-opportunity": 6,
+    "phase:early": 5,
+    "rung:hidden": 5,
+    "call:forced": 8,
+    "position:4": 3,
+    "control:opponent": 5,
+    "position:2": 3,
+    "position:3": 1,
+    "control:partner": 2,
+    "phase:late": 1
+  },
+  "description": "Descriptive observed collection coverage only; absent categories have zero cases. Not expert intention labels or passed strategy tests."
+}

@@ -38,3 +38,6 @@ server/ai/models/experiments/v2/
 
 # V3 offline experimental checkpoints; canonical network remains untouched
 server/ai/models/experiments/v3/
+
+# Local expert review records, credentials are supplied via environment only
+.expert-review/
