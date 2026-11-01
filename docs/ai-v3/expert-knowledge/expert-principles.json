@@ -1,0 +1,1077 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentType": "principles",
+  "source": {
+    "id": "expert-task-2026-11-01",
+    "path": "expert-source.md",
+    "sha256": "81c930ad7012cad4197c60b0767b9655643e6370fb54e66b9cc961c76be7ec91",
+    "provenance": "User-supplied consolidation of prior expert discussions; original question-by-question transcripts were not supplied. Quotes refer to this consolidation, not independently recovered transcripts."
+  },
+  "principles": [
+    {
+      "id": "EK-A1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "caller_strength",
+      "gamePhase": "bidding",
+      "preconditions": [
+        "Caller is dealer and required to declare after preceding passes, versus a voluntary declaration."
+      ],
+      "preferredAction": "Use forced/voluntary status as probabilistic evidence; voluntary caller is considered more likely strong in selected trump.",
+      "reasoning": "A forced caller may not have a strong option.",
+      "expectedBenefit": "Better uncertainty about caller support.",
+      "exceptions": [
+        "Voluntary does not prove strength; forced does not prove weakness."
+      ],
+      "certainty": "uncertain",
+      "classification": "probabilistic_inference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "A1",
+          "quote": "This is probabilistic evidence, not certainty."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [
+        "How strongly should this prior vary by bidding mode and five-card declaration information?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-A2",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_control",
+      "gamePhase": "any_trick",
+      "preconditions": [
+        "Partner called rung and is already winning."
+      ],
+      "preferredAction": "Generally leave control with partner; avoid unnecessary overtaking, especially during consecutive-win planning.",
+      "reasoning": "Partner may retain useful control while our high cards are conserved.",
+      "expectedBenefit": "Partnership control over future tricks.",
+      "exceptions": [
+        "Exceptional circumstances may justify taking control; not an absolute command."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "A2",
+          "quote": "Do not unnecessarily overtake a winning partner."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-K1",
+        "EK-J4"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-B1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "position_risk",
+      "gamePhase": "following",
+      "preconditions": [
+        "Playing third; opponent still to act; partner 4♦ and opponent 8♦; own A♦ K♦ 10♦ 6♦."
+      ],
+      "preferredAction": "Prefer A♦ in the discussed position.",
+      "reasoning": "10♦ may be overtaken by the remaining opponent.",
+      "expectedBenefit": "Reduce remaining-player risk.",
+      "exceptions": [
+        "Not a universal highest-card rule; Ace downgrade, trump and public history still matter."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "B1",
+          "quote": "Expert prefers A♦ because 10♦ could be beaten by the remaining opponent."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-B2",
+        "EK-C1"
+      ],
+      "scenarioIds": [
+        "SC-B1"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-B2",
+      "status": "active",
+      "supersededBy": [],
+      "category": "position_risk",
+      "gamePhase": "following",
+      "preconditions": [
+        "Playing fourth and 10♦ is sufficient to win the completed trick."
+      ],
+      "preferredAction": "May play 10♦ and preserve stronger cards.",
+      "reasoning": "There is no remaining player to overtake this play.",
+      "expectedBenefit": "Efficient use of suit strength.",
+      "exceptions": [
+        "Future suit control and Ace interaction can change the choice."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "B2",
+          "quote": "This is context-sensitive."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-C1",
+        "EK-N1"
+      ],
+      "scenarioIds": [
+        "SC-B2"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-C1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "ace_management",
+      "gamePhase": "any_trick",
+      "preconditions": [
+        "Considering multiple currently winning cards."
+      ],
+      "preferredAction": "Consider retained suit strength and possible consecutive-lead Ace downgrade; no universal lowest-winner or Ace-first rule.",
+      "reasoning": "A King retained after an Ace can offer different future control from a Jack retained after an Ace.",
+      "expectedBenefit": "Plan future winners without making Ace avoidance the sole objective.",
+      "exceptions": [
+        "A♦/K♦ example differs from A♦/J♦ example; Q♦ may be interchangeable after K♦ played."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "C1",
+          "quote": "The expert treats avoiding a double-Ace disadvantage as a preventive consideration, not the overriding objective."
+        }
+      ],
+      "relatedPrinciples": [
+        "GM-ACE",
+        "EK-N1"
+      ],
+      "scenarioIds": [
+        "SC-C1",
+        "SC-C2",
+        "SC-C3"
+      ],
+      "openQuestions": [
+        "Exact trick context and already-played cards for each example remain unspecified."
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-D1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "suit_preservation",
+      "gamePhase": "leading",
+      "preconditions": [
+        "Holding high-card strength in a suit."
+      ],
+      "preferredAction": "Often explore a different suit and preserve strong cards; after A♠ win, may switch and retain K♠.",
+      "reasoning": "Strong cards may later defend against an opponent streak.",
+      "expectedBenefit": "Future control rather than demonstrating strength.",
+      "exceptions": [
+        "Untouched-suit exploration with 3♠ is also preferred in another context; neither is unconditional."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "D1",
+          "quote": "Avoid spending strong cards merely to demonstrate strength."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-H1",
+        "EK-J4"
+      ],
+      "scenarioIds": [
+        "SC-D1",
+        "SC-D2"
+      ],
+      "openQuestions": [
+        "Which context selects another suit versus low-spade exploration with A♠ 9♠ 3♠?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-E1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partnership_coverage",
+      "gamePhase": "any_trick",
+      "preconditions": [
+        "Assessing own weakness and possible partner coverage."
+      ],
+      "preferredAction": "Evaluate combined team coverage; do not automatically return a low-card signal.",
+      "reasoning": "Individual weakness need not be team weakness.",
+      "expectedBenefit": "Preserve team control and concealment.",
+      "exceptions": [
+        "Partner coverage is uncertain unless established publicly; never inspect hidden hands."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "E1",
+          "quote": "A suit that is weak for one partner may still be strong for the team if the other partner can cover it."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-F1",
+        "EK-I1"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-F1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_signals",
+      "gamePhase": "after_partner_lead",
+      "preconditions": [
+        "Partner wins A♥ then leads 2♣."
+      ],
+      "preferredAction": "Treat club shortage, possibly becoming void after the low club, as a hypothesis about clubs, not hearts.",
+      "reasoning": "The subsequent low-club play is the relevant cue; the Ace win may be natural or forced.",
+      "expectedBenefit": "Contextual partner-intent inference.",
+      "exceptions": [
+        "2♣ does not prove partner had only one club; concealed/remaining cards are unknown."
+      ],
+      "certainty": "uncertain",
+      "classification": "probabilistic_inference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "F1",
+          "quote": "Partner wins with A♥ and then leads 2♣: expert interprets this as a possible indication that partner is now void in clubs, not hearts."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-L1",
+        "EK-E1"
+      ],
+      "scenarioIds": [
+        "SC-F1",
+        "SC-L1"
+      ],
+      "openQuestions": [
+        "How should public count evidence change the belief?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-F2",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_signals",
+      "gamePhase": "hidden_trump",
+      "preconditions": [
+        "Partner called hidden rung, wins then returns a low spade."
+      ],
+      "preferredAction": "Treat spade weakness and spades possibly not being trump as uncertain evidence.",
+      "reasoning": "Sequence may communicate weakness but is not a disclosure.",
+      "expectedBenefit": "Update beliefs while retaining alternatives.",
+      "exceptions": [
+        "Caller can still have spade trump; win/lead may have been forced or natural."
+      ],
+      "certainty": "uncertain",
+      "classification": "probabilistic_inference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "F2",
+          "quote": "evidence that spades may not be trump."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-F1",
+        "EK-A1"
+      ],
+      "scenarioIds": [
+        "SC-F2"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-G1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "concealment",
+      "gamePhase": "hidden_trump",
+      "preconditions": [
+        "Our team called; opponent confirmed void in suit under consideration; e.g. singleton 7♦."
+      ],
+      "preferredAction": "Strongly avoid voluntarily leading that suit when it creates an opponent reveal opportunity.",
+      "reasoning": "A void opponent of the caller can reach the official reveal condition.",
+      "expectedBenefit": "Protect hidden rung.",
+      "exceptions": [
+        "Suspected shortage is weaker evidence; a known void alone does not justify overtaking a winning partner."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "G1",
+          "quote": "A suspected shortage is less decisive than a confirmed void."
+        }
+      ],
+      "relatedPrinciples": [
+        "GM-REVEAL",
+        "GM-FOLLOW",
+        "EK-K1",
+        "EK-H1"
+      ],
+      "scenarioIds": [
+        "SC-G1",
+        "SC-G2"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-G2",
+      "status": "active",
+      "supersededBy": [],
+      "category": "card_counting",
+      "gamePhase": "hidden_trump",
+      "preconditions": [
+        "Our team protects hidden rung."
+      ],
+      "preferredAction": "Count public played/outstanding cards, compare safer alternatives and preserve future stoppers.",
+      "reasoning": "Distribution and lead ownership affect reveal risk.",
+      "expectedBenefit": "Control and defensive resources.",
+      "exceptions": [
+        "Unknown holder identities remain estimates."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "G2",
+          "quote": "Count outstanding cards and estimate who may hold them."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-M1",
+        "EK-N1"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-H1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "suit_exploration",
+      "gamePhase": "leading",
+      "preconditions": [
+        "Spades untouched; own A♠ 9♠ 3♠; several spades remain in other hands."
+      ],
+      "preferredAction": "In the discussed context, prefer 3♠ and observe responses.",
+      "reasoning": "Explore distribution while retaining A♠.",
+      "expectedBenefit": "Information and preserved strength.",
+      "exceptions": [
+        "Untouched does not guarantee safety; another context prefers exploring a different suit."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "H1",
+          "quote": "This is a strategic preference, not a guarantee that an untouched suit is safe."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-D1",
+        "EK-M1"
+      ],
+      "scenarioIds": [
+        "SC-H1"
+      ],
+      "openQuestions": [
+        "What alternatives and reveal risks distinguish this from SC-D1?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-I1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "opponent_signals",
+      "gamePhase": "hidden_trump",
+      "preconditions": [
+        "Our team protects hidden rung and opponent appears to request a suit."
+      ],
+      "preferredAction": "Avoid voluntarily helping opponents exploit that suit; weigh partner signals against this danger.",
+      "reasoning": "Returning a suit can help the opposing partnership reach a reveal or control opportunity.",
+      "expectedBenefit": "Deny opponent coordination.",
+      "exceptions": [
+        "An inferred request is not a confirmed void."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "I1",
+          "quote": "A partner's signal is relevant but does not automatically override this danger."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-E1",
+        "EK-G1",
+        "EK-L1"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-J1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_control",
+      "gamePhase": "following",
+      "preconditions": [
+        "Partner Q♠ beats opponent 9♠; own K♠ 3♠."
+      ],
+      "preferredAction": "Play 3♠ in the discussed scenario.",
+      "reasoning": "Partner already wins; preserve K♠.",
+      "expectedBenefit": "Save high-card control.",
+      "exceptions": [
+        "Unknown remaining player/trump/history could change a fully specified case."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J1",
+          "quote": "Expert plays 3♠, allowing partner to win and preserving K♠."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-A2",
+        "EK-K1"
+      ],
+      "scenarioIds": [
+        "SC-J1"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-J2",
+      "status": "active",
+      "supersededBy": [],
+      "category": "take_control",
+      "gamePhase": "following",
+      "preconditions": [
+        "Opponent Q♠ winning; own K♠ 3♠."
+      ],
+      "preferredAction": "Play K♠ in the discussed scenario.",
+      "reasoning": "Take control from an opponent.",
+      "expectedBenefit": "Team control.",
+      "exceptions": [
+        "A currently winning K may not win against a later player or trump."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J2",
+          "quote": "Expert plays K♠ to take control."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-B1",
+        "EK-J3"
+      ],
+      "scenarioIds": [
+        "SC-J2"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-J3",
+      "status": "active",
+      "supersededBy": [],
+      "category": "take_control",
+      "gamePhase": "following",
+      "preconditions": [
+        "Partner Q♣ losing to opponent K♣; own A♣ 8♣ 3♣."
+      ],
+      "preferredAction": "Play A♣ in the discussed scenario.",
+      "reasoning": "Protect team control.",
+      "expectedBenefit": "Prevent opponent win where the Ace succeeds.",
+      "exceptions": [
+        "Ace downgrade and any remaining player must be checked in a real state."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J3",
+          "quote": "Expert plays A♣."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-J2",
+        "GM-ACE"
+      ],
+      "scenarioIds": [
+        "SC-J3"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-J4",
+      "status": "active",
+      "supersededBy": [],
+      "category": "streak_defense",
+      "gamePhase": "post_reveal",
+      "preconditions": [
+        "Opponent is threatening another consecutive trick; a winning stopper is available."
+      ],
+      "preferredAction": "Strongly prefer stopping the opponent.",
+      "reasoning": "A qualifying individual opponent streak can end the game; retain stoppers for this risk.",
+      "expectedBenefit": "Avoid official game loss, not merely improve trick count.",
+      "exceptions": [
+        "Qualification depends on caller side, same individual, reveal and trick index; caller-team streaks do not trigger that early-win condition."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J4",
+          "quote": "the expert strongly prefers stopping them when a winning card is available."
+        }
+      ],
+      "relatedPrinciples": [
+        "GM-STREAK",
+        "GM-SCORE",
+        "EK-D1"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-K1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_control",
+      "gamePhase": "following",
+      "preconditions": [
+        "Partner Q♥ already winning; own A♥ 3♥, even with an opponent confirmed void in hearts."
+      ],
+      "preferredAction": "Prefer 3♥ and let partner retain control in the discussed scenario.",
+      "reasoning": "Preserve Ace and partner control; possible future reveal alone is insufficient reason to overtake.",
+      "expectedBenefit": "Resources and partnership continuity.",
+      "exceptions": [
+        "A prior suggested take-control exception was not equally endorsed; extraordinary exceptions still need explicit context."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "K1",
+          "quote": "the expert subsequently clarified a strong preference for leaving control with the partner."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-A2",
+        "EX-K1",
+        "EK-G1"
+      ],
+      "scenarioIds": [
+        "SC-K1"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EX-K1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "partner_control",
+      "gamePhase": "following",
+      "preconditions": [
+        "Taking control might prevent a dangerous next lead; exact state absent."
+      ],
+      "preferredAction": "Do not apply as an active override of EK-K1; retain only as an unresolved exceptional possibility.",
+      "reasoning": "The later clarification gives stronger support to leaving partner in control.",
+      "expectedBenefit": "Preserve nuance without restoring a rejected generalization.",
+      "exceptions": [
+        "Requires a new explicit expert-supported case; a confirmed void is insufficient by itself."
+      ],
+      "certainty": "unresolved",
+      "classification": "conditional_exception",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "K1",
+          "quote": "A previously discussed possible exception involved taking control to prevent a dangerous next lead"
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-K1"
+      ],
+      "scenarioIds": [],
+      "openQuestions": [
+        "What exceptional observable state would justify overtaking?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-L1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "force_reveal",
+      "gamePhase": "opponent_called",
+      "preconditions": [
+        "Opponents called; partner A♥ win then low 2♣; later we control lead."
+      ],
+      "preferredAction": "May return 4♣ to exploit possible partner club shortage, after assessing opponent voids and safety.",
+      "reasoning": "Partner might obtain a reveal opportunity as opponent of caller.",
+      "expectedBenefit": "Create reveal opportunities for our team.",
+      "exceptions": [
+        "Not automatic; team coverage, opponent voids and alternatives may override."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "L1",
+          "quote": "the expert may return 4♣ to exploit that shortage."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-F1",
+        "EK-I1",
+        "GM-REVEAL"
+      ],
+      "scenarioIds": [
+        "SC-L1"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-M1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "card_counting",
+      "gamePhase": "repeated_leads",
+      "preconditions": [
+        "Considering repeated leads with many cards in that suit outstanding in other hands."
+      ],
+      "preferredAction": "Generally avoid repeated leads without enough commanding high cards for multiple wins.",
+      "reasoning": "Many outstanding cards create competition and distribution risk, not automatic opportunity.",
+      "expectedBenefit": "Retain lead across realistic two/three-trick plans.",
+      "exceptions": [
+        "Several commanding highs can justify repetition; five outstanding is an example, never a universal threshold."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "M1",
+          "quote": "generally not with only Q♣ and 4♣."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-H1",
+        "EK-N1"
+      ],
+      "scenarioIds": [
+        "SC-M1"
+      ],
+      "openQuestions": [
+        "Which public counts and high-card combinations support a specific repeated-lead plan?"
+      ],
+      "mechanicVerification": null
+    },
+    {
+      "id": "EK-N1",
+      "status": "active",
+      "supersededBy": [],
+      "category": "multi_trick_planning",
+      "gamePhase": "any_trick",
+      "preconditions": [
+        "Evaluating action sequences, retained cards and likely responses."
+      ],
+      "preferredAction": "Plan beyond immediate trick wins: retain K♦ after A♦, explore Q♥ or J♣, save A♠, assess future voids and same-player continuation.",
+      "reasoning": "Current winning probability does not capture future control, reveal exposure and streak risk.",
+      "expectedBenefit": "Official team outcome over multiple tricks.",
+      "exceptions": [
+        "No exact plan is mandated without full observable state and legal actions."
+      ],
+      "certainty": "context_dependent",
+      "classification": "expert_strategic_preference",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "N1",
+          "quote": "The expert regularly plans more than one trick ahead."
+        }
+      ],
+      "relatedPrinciples": [
+        "EK-C1",
+        "EK-D1",
+        "EK-M1",
+        "GM-STREAK"
+      ],
+      "scenarioIds": [
+        "SC-N1"
+      ],
+      "openQuestions": [],
+      "mechanicVerification": null
+    },
+    {
+      "id": "GM-ACE",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "next_trick_lead",
+      "preconditions": [
+        "Same player won preceding trick with rank A; leads another rank A; current trick number >1."
+      ],
+      "preferredAction": "Engine marks new Ace isAceDowngraded and resolves it at effective power 2.",
+      "reasoning": "Exact implemented condition; not any consecutive Ace plays and not a blanket prohibition.",
+      "expectedBenefit": "Accurate explanation only; no engine change.",
+      "exceptions": [
+        "Off-lead Aces do not meet this condition; suits need not match; condition is not restricted to revealed rung."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "C",
+          "quote": "Verify the exact conditions and implementation in the official engine."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/BundRungEngine.ts",
+        "symbol": "playCard / resolveTrick",
+        "lines": "1184–1200; 1302",
+        "finding": "Boolean lead/winner/rank conditions and getCardPower downgrade."
+      }
+    },
+    {
+      "id": "GM-FORCED",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "bidding",
+      "preconditions": [
+        "No rung selected and three bidders have passed; dealer is fourth bidder."
+      ],
+      "preferredAction": "Engine refuses another PASS; dealer must select rung or Bwinji.",
+      "reasoning": "biddingPassCount === 3 guard.",
+      "expectedBenefit": "Distinguish forced declaration fact from a strength prior.",
+      "exceptions": [
+        "Being dealer alone does not establish that a particular call was forced."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "A1",
+          "quote": "If the rung caller is also the dealer and must call, their hand may be weak."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/BundRungEngine.ts",
+        "symbol": "submitBid",
+        "lines": "572–587",
+        "finding": "Fourth bidder PASS throws; strength is not verified by this rule."
+      }
+    },
+    {
+      "id": "GM-FOLLOW",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "following",
+      "preconditions": [
+        "Current actor has legal available lead-suit cards."
+      ],
+      "preferredAction": "Engine requires following suit; legal non-follow can support void evidence in available lead suit.",
+      "reasoning": "Matching-suit filtering precedes arbitrary discards.",
+      "expectedBenefit": "Conservative public void evidence.",
+      "exceptions": [
+        "Before reveal caller locked card is unavailable except last forced play; failure to follow does not prove absence of that suit in the locked slot. Concealed card suit must not be inferred from inaccessible identity."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "5",
+          "quote": "An opponent failing to follow suit may establish a confirmed void, subject to official rules."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/BundRungEngine.ts",
+        "symbol": "getLegalCardsForPlayer",
+        "lines": "1062–1106",
+        "finding": "Includes revealed locked trump or last caller turn, matching-suit filter and reveal gating."
+      }
+    },
+    {
+      "id": "GM-REVEAL",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "hidden_trump",
+      "preconditions": [
+        "Current opponent of caller is void in established lead suit, rung hidden, not pending or paused, TRICK_PLAYING."
+      ],
+      "preferredAction": "Reveal permission arises; engine blocks playing a hand card before reveal. After reveal a revealer with trump must play trump when void in lead suit.",
+      "reasoning": "Official permission and legal-card checks.",
+      "expectedBenefit": "Explain strategic reveal opportunities without changing mechanics.",
+      "exceptions": [
+        "A suspected void is not permission; same-team caller partner cannot request via this condition; leading a suit alone is insufficient."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "G",
+          "quote": "if that creates an opportunity to force reveal."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/BundRungEngine.ts",
+        "symbol": "getRevealPermissions / getLegalCardsForPlayer",
+        "lines": "1840–1865; 1093–1112",
+        "finding": "Actor/team/void/reveal-state checks; trump obligation follows matching suit."
+      }
+    },
+    {
+      "id": "GM-STREAK",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "post_reveal",
+      "preconditions": [
+        "Rung revealed; current trick >=2; same individual wins two consecutive counted tricks; winner opposes caller."
+      ],
+      "preferredAction": "Engine resolves game for that opponent team; trick 1 and unrevealed completions reset qualifying streak.",
+      "reasoning": "Individual streak check, distinct from team trick counter.",
+      "expectedBenefit": "Represent actual risk of conceding consecutive wins.",
+      "exceptions": [
+        "A caller-team individual streak does not trigger early victory; alternating teammates do not qualify; absent early victory, trick 13 winner wins."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J4",
+          "quote": "Record the actual scoring consequences using the official scoring engine, not assumptions."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/BundRungEngine.ts",
+        "symbol": "resolveTrick",
+        "lines": "1354–1416",
+        "finding": "Individual tracking/reset and isOpponentEarlyWin; final-trick fallback."
+      }
+    },
+    {
+      "id": "GM-SCORE",
+      "status": "active",
+      "supersededBy": [],
+      "category": "mechanics",
+      "gamePhase": "resolution",
+      "preconditions": [
+        "An official winning team has been resolved."
+      ],
+      "preferredAction": "Use scoring engine mode/modifier/caller-team/dealer-team matrix; do not add per-trick points for a prevented streak.",
+      "reasoning": "Game outcome feeds score adjustment and dealer score/transfer/Khoti handling.",
+      "expectedBenefit": "Avoid invented fixed reward for each consecutive trick.",
+      "exceptions": [
+        "Bwinji/open modifiers differ; narrative examples do not supply enough context for a numeric score."
+      ],
+      "certainty": "engine_verified",
+      "classification": "verified_game_mechanic",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J4",
+          "quote": "Record the actual scoring consequences using the official scoring engine, not assumptions."
+        }
+      ],
+      "relatedPrinciples": [],
+      "scenarioIds": [],
+      "openQuestions": [],
+      "mechanicVerification": {
+        "sourceCommit": "716d4361ac1e45f6f504c49fb37917e44165dc2a",
+        "path": "server/engine/ScoringEngine.ts",
+        "symbol": "calculateAdjustment / applyGameResult",
+        "lines": "64–128; 136–215",
+        "finding": "Close trump: dealer called => dealer win -13 / loss +26; other team called => dealer win -26 / loss +13; different matrices for open/Bwinji. Adjustment is dealer-score convention, not generic team utility."
+      }
+    }
+  ],
+  "corrections": [
+    {
+      "id": "COR-01",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "Always return the suit your partner signalled.",
+      "replacementPrincipleIds": [
+        "EK-E1",
+        "EK-I1",
+        "EK-L1"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 1",
+          "quote": "Consider partner signals, but preserve own strength and avoid helping opponents or exposing rung."
+        }
+      ]
+    },
+    {
+      "id": "COR-02",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "Partner winning A♥ and switching to clubs indicates heart shortage.",
+      "replacementPrincipleIds": [
+        "EK-F1"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 2",
+          "quote": "The subsequent low-club lead may indicate club shortage. The Ace win alone may be natural or forced."
+        }
+      ]
+    },
+    {
+      "id": "COR-03",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "Many outstanding clubs automatically make clubs attractive to lead repeatedly.",
+      "replacementPrincipleIds": [
+        "EK-M1"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 3",
+          "quote": "Many outstanding clubs can make repeated club leads risky unless sufficient high-card control exists."
+        }
+      ]
+    },
+    {
+      "id": "COR-04",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "Always use the lowest card that wins.",
+      "replacementPrincipleIds": [
+        "EK-C1",
+        "EK-B1",
+        "EK-B2"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 4",
+          "quote": "Evaluate the remaining strength in the suit and the double-Ace interaction."
+        }
+      ]
+    },
+    {
+      "id": "COR-05",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "Confirmed opponent void always justifies overtaking a winning partner.",
+      "replacementPrincipleIds": [
+        "EK-K1",
+        "EX-K1"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 5",
+          "quote": "Expert still prefers preserving the Ace and letting the partner win in the discussed situation."
+        }
+      ]
+    },
+    {
+      "id": "COR-06",
+      "status": "rejected_interpretation",
+      "rejectedInterpretation": "A partner's low-card signal establishes a certain fact.",
+      "replacementPrincipleIds": [
+        "EK-F1",
+        "EK-F2"
+      ],
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "4 correction 6",
+          "quote": "Treat inferred signals as uncertain unless supported by directly observable game facts."
+        }
+      ]
+    }
+  ]
+}
