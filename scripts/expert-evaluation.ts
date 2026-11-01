@@ -19,7 +19,9 @@ export async function evaluationCLI(args:string[]){
  const store=loadReviewStore(dir);
  if(command==='export'){
   const output=resolve(get('--output','/tmp/bundrung-review-export.json'));if(output.startsWith(resolve('server/ai/models')))throw new Error('EVALUATION_MODEL_PATH_FORBIDDEN');
-  writeFileSync(output,JSON.stringify({report:evaluationReport(store.recordsFor(),store.bundle),acceptedAnnotations:store.exportTraining(),reviews:store.recordsFor()},null,2)+'\n',{flag:'wx',mode:0o600});return {output,warning:'Curator-only export contains seeds and private source references. Do not give it to annotators.'};
+  const accepted=store.exportTraining(),trainingDir=get('--training-dir','');
+  if(trainingDir){const target=resolve(trainingDir);if(target.startsWith(resolve('server/ai/models')))throw new Error('EVALUATION_MODEL_PATH_FORBIDDEN');writeBundle(target,{'private/packets.json':store.bundle.corpus.packets,'private/manifest.json':store.bundle.corpus.manifest,'annotations.json':accepted});chmodSync(target,0o700);}
+  writeFileSync(output,JSON.stringify({report:evaluationReport(store.recordsFor(),store.bundle),acceptedAnnotations:accepted,reviews:store.recordsFor()},null,2)+'\n',{flag:'wx',mode:0o600});return {output,warning:'Curator-only export contains seeds and private source references. Do not give it to annotators.'};
  }
  if(command==='serve'){
   const users=JSON.parse(process.env.EXPERT_REVIEW_USERS??'{}'),port=Number(get('--port','4318'));if(!Number.isSafeInteger(port)||port<1024||port>65535)throw new Error('EVALUATION_PORT');

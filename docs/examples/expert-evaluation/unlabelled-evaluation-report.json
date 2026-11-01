@@ -1,0 +1,39 @@
+{
+  "schema": "bundrung-expert-evaluation-report/v1",
+  "manifestHash": "be63e4e44574900f157e5ec8ed49b7cb6d0ee7cec3ee11666779dd84573e5b11",
+  "totalRevisionRecords": 1,
+  "reviewedSituations": 0,
+  "excludedPostComparisonOrUnlabelled": 1,
+  "countsByStatus": {
+    "reviewed": 0,
+    "ambiguous": 0,
+    "insufficient": 0,
+    "skipped": 1
+  },
+  "models": {
+    "v2": {
+      "available": 0,
+      "topRankedAgreementRate": null,
+      "disagreements": 0,
+      "agreementCount": 0,
+      "conditionalTop2Tiers": {
+        "compared": 0,
+        "rate": null
+      }
+    },
+    "v3": {
+      "available": 0,
+      "topRankedAgreementRate": null,
+      "disagreements": 0,
+      "agreementCount": 0,
+      "conditionalTop2Tiers": {
+        "compared": 0,
+        "rate": null
+      }
+    }
+  },
+  "groups": {},
+  "claim": "Descriptive expert agreement, not playing strength or improvement. Conditional top-two rank tiers compare only genuinely ranked alternatives containing the AI action. Splits are reported separately; holdout must never be used for model selection.",
+  "trainingPerformed": false,
+  "confidenceInterval": null
+}

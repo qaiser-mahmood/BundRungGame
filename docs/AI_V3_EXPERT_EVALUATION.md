@@ -53,10 +53,10 @@ The review envelope adds workflow metadata around the **existing** `Annotation` 
 Curator export (exclusive new output file, not an API endpoint):
 
 ```sh
-npm run expert:review -- export --data .expert-review/session-01 --output /tmp/review-export.json
+npm run expert:review -- export --data .expert-review/session-01 --output /tmp/review-export.json --training-dir /tmp/v3-reviewed-corpus
 ```
 
-Export includes all review revisions, a report and an `AcceptedDataset` from the existing V3 importer. Only independent blind reviewed labels with actual confidence are exported as training-compatible records; AI-exposed revisions are retained for audit but excluded. Training/validation/holdout metadata remains intact. Existing V3 training row preparation must select train/validation and must never fit holdout. No training is performed here.
+The optional new `--training-dir` writes canonical `private/packets.json`, `private/manifest.json` and `annotations.json`, directly compatible with the existing `v3:train --corpus DIRECTORY --annotations DIRECTORY/annotations.json` arguments. It is curator-only, never an expert assignment. Do not run training until supervision and independent validation gates are satisfied. Export includes all review revisions, a report and an `AcceptedDataset` from the existing V3 importer. Only independent blind reviewed labels with actual confidence are exported as training-compatible records; AI-exposed revisions are retained for audit but excluded. Training/validation/holdout metadata remains intact. Existing V3 training row preparation must select train/validation and must never fit holdout. No training is performed here.
 
 Use stable identities and **one curator-controlled corpus per study**. Do not give experts seeds, private bundles, alternate offsets or overlapping new sessions from the same deals. Split integrity is enforced within the manifest; cross-study overlap must be checked by curator deal keys before combining corpora. Experts are self-declared; authentication does not establish qualification. The tool cannot prevent an expert independently reconstructing a deal outside the controlled workflow.
 
