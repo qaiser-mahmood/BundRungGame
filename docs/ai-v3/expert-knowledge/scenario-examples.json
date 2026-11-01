@@ -1,0 +1,1153 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentType": "scenarios",
+  "sourceId": "expert-task-2026-11-01",
+  "scenarios": [
+    {
+      "id": "SC-B1",
+      "discussionNumber": null,
+      "topic": "B1",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": 3,
+        "trickNumber": null,
+        "ownCards": [
+          "D_A",
+          "D_K",
+          "D_10",
+          "D_6"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "partner",
+            "card": "D_4",
+            "visibility": "public"
+          },
+          {
+            "seatRole": "opponent",
+            "card": "D_8",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "D_A",
+      "expertResponse": "Prefer A♦ to reduce risk from the opponent still to act.",
+      "alternativesConsidered": [
+        "D_10"
+      ],
+      "reasoning": [
+        "Prefer A♦ to reduce risk from the opponent still to act."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "B1",
+          "quote": "Expert prefers A♦ because 10♦ could be beaten by the remaining opponent."
+        }
+      ],
+      "principleIds": [
+        "EK-B1"
+      ],
+      "correctionIds": [
+        "COR-04"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-B2",
+      "discussionNumber": null,
+      "topic": "B2",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": 4,
+        "trickNumber": null,
+        "ownCards": [],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "D_10",
+      "expertResponse": "May use 10♦ if sufficient to beat all other played cards; preserve stronger cards.",
+      "alternativesConsidered": [
+        "stronger diamonds unspecified"
+      ],
+      "reasoning": [
+        "May use 10♦ if sufficient to beat all other played cards; preserve stronger cards."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "B2",
+          "quote": "the expert may play 10♦ and preserve stronger cards."
+        }
+      ],
+      "principleIds": [
+        "EK-B2"
+      ],
+      "correctionIds": [
+        "COR-04"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-C1",
+      "discussionNumber": null,
+      "topic": "C",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "D_A",
+          "D_K",
+          "D_3",
+          "S_A"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "D_A",
+      "expertResponse": "Win with A♦ while retaining K♦ as a strong diamond.",
+      "alternativesConsidered": [
+        "D_K"
+      ],
+      "reasoning": [
+        "Win with A♦ while retaining K♦ as a strong diamond."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "C",
+          "quote": "the expert prefers A♦ over K♦ when both win"
+        }
+      ],
+      "principleIds": [
+        "EK-C1"
+      ],
+      "correctionIds": [
+        "COR-04"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-C2",
+      "discussionNumber": null,
+      "topic": "C",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "D_A",
+          "D_J",
+          "D_3",
+          "S_A"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "D_J",
+      "expertResponse": "If J♦ suffices, retain A♦; Jack does not provide comparable future control.",
+      "alternativesConsidered": [
+        "D_A"
+      ],
+      "reasoning": [
+        "If J♦ suffices, retain A♦; Jack does not provide comparable future control."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "C",
+          "quote": "the expert prefers J♦ when J♦ is sufficient to win"
+        }
+      ],
+      "principleIds": [
+        "EK-C1"
+      ],
+      "correctionIds": [
+        "COR-04"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-C3",
+      "discussionNumber": null,
+      "topic": "C",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "D_A",
+          "D_Q",
+          "D_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "K♦ already played; player and trick unspecified."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "A♦ and Q♦ considered interchangeable here.",
+      "alternativesConsidered": [
+        "D_A",
+        "D_Q"
+      ],
+      "reasoning": [
+        "A♦ and Q♦ considered interchangeable here."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "C",
+          "quote": "the expert considers A♦ and Q♦ strategically interchangeable in the discussed situation."
+        }
+      ],
+      "principleIds": [
+        "EK-C1"
+      ],
+      "correctionIds": [
+        "COR-04"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-D1",
+      "discussionNumber": null,
+      "topic": "D",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "S_A",
+          "S_9",
+          "S_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Prefer exploring another suit; the alternative suit/card was not specified.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Prefer exploring another suit; the alternative suit/card was not specified."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "D",
+          "quote": "prefer exploring a different suit rather than unnecessarily leading spades."
+        }
+      ],
+      "principleIds": [
+        "EK-D1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-D2",
+      "discussionNumber": null,
+      "topic": "D",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "S_K"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "Observer won with A♠; exact trick unspecified."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Switch suits, preserving K♠ for later defensive control.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Switch suits, preserving K♠ for later defensive control."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "D",
+          "quote": "After winning with A♠, switch suits and retain K♠ for later defensive control."
+        }
+      ],
+      "principleIds": [
+        "EK-D1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-F1",
+      "discussionNumber": null,
+      "topic": "F",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "partner",
+            "card": "C_2",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [
+          "Partner previously won with A♥."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": [
+          "Partner clubs; inference only, not confirmed void."
+        ]
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Possible current club shortage/void after low club; do not label hearts short from the Ace win.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Possible current club shortage/void after low club; do not label hearts short from the Ace win."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "F",
+          "quote": "possible indication that partner is now void in clubs, not hearts."
+        }
+      ],
+      "principleIds": [
+        "EK-F1"
+      ],
+      "correctionIds": [
+        "COR-02",
+        "COR-06"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-F2",
+      "discussionNumber": null,
+      "topic": "F",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "partner",
+        "callType": "unknown",
+        "rungVisibility": "hidden",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "Partner won, then returned a low spade; ranks and exact tricks unspecified."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": [
+          "Partner spade weakness; uncertain."
+        ]
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Infer possible spade weakness and possible non-spade trump, without certainty.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Infer possible spade weakness and possible non-spade trump, without certainty."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "F",
+          "quote": "evidence that spades may not be trump."
+        }
+      ],
+      "principleIds": [
+        "EK-F2"
+      ],
+      "correctionIds": [
+        "COR-06"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-G1",
+      "discussionNumber": null,
+      "topic": "G",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "our_team_unspecified",
+        "callType": "unknown",
+        "rungVisibility": "hidden",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "D_7"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [
+          {
+            "seatRole": "opponent_unspecified",
+            "suit": "DIAMONDS",
+            "basis": "Supplied narrative premise; actual public proof absent."
+          }
+        ],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Strongly avoid leading singleton 7♦ into confirmed opponent void.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Strongly avoid leading singleton 7♦ into confirmed opponent void."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "G",
+          "quote": "expert strongly avoids leading 7♦."
+        }
+      ],
+      "principleIds": [
+        "EK-G1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-G2",
+      "discussionNumber": null,
+      "topic": "G",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "our_team_unspecified",
+        "callType": "unknown",
+        "rungVisibility": "hidden",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "D_7"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": [
+          "Opponent diamonds; unconfirmed."
+        ]
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "May consider diamonds if opponent only suspected short, after assessing safer alternatives.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "May consider diamonds if opponent only suspected short, after assessing safer alternatives."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "G",
+          "quote": "the expert may consider diamonds after assessing safer alternatives."
+        }
+      ],
+      "principleIds": [
+        "EK-G1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-H1",
+      "discussionNumber": null,
+      "topic": "H",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": 1,
+        "trickNumber": null,
+        "ownCards": [
+          "S_A",
+          "S_9",
+          "S_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "Spades not previously played; several spades remain in other hands, exact count unspecified."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "S_3",
+      "expertResponse": "Lead 3♠ to test untouched spades and retain A♠.",
+      "alternativesConsidered": [
+        "S_A",
+        "S_9"
+      ],
+      "reasoning": [
+        "Lead 3♠ to test untouched spades and retain A♠."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "H",
+          "quote": "expert prefers leading 3♠."
+        }
+      ],
+      "principleIds": [
+        "EK-H1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-J1",
+      "discussionNumber": null,
+      "topic": "J1",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "S_K",
+          "S_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "partner",
+            "card": "S_Q",
+            "visibility": "public"
+          },
+          {
+            "seatRole": "opponent",
+            "card": "S_9",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "S_3",
+      "expertResponse": "Leave winning partner in control, preserve K♠.",
+      "alternativesConsidered": [
+        "S_K"
+      ],
+      "reasoning": [
+        "Leave winning partner in control, preserve K♠."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J1",
+          "quote": "Expert plays 3♠, allowing partner to win and preserving K♠."
+        }
+      ],
+      "principleIds": [
+        "EK-J1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-J2",
+      "discussionNumber": null,
+      "topic": "J2",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "S_K",
+          "S_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "opponent",
+            "card": "S_Q",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "S_K",
+      "expertResponse": "Take control from winning opponent Q♠.",
+      "alternativesConsidered": [
+        "S_3"
+      ],
+      "reasoning": [
+        "Take control from winning opponent Q♠."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J2",
+          "quote": "Expert plays K♠ to take control."
+        }
+      ],
+      "principleIds": [
+        "EK-J2"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-J3",
+      "discussionNumber": null,
+      "topic": "J3",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "C_A",
+          "C_8",
+          "C_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "partner",
+            "card": "C_Q",
+            "visibility": "public"
+          },
+          {
+            "seatRole": "opponent",
+            "card": "C_K",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "C_A",
+      "expertResponse": "Play A♣ to protect team control.",
+      "alternativesConsidered": [
+        "C_8",
+        "C_3"
+      ],
+      "reasoning": [
+        "Play A♣ to protect team control."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "J3",
+          "quote": "Expert plays A♣."
+        }
+      ],
+      "principleIds": [
+        "EK-J3"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-K1",
+      "discussionNumber": null,
+      "topic": "K",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "H_A",
+          "H_3"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [
+          {
+            "seatRole": "partner",
+            "card": "H_Q",
+            "visibility": "public"
+          }
+        ],
+        "knownPublicHistory": [],
+        "confirmedVoids": [
+          {
+            "seatRole": "opponent_unspecified",
+            "suit": "HEARTS",
+            "basis": "Supplied narrative premise; actual public proof absent."
+          }
+        ],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": "H_3",
+      "expertResponse": "Preserve A♥ and let partner win; future reveal risk alone does not justify overtaking.",
+      "alternativesConsidered": [
+        "H_A"
+      ],
+      "reasoning": [
+        "Preserve A♥ and let partner win; future reveal risk alone does not justify overtaking."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "K",
+          "quote": "Even if an opponent is confirmed void in hearts, the expert still prefers 3♥ in the discussed scenario."
+        }
+      ],
+      "principleIds": [
+        "EK-K1"
+      ],
+      "correctionIds": [
+        "COR-05"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-L1",
+      "discussionNumber": null,
+      "topic": "L",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "opponent_team",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "C_4"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "Partner won A♥ and then led 2♣; observer later controls lead, exact intervening plays unspecified."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": [
+          "Partner clubs; inference only."
+        ]
+      },
+      "expertSelectedCard": "C_4",
+      "expertResponse": "May return 4♣ to exploit possible partner club shortage; assess opponent voids and safety first.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "May return 4♣ to exploit possible partner club shortage; assess opponent voids and safety first."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "L",
+          "quote": "the expert may return 4♣ to exploit that shortage."
+        }
+      ],
+      "principleIds": [
+        "EK-F1",
+        "EK-L1"
+      ],
+      "correctionIds": [
+        "COR-01",
+        "COR-02",
+        "COR-06"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-M1",
+      "discussionNumber": null,
+      "topic": "M",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "C_Q",
+          "C_4"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [
+          "Five or more clubs said to remain in other hands; exact distribution and history absent."
+        ],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Generally avoid repeated club leads without sufficient commanding high cards; five is not a fixed threshold.",
+      "alternativesConsidered": [],
+      "reasoning": [
+        "Generally avoid repeated club leads without sufficient commanding high cards; five is not a fixed threshold."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "M",
+          "quote": "generally not with only Q♣ and 4♣."
+        }
+      ],
+      "principleIds": [
+        "EK-M1"
+      ],
+      "correctionIds": [
+        "COR-03"
+      ],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-N1",
+      "discussionNumber": null,
+      "topic": "N",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "answered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "unknown",
+        "knownTrumpSuit": null,
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [
+          "H_Q",
+          "C_J",
+          "S_A"
+        ],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": "Consider exploratory Q♥ or J♣ while preserving A♠ as part of multi-trick planning.",
+      "alternativesConsidered": [
+        "H_Q",
+        "C_J"
+      ],
+      "reasoning": [
+        "Consider exploratory Q♥ or J♣ while preserving A♠ as part of multi-trick planning."
+      ],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_quantified",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "N",
+          "quote": "Lead Q♥ or J♣ to explore weaker suits."
+        }
+      ],
+      "principleIds": [
+        "EK-N1"
+      ],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    },
+    {
+      "id": "SC-21",
+      "discussionNumber": 21,
+      "topic": "Post-reveal strategy with diamonds as trump; unanswered",
+      "observationCompleteness": "narrative_only",
+      "responseStatus": "unanswered",
+      "context": {
+        "rungCaller": "unknown",
+        "callType": "unknown",
+        "rungVisibility": "revealed",
+        "knownTrumpSuit": "DIAMONDS",
+        "position": null,
+        "trickNumber": null,
+        "ownCards": [],
+        "ownCardsComplete": false,
+        "currentTrick": [],
+        "knownPublicHistory": [],
+        "confirmedVoids": [],
+        "suspectedShortages": []
+      },
+      "expertSelectedCard": null,
+      "expertResponse": null,
+      "alternativesConsidered": [],
+      "reasoning": [],
+      "exceptions": [
+        "Narrative preference only; legal actions and actual outcome require an official observable snapshot."
+      ],
+      "expressedConfidence": "not_expressed",
+      "evidence": [
+        {
+          "sourceId": "expert-task-2026-11-01",
+          "section": "8",
+          "quote": "Scenario 21, involving post-reveal strategy with diamonds as trump, was presented but **not yet answered by the expert**."
+        }
+      ],
+      "principleIds": [],
+      "correctionIds": [],
+      "missingInformation": [
+        "Complete observable snapshot and legal-action mask.",
+        "Full own hand, unless separately confirmed by expert.",
+        "Trick number, preceding winner and Ace downgrade flags.",
+        "Unspecified caller, reveal, trump, position, public history, voids and score context remain unknown; do not fill them by inference."
+      ]
+    }
+  ]
+}
