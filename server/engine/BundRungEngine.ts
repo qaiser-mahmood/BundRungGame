@@ -1235,6 +1235,10 @@ export class BundRungEngine extends BaseRungEngine {
       throw new Error('Only the opponent team can ask to reveal Rung');
     }
 
+    if (!this.getRevealPermissions(playerId).canRequestRungReveal) {
+      throw new Error('Rung reveal requires your turn and no available cards in the lead suit');
+    }
+
     this.isTrumpRevealPending = true;
     this.trumpRevealRequesterId = playerId;
     this.rungRevealerPlayerId = playerId;
@@ -1843,7 +1847,7 @@ export class BundRungEngine extends BaseRungEngine {
     // Only opponent team can ask! Must be this player's turn, Rung unrevealed, not pending, not paused, leadSuit exists, and player is void in leadSuit
     const isCurrentTurn = this.phase === 'TRICK_PLAYING' && this.players[this.currentTurnPlayerIndex]?.id === playerId;
     const caller = this.players.find((p) => p.id === this.trumpCallerPlayerId);
-    const isOpponentTeam = caller && player ? player.team !== caller.team : true;
+    const isOpponentTeam = Boolean(caller && player && player.team !== caller.team);
     const leadSuit = this.currentTrick.leadSuit;
     const hasLeadSuit = leadSuit ? myHand.some((c) => c.suit === leadSuit) : true;
     const isVoidInLead = Boolean(leadSuit && !hasLeadSuit);

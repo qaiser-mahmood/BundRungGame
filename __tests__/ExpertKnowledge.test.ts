@@ -59,14 +59,14 @@ describe('documented JSON Schema subset semantics',()=>{
  });
 });
 
-// Documents a pre-existing engine gap for a separate repair PR, not a desired rule.
+// Regression coverage for the previously documented engine boundary bypass.
 describe('GM-REVEAL engine evidence boundary',()=>{
- it('reproduces direct request accepting an opponent without turn/void permission',()=>{
+ it('rejects direct request without turn/void permission',()=>{
   const engine=new BundRungEngine();for(let i=1;i<=4;i++)engine.addPlayer('p'+i,'Player '+i);
   const state=engine as any;state.phase='TRICK_PLAYING';state.trumpCallerPlayerId='p1';state.currentTurnPlayerIndex=2;
   state.currentTrick={trickNumber:2,leadPlayerId:'p1',leadSuit:'HEARTS',cards:[{playerId:'p1',card:{id:'H_2',suit:'HEARTS',rank:'2',playValue:2,tossValue:2},playedAt:0},{playerId:'p2',card:{id:'H_4',suit:'HEARTS',rank:'4',playValue:4,tossValue:4},playedAt:1}],winnerPlayerId:null,winningTeam:null};
   state.hands.p2=[{id:'H_3',suit:'HEARTS',rank:'3',playValue:3,tossValue:3}];
   expect(engine.getRevealPermissions('p2').canRequestRungReveal).toBe(false);
-  expect(()=>engine.requestTrumpReveal('p2')).not.toThrow();expect(engine.getPublicState().isTrumpRevealPending).toBe(true);
+  expect(()=>engine.requestTrumpReveal('p2')).toThrow();expect(engine.getPublicState().isTrumpRevealPending).toBe(false);
  });
 });
