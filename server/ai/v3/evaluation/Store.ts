@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {assignmentPackets,digest,verifyCorpus,type DecisionPacket} from '../data/Corpus';
 import {validateAnnotation,importAnnotations,ANNOTATION_SCHEMA,type Annotation,type AnnotationBatch} from '../data/Annotations';
+import {firstIndependentReviews} from './IndependentReviews';
 import type {EvaluationBundle} from './Prepare';
 export type ReviewStatus='reviewed'|'ambiguous'|'insufficient'|'skipped';
 export interface Submission {requestId:string;expectedRevision:number;status:ReviewStatus;selected:number|null;rankedAlternatives:number[][];reasoning:string;signals:string;uncertainty:string;confidence:number|null;principles:string[];}
@@ -40,10 +41,10 @@ export class ReviewStore {
   const record:ReviewRecord={schema:'bundrung-expert-review/v1',id:randomUUID(),annotatorId:actor,packetId:id,observationHash:p.observationHash,dealKey:p.dealKey,seed:source.seed,replayReference:`${this.bundle.corpus.manifest.manifestHash}:${id}`,actingPlayer:'relative-seat-0',legal:p.observation.legal,revision,timestamp:new Date().toISOString(),blindAtSubmission:!this.records.some(r=>r.annotatorId===actor&&r.dealKey===p.dealKey&&r.submission.status!=='skipped'),submission:structuredClone(body),annotation,predictions:this.bundle.predictions[id],sourceCommit:this.bundle.corpus.manifest.config.sourceCommit,manifestHash:this.bundle.corpus.manifest.manifestHash,split:source.split};
   const next=[...this.records,record];this.flush(next);this.records=next;return record;
  }
- comparison(actor:string,id:string){const r=this.latest(actor,id);if(!r||r.submission.status==='skipped')throw new Error('EVALUATION_BLIND_REVIEW_REQUIRED');return {annotationId:r.id,revision:r.revision,expert:r.submission.selected,predictions:r.predictions,agreement:Object.fromEntries(Object.entries(r.predictions).map(([k,p])=>[k,p.status==='available'&&r.submission.selected!==null?p.action===r.submission.selected:null])),legal:r.legal,blindAtSubmission:r.blindAtSubmission};}
+ comparison(actor:string,id:string,revision?:number){const r=revision===undefined?this.latest(actor,id):this.records.find(r=>r.annotatorId===actor&&r.packetId===id&&r.revision===revision);if(!r||r.submission.status==='skipped')throw new Error('EVALUATION_BLIND_REVIEW_REQUIRED');return {annotationId:r.id,revision:r.revision,expert:r.submission.selected,predictions:r.predictions,agreement:Object.fromEntries(Object.entries(r.predictions).map(([k,p])=>[k,p.status==='available'&&r.submission.selected!==null?p.action===r.submission.selected:null])),legal:r.legal,blindAtSubmission:r.blindAtSubmission};}
  recordsFor(actor?:string){return this.records.filter(r=>!actor||r.annotatorId===actor).map(r=>structuredClone(r));}
  exportTraining(){
-  const eligible=this.records.filter(r=>r.blindAtSubmission&&r.annotation&&r.submission.status==='reviewed');
+  const eligible=firstIndependentReviews(this.records).filter(r=>r.annotation!==null);
   const batches:AnnotationBatch[]=eligible.map(r=>({schema:ANNOTATION_SCHEMA,manifestHash:r.manifestHash,annotatorId:r.annotatorId,provenance:{kind:'human-expert',qualification:'self-declared'},annotations:[r.annotation!]}));
   return importAnnotations(this.bundle.corpus,batches);
  }

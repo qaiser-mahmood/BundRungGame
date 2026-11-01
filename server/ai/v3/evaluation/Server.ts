@@ -18,7 +18,7 @@ export function reviewApp(store:ReviewStore,users:Record<string,string>){
  app.use(express.json({limit:'32kb',strict:true}));
  app.get('/api/session',(_req,res)=>res.json({actor:res.locals.actor,cases:store.assigned.map(p=>({id:p.id,revision:store.latest(res.locals.actor,p.id)?.revision??0})),cards:CARDS.map((c,index)=>({index,id:c.id,rank:c.rank,suit:c.suit})),principles:store.principleIds.map(id=>({id,description:guide.find(p=>p.id===id)?.preferredAction??id}))}));
  app.get('/api/cases/:id',(req,res)=>{try{res.json(store.case(res.locals.actor,req.params.id));}catch{res.status(404).json({error:'UNKNOWN_CASE'});}});
- app.post('/api/cases/:id/reviews',(req,res)=>{try{const record=store.submit(res.locals.actor,req.params.id,req.body);res.json({id:record.id,revision:record.revision,comparison:record.submission.status==='skipped'?null:store.comparison(res.locals.actor,req.params.id)});}catch(e){res.status(400).json({error:e instanceof Error?e.message:'SUBMISSION_REJECTED'});}});
+ app.post('/api/cases/:id/reviews',(req,res)=>{try{const record=store.submit(res.locals.actor,req.params.id,req.body);res.json({id:record.id,revision:record.revision,comparison:record.submission.status==='skipped'?null:store.comparison(res.locals.actor,req.params.id,record.revision)});}catch(e){res.status(400).json({error:e instanceof Error?e.message:'SUBMISSION_REJECTED'});}});
  app.get('/api/cases/:id/comparison',(req,res)=>{try{res.json(store.comparison(res.locals.actor,req.params.id));}catch{res.status(403).json({error:'BLIND_REVIEW_REQUIRED'});}});
  app.get('/api/report',(_req,res)=>res.json(evaluationReport(store.recordsFor(res.locals.actor),store.bundle)));
  app.use((_req,res)=>res.status(404).json({error:'NOT_FOUND'}));

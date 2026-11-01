@@ -1,11 +1,11 @@
 # Reveal repair and expert-evaluation delivery evidence
 
-Two separate branches, stacked as requested:
+Initial delivery used two stacked branches. PR #6 is now merged and PR #7 targets `feature/ai-v3-partnership-learning`:
 
-- `fix/rung-reveal-eligibility`: `8c66679482b1fce2c27ad3217bc62e378c16bddc`, based on the latest V3 merge `284e00e`. Centralizes request enforcement on advertised engine eligibility. Existing socket identity mapping and caller show sequence were reviewed; wrong-turn/has-suit requests are now rejected before mutation. Locked-card and post-reveal obligations preserved.
-- `feature/ai-v3-expert-evaluation`: based on that fix. Offline engine preparation, authenticated local blind-review service, private persistent revisions, real V2 comparisons, unavailable V3 and canonical V3 annotation export. No production service integration, dependencies or model training.
+- PR #6 / `fix/rung-reveal-eligibility`: `8c66679482b1fce2c27ad3217bc62e378c16bddc`, merged into V3 by `ff521e7fb90897f6d895b2094b5dc98a9b4fac2e`. Centralizes request enforcement on advertised engine eligibility. Existing socket identity mapping and caller show sequence were reviewed; wrong-turn/has-suit requests are now rejected before mutation. Locked-card and post-reveal obligations preserved.
+- PR #7 / `feature/ai-v3-expert-evaluation`: updated by merging the current V3 base, with no force push. The diff against V3 contains only evaluation changes. Offline engine preparation, authenticated local blind-review service, private persistent revisions, real V2 comparisons, unavailable V3 and canonical V3 annotation export. No production service integration, dependencies or model training.
 
-## Executed checks
+## Original delivery checks (historical)
 
 - Part 1 focused engine/knowledge checks: **52 tests / 4 files passed**, AI TypeScript passed.
 - Final combined focused checks: **114 tests / 9 files passed**. Includes 14 reveal regressions and 15 evaluation tests, plus knowledge, normal reveal, Ace/last-turn, scoring, existing V3 corpus/observation/baseline checks.
@@ -32,6 +32,18 @@ Use the [startup/storage guide](AI_V3_EXPERT_EVALUATION.md). The interface is in
 
 Revisions after AI comparison are audit-only for independent evaluation/training export. Labels without explicitly provided confidence do not become weighted training annotations. Ambiguous/insufficient/skip cases are preserved without invented actions or intentions. Reveal opportunities are automatic rule transitions, not a separate expert reveal-action task. No sequence model, live V3 integration or new trained baseline exists.
 
-Human browser usability has not been independently reviewed. Review the interface manually, curate wider source coverage and qualified independent experts, then collect real blind rankings. Preserve holdout isolation before offline supervised training/calibration and future paired strength/load benchmarks. The ordinary reveal fix can be reviewed independently from this collection tool.
+Human browser usability has not been independently reviewed. Review the interface manually, curate wider source coverage and qualified independent experts, then collect real blind rankings. Preserve holdout isolation before offline supervised training/calibration and future paired strength/load benchmarks. The ordinary reveal fix is already merged; the evaluation PR does not duplicate it.
 
-GitHub API PR creation is blocked by the environment proxy (`Forbidden`); branches are pushed and compare links supplied. No network/security settings changed and neither branch merged.
+## Final PR #7 correction checks
+
+GitHub API access works in the newly published environment. PR #6 is confirmed merged; PR #7 remains open/draft and targets V3. No new PR is created and PR #7 is not merged. No environment/network/security settings were changed during this correction task.
+
+Executed: `ExpertEvaluation.test.ts` (21 tests) and `ExpertControl.test.ts` (12 tests) pass, plus `V3Data.test.ts` (13) and `V3Observation.test.ts` (11). Total **57 tests / 4 files**. `npm run typecheck:ai` and `npx tsc --noEmit` pass; there is no `typecheck` npm script, so the latter is the application TypeScript check. No failures in these executed checks. No model training, tournaments, full integration suite or browser automation ran.
+
+The comparator reuses the existing compact utility, tested against the actual authoritative resolver in eight named fixtures and all their prefixes. Cases include lead being trump, multiple trumps, downgraded Ace, equal effective power, all player/team outcomes, and conservative unknowns for concealed/missing input. No engine, V2 comparator or scoring implementation changed.
+
+A shared read-side review selector chooses the first independent label by revision, prevents later blind-flag revisions from replacing it, treats earlier non-skip ambiguity as AI exposure, and ignores exact duplicate revisions. Conflicting copies fail closed. Report and training export use the same decision; absent original confidence cannot be filled from a later exposed edit. Stored records are not rewritten. HTTP retries now pair the original revision with its original comparison.
+
+The workflow review confirms official-engine generation/replay, strict observation-only display/model inputs, predictions hidden until authenticated submission, server legal-action validation, durable revisions, separate train/holdout provenance, canonical V3 annotation export and unavailable V3. Tests use numerical fixtures only; no human labels were collected or edited. Source-snapshot integrity does not establish human expertise or model strength. Prior sample metrics above remain historical and are not recomputed into new strength claims.
+
+Ready for final review and human expert testing, with manual browser usability, actual expert collection and broader rare-scenario coverage still outstanding. Production game behavior, policy defaults, checkpoints and runtime socket APIs remain unchanged relative to the updated V3 base.
