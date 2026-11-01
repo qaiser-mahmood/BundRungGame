@@ -18,3 +18,7 @@ Reviewed actual source at `716d4361ac1e45f6f504c49fb37917e44165dc2a`; engine and
 Deterministic reproduction in `ExpertKnowledge.test.ts`, `GM-REVEAL engine evidence boundary`: p1 leads H_2, p2 follows H_4 and still holds H_3, and p3 is now current actor. `getRevealPermissions('p2').canRequestRungReveal` is false, yet direct `requestTrumpReveal('p2')` succeeds and sets pending reveal. This proves the missing turn/void guard; it is a characterization of existing behavior, not a desired rule. No exploit, network test or production mutation was performed.
 
 A future focused repair should unify server-side request enforcement with authoritative eligibility, test wrong-turn/no-lead/has-lead-suit rejection and valid requests, and assess compatibility with existing callers. **No engine fix is included here**, as required by this documentation task. The knowledge entry now explicitly distinguishes the advertised permission from actual direct-method enforcement.
+
+## Repair status
+
+The later `fix/rung-reveal-eligibility` change enforces shared eligibility in the request method and replaces the bypass characterization with rejection coverage. See [repair report](../../RUNG_REVEAL_ELIGIBILITY_FIX.md). The source review above remains a historical record pinned to the pre-fix commit.
