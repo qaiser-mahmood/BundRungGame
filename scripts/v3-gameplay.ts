@@ -1,0 +1,10 @@
+import {writeFileSync} from 'node:fs';
+import {TeacherPolicy} from '../server/ai/v3/learning/TeacherPolicy';
+import {observePlayerDecision,vectorize} from '../server/ai/v3/data/Observation';
+import {legalMask} from '../server/ai/v2/learning/Features';
+import {runGame} from './ai-benchmark';
+import {teacherOptions} from './v3-first-training';
+const model=TeacherPolicy.load(process.argv[2]),results=[];
+for(let i=0;i<6;i++)for(const team of ['TEAM_1','TEAM_2'] as const)results.push(runGame(981000+i,team,'ai-v2-ismcts','ai-v2-ismcts',{}, {},{...teacherOptions,policyOnly:true,prior:(s,p,c)=>model.probabilities(vectorize(observePlayerDecision(s,p)),legalMask(c))},teacherOptions));
+const report={seed:981000,pairs:6,games:results.length,wins:results.filter(r=>r.candidateWon===true).length,losses:results.filter(r=>r.candidateWon===false).length,ties:results.filter(r=>r.winner===null&&!r.error).length,errors:results.filter(r=>r.error),invalidMoves:results.reduce((n,r)=>n+r.invalidMoves,0),note:'Balanced team assignment, same seeded deals. Card policy only; forced transitions shared. Small sample does not establish superiority.',results};
+writeFileSync(process.argv[3],JSON.stringify(report,null,2),{flag:'wx'});console.log(JSON.stringify({...report,results:undefined},null,2));

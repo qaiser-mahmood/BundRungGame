@@ -1,0 +1,3781 @@
+{
+  "seed": 981000,
+  "pairs": 6,
+  "games": 12,
+  "wins": 5,
+  "losses": 7,
+  "ties": 0,
+  "errors": [],
+  "invalidMoves": 0,
+  "note": "Balanced team assignment, same seeded deals. Card policy only; forced transitions shared. Small sample does not establish superiority.",
+  "results": [
+    {
+      "seed": 981000,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "b8897b40a144a53bbac57b5a6b1c7b95c5301225088f7dfd13cc472bc9ef4d24",
+      "winner": "TEAM_1",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 3,
+        "overtook": 0,
+        "conservedWins": 2,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.16639999999995325
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.08759999999995216
+        }
+      ],
+      "candidateWon": true,
+      "signedScoreAdjustment": 26,
+      "trickDifferential": 1,
+      "completedTricks": 7,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 20.367099999999994,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.012600000000020373,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 12.27660000000003,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.2456999999999994,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 11.697599999999966,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 7.926199999999994,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.6460000000000719,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.703399999999988,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.657000000000039,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0061000000000603904,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 5.118499999999926,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.9164000000000669,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.909999999999968,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.43470000000002074,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.004199999999968895,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2841000000000804,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.6182000000000016,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.5411000000000286,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.29769999999996344,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.83280000000002,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.9139999999999873,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.012100000000032196,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 6.731499999999983,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.3973000000000866,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.5698000000001002,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.206199999999967,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.23709999999994125,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.004199999999968895,
+          "cardId": "H_5"
+        }
+      ]
+    },
+    {
+      "seed": 981000,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "b8897b40a144a53bbac57b5a6b1c7b95c5301225088f7dfd13cc472bc9ef4d24",
+      "winner": "TEAM_1",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 6,
+        "overtook": 3,
+        "conservedWins": 6,
+        "overtookWins": 3
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.014599999999973079
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.006700000000023465
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -26,
+      "trickDifferential": 7,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.6421000000000276,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.004599999999982174,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3813999999999851,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 5.924800000000005,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.7532999999999674,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.310299999999984,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3224999999999909,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.780799999999999,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.7010999999999967,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 6.257799999999975,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3301999999999907,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0039999999999054126,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.5852999999999611,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.035400000000095,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.28330000000005384,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.1200000000000045,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.6628999999999223,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.6680999999999813,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.009199999999964348,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.212999999999965,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.4682999999999993,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.005299999999920146,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.5041999999999689,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.8623000000000047,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.4410000000000309,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.003500000000030923,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.26120000000003074,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.6159000000000106,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.6353000000000293,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3389000000000806,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.6187999999999647,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.30520000000001346,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.4114999999999327,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.5840999999999212,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.007100000000036744,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.8830999999998994,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3928999999999405,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.5670000000000073,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.35819999999989705,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.004000000000019099,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.42669999999998254,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.2989999999999782,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.24739999999997053,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.3640000000000327,
+          "cardId": "D_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.2604000000000042,
+          "cardId": "D_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.8270999999999731,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.22720000000003893,
+          "cardId": "D_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.8243999999999687,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0039999999999054126,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.002399999999965985,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.002000000000066393,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.0018999999999778083,
+          "cardId": "D_6"
+        }
+      ]
+    },
+    {
+      "seed": 981001,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "ee4d4ca6f5961cf9c0a0ee5797879b1f35e8267874c68fc71574f08448b4b03d",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 0,
+        "overtook": 0,
+        "conservedWins": 0,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.010200000000054388
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.005599999999958527
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -13,
+      "trickDifferential": -13,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 6.283799999999928,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.5117999999999938,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 6.474199999999996,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.007100000000036744,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 6.092300000000023,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.42629999999996926,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.9373000000000502,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0036999999999807187,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 5.012899999999945,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.2826999999999771,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.028500000000008,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.31719999999995707,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.526700000000005,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.26470000000006166,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0039000000000442014,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.4318000000000666,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.8723999999999705,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.005600000000072214,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.6854000000000724,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.3048999999999751,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.304200000000037,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.2925000000000182,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.7968000000000757,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.30169999999998254,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.400500000000079,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.3567000000000462,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.6282999999999674,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2778999999999314,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.5762999999999465,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.28789999999992233,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.1242999999999483,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2676000000000158,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.80600000000004,
+          "cardId": "D_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.6222000000000207,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.004199999999968895,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.36990000000002965,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.5679999999999836,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.006200000000035288,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.5003000000000384,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.008199999999987995,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.1929999999999836,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.268100000000004,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.943300000000022,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2300000000000182,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.1020999999999503,
+          "cardId": "D_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.24530000000004293,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.7637000000000853,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2524999999999409,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.0030000000000427463,
+          "cardId": "D_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0020999999999276042,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.002000000000066393,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0018000000000029104,
+          "cardId": "C_4"
+        }
+      ]
+    },
+    {
+      "seed": 981001,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "ee4d4ca6f5961cf9c0a0ee5797879b1f35e8267874c68fc71574f08448b4b03d",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 6,
+        "overtook": 3,
+        "conservedWins": 6,
+        "overtookWins": 3
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.010099999999965803
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.008500000000026375
+        }
+      ],
+      "candidateWon": true,
+      "signedScoreAdjustment": 13,
+      "trickDifferential": 9,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.7054000000000542,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.067700000000059,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.29320000000006985,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 5.35209999999995,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.688099999999963,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.2744999999999891,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 5.06370000000004,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.25759999999991123,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.4475000000001046,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.6114000000000033,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.007000000000061846,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.92450000000008,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.4420999999999822,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0036000000000058208,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3976999999999862,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.107499999999959,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.36180000000001655,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.43870000000004,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.27559999999994034,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.953899999999976,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3426999999999225,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.003399999999942338,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.18110000000001492,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.2855999999999312,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.1814999999999145,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.23310000000003583,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.7778000000000702,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.22220000000004347,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.24909999999999854,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.320100000000025,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.1973000000000411,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.8319999999999936,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.26739999999995234,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.00329999999996744,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21710000000007312,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.3918999999999642,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21460000000001855,
+          "cardId": "D_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.5576999999999543,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.18049999999993815,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.1667999999999665,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.21660000000008495,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.0851000000000113,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21420000000000528,
+          "cardId": "D_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.857900000000086,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.19659999999998945,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.6795999999999367,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.003400000000056025,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.5866999999999507,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.003199999999992542,
+          "cardId": "D_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.002299999999991087,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0020999999999276042,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0020999999999276042,
+          "cardId": "C_4"
+        }
+      ]
+    },
+    {
+      "seed": 981002,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "04cd253b22d3ccb714740845ede94050f51accb73c4d2e89df46275e6671b9cc",
+      "winner": "TEAM_1",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 3,
+        "overtook": 0,
+        "conservedWins": 3,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.01310000000000855
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.006799999999998363
+        }
+      ],
+      "candidateWon": true,
+      "signedScoreAdjustment": 26,
+      "trickDifferential": 3,
+      "completedTricks": 5,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 4.146199999999908,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2403999999999087,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.771099999999933,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.17049999999994725,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2764999999999418,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.8670999999999367,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.006999999999948159,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.6411000000000513,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.9618000000000393,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.00659999999993488,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.783700000000067,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2341000000000122,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.26089999999999236,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.7875000000000227,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2034000000001015,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.003100000000017644,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.34190000000000964,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.3993999999999005,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.2844000000000051,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.003199999999992542,
+          "cardId": "S_9"
+        }
+      ]
+    },
+    {
+      "seed": 981002,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "04cd253b22d3ccb714740845ede94050f51accb73c4d2e89df46275e6671b9cc",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 7,
+        "overtook": 0,
+        "conservedWins": 5,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.007500000000050022
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.004400000000032378
+        }
+      ],
+      "candidateWon": true,
+      "signedScoreAdjustment": 13,
+      "trickDifferential": -1,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.4158999999999651,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.0214999999999463,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.22339999999996962,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.9063999999999623,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.091600000000085,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.22029999999995198,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.003100000000017644,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.14850000000001273,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.7923000000000684,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.24169999999992342,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.00329999999996744,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.002200000000016189,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.6024999999999636,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.24860000000001037,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.9710000000000036,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.006600000000048567,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.5214000000000851,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.39029999999991105,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.7109000000000378,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.1773999999999205,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.39840000000003783,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.317099999999982,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.30740000000002965,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.003400000000056025,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.5755000000000337,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21079999999994925,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.9885000000000446,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.16399999999998727,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.25289999999995416,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.9788999999999533,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0049999999999954525,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.5127999999999702,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.27089999999998327,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.5172000000000025,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.19290000000000873,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.003499999999917236,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.102800000000002,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21109999999998763,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.3899000000000115,
+          "cardId": "D_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0038999999999305146,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21090000000003783,
+          "cardId": "D_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.8106999999999971,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.22449999999992087,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.7957000000000107,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.7985999999999649,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.17489999999997963,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.7363000000000284,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.191599999999994,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.003100000000017644,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.002200000000016189,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0018000000000029104,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0018000000000029104,
+          "cardId": "D_2"
+        }
+      ]
+    },
+    {
+      "seed": 981003,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "08ae23fc64a7374cf34b7cdfdd15a8a268b3a78f81678ad2bd60d29763fb5809",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 5,
+        "overtook": 1,
+        "conservedWins": 5,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.007500000000050022
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.10559999999998126
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -13,
+      "trickDifferential": -1,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.867599999999925,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.3208000000000766,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.6054000000000315,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.16700000000003,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.0990000000000464,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.17029999999999745,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.873100000000022,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.155399999999986,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.26149999999995543,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.488900000000058,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2359000000000151,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.3571999999999207,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.0190000000000055,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.18489999999997053,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.90319999999997,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.17499999999995453,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.24959999999998672,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.0036000000000058208,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.16420000000005075,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0027000000000043656,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.91700000000003,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2096000000000231,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.003100000000017644,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.14850000000001273,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.24049999999999727,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.269100000000094,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.3351000000000113,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 5.522600000000011,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.31500000000005457,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.9365999999999985,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.22529999999994743,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0038999999999305146,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.20910000000003492,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.438199999999938,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.00430000000005748,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.42470000000003,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.28280000000006567,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.7586000000000013,
+          "cardId": "D_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.006799999999998363,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.343900000000076,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 1.2596000000000913,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.004299999999943793,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 1.490799999999922,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.24420000000009168,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.9996999999999616,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.20419999999990068,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.8718000000000075,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.205600000000004,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.004500000000007276,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.002299999999991087,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.002200000000016189,
+          "cardId": "D_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0019999999999527063,
+          "cardId": "D_7"
+        }
+      ]
+    },
+    {
+      "seed": 981003,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "08ae23fc64a7374cf34b7cdfdd15a8a268b3a78f81678ad2bd60d29763fb5809",
+      "winner": "TEAM_1",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 4,
+        "overtook": 3,
+        "conservedWins": 2,
+        "overtookWins": 3
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.009199999999964348
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.005700000000047112
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -26,
+      "trickDifferential": 2,
+      "completedTricks": 12,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.39239999999995234,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 6.692999999999984,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.26279999999997017,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.9478000000000293,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.2187999999999874,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.2602000000000544,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.7063000000000557,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.18420000000003256,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.42190000000005057,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.004000000000019099,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.002199999999902502,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.724799999999959,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.145200000000045,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.33330000000000837,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.363200000000006,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.21810000000004948,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.25090000000000146,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.3573000000000093,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.25310000000001764,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.3402999999999565,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.9975999999999203,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3102000000000089,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.005499999999983629,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.2199000000000524,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.2638000000000602,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.003100000000017644,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.19790000000000418,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.3233999999999924,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.38639999999998054,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.173599999999965,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.2437999999999647,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.4437000000000353,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.29520000000002256,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.7189999999999372,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.22860000000002856,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.09030000000007,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.467899999999986,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.821299999999951,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.4137000000000626,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.153699999999958,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.27499999999997726,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.162900000000036,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.36590000000001055,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.1527000000000953,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.8493000000000848,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.21820000000002437,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.004299999999943793,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.15080000000000382,
+          "cardId": "D_3"
+        }
+      ]
+    },
+    {
+      "seed": 981004,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "c134d59abcc015da387249dcdb9191de7d067c65163188e76a152e5ccadd71d9",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 3,
+        "overtook": 0,
+        "conservedWins": 1,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.010800000000017462
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.014300000000048385
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -26,
+      "trickDifferential": -2,
+      "completedTricks": 6,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.3711000000000695,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 7.958300000000008,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2115000000000009,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 3.5725000000001046,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 5.587200000000053,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.20109999999999673,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 6.055499999999938,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.2766000000000304,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.902499999999918,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.008500000000026375,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0027000000000043656,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0019999999999527063,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.29559999999992215,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.934299999999894,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.19489999999996144,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.7561000000000604,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.24699999999984357,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.256399999999985,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.1695999999999458,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0038000000001829903,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 2.5599999999999454,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.005999999999858119,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.002399999999852298,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.1975999999999658,
+          "cardId": "C_6"
+        }
+      ]
+    },
+    {
+      "seed": 981004,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "c134d59abcc015da387249dcdb9191de7d067c65163188e76a152e5ccadd71d9",
+      "winner": "TEAM_1",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 3,
+        "overtook": 1,
+        "conservedWins": 2,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.016699999999900683
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.015300000000024738
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -13,
+      "trickDifferential": -5,
+      "completedTricks": 13,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.906700000000001,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.23159999999984393,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 7.033300000000054,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.2400000000000091,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3389999999999418,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 5.649400000000014,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.2743000000000393,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 6.6457000000000335,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3749000000000251,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.004999999999881766,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.002300000000104774,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.002399999999852298,
+          "cardId": "S_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.32339999999999236,
+          "cardId": "S_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.319899999999961,
+          "cardId": "D_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.29520000000002256,
+          "cardId": "H_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.5157999999998992,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 5.022699999999986,
+          "cardId": "H_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.33930000000009386,
+          "cardId": "C_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.868199999999888,
+          "cardId": "H_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.008799999999837382,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3385000000000673,
+          "cardId": "C_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.00680000000011205,
+          "cardId": "C_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.002300000000104774,
+          "cardId": "C_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.4636000000000422,
+          "cardId": "C_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.7044999999998254,
+          "cardId": "H_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.30189999999993233,
+          "cardId": "C_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.9517000000000735,
+          "cardId": "H_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.26099999999996726,
+          "cardId": "D_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.4628000000000156,
+          "cardId": "C_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.24649999999996908,
+          "cardId": "C_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 2.1700000000000728,
+          "cardId": "H_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.29369999999994434,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 3.105099999999993,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.40610000000015134,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 2.0272999999999683,
+          "cardId": "H_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.20730000000003201,
+          "cardId": "C_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.846599999999853,
+          "cardId": "D_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3164000000001579,
+          "cardId": "D_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.5520000000001346,
+          "cardId": "H_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.1854000000000724,
+          "cardId": "D_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.1044999999999163,
+          "cardId": "C_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.0030999999999039574,
+          "cardId": "C_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.9703999999999269,
+          "cardId": "H_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.20259999999984757,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 1.0750000000000455,
+          "cardId": "H_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.3029999999998836,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.7481999999999971,
+          "cardId": "C_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.16579999999999018,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0018000000000029104,
+          "cardId": "D_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.001399999999875945,
+          "cardId": "D_2"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.0013000000001284207,
+          "cardId": "C_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.001299999999901047,
+          "cardId": "D_4"
+        }
+      ]
+    },
+    {
+      "seed": 981005,
+      "candidateTeam": "TEAM_1",
+      "candidatePlayerIds": [
+        "p0",
+        "p2"
+      ],
+      "dealHash": "20eac391027507e658025b9f9b0e28414b629f9760bc8fec7279523d44d7fdcf",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 0,
+        "overtook": 0,
+        "conservedWins": 0,
+        "overtookWins": 0
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.005100000000084037
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.015899999999874126
+        }
+      ],
+      "candidateWon": false,
+      "signedScoreAdjustment": -26,
+      "trickDifferential": -2,
+      "completedTricks": 4,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.3808999999998832,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 4.058399999999892,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.26720000000000255,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 3.207099999999855,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 5.6121999999998025,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.1957999999999629,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.0030999999999039574,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.15330000000017208,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.30340000000001055,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 5.37480000000005,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.006499999999959982,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 6.471900000000005,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 2.7637999999999465,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 0.2312000000001717,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.5841000000000349,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0028999999999541615,
+          "cardId": "H_K"
+        }
+      ]
+    },
+    {
+      "seed": 981005,
+      "candidateTeam": "TEAM_2",
+      "candidatePlayerIds": [
+        "p1",
+        "p3"
+      ],
+      "dealHash": "20eac391027507e658025b9f9b0e28414b629f9760bc8fec7279523d44d7fdcf",
+      "winner": "TEAM_2",
+      "terminal": {
+        "matchOver": false,
+        "matchWinner": null
+      },
+      "search": {
+        "worlds": 0,
+        "attempts": 0,
+        "samplingFailures": 0,
+        "invalidWorlds": 0,
+        "transitionFailures": 0,
+        "internalFailures": 0,
+        "deadlineStops": 0,
+        "partialComparisonsDiscarded": 0,
+        "recoveredDecisions": 0,
+        "fallbacks": 0,
+        "neuralUses": 0
+      },
+      "partnership": {
+        "conserved": 3,
+        "overtook": 1,
+        "conservedWins": 2,
+        "overtookWins": 1
+      },
+      "searchByPolicy": {
+        "ai-v2-ismcts": {
+          "worlds": 0,
+          "attempts": 0,
+          "samplingFailures": 0,
+          "invalidWorlds": 0,
+          "transitionFailures": 0,
+          "internalFailures": 0,
+          "deadlineStops": 0,
+          "partialComparisonsDiscarded": 0,
+          "recoveredDecisions": 0,
+          "fallbacks": 0,
+          "neuralUses": 0
+        }
+      },
+      "advanced": {
+        "decisions": 0,
+        "particles": 0,
+        "continuations": 0,
+        "protectPartner": 0,
+        "contest": 0,
+        "streak": 0
+      },
+      "endgame": {
+        "attempts": 0,
+        "solved": 0,
+        "nodes": 0,
+        "budgetStops": 0
+      },
+      "revealActions": [
+        {
+          "type": "request",
+          "milliseconds": 0.004500000000007276
+        },
+        {
+          "type": "show",
+          "milliseconds": 0.00479999999993197
+        }
+      ],
+      "candidateWon": true,
+      "signedScoreAdjustment": 26,
+      "trickDifferential": 3,
+      "completedTricks": 5,
+      "invalidMoves": 0,
+      "error": null,
+      "decisions": [
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.6259000000000015,
+          "cardId": "D_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.22019999999997708,
+          "cardId": "D_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 3.0154999999999745,
+          "cardId": "D_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.16599999999993997,
+          "cardId": "D_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.33999999999991815,
+          "cardId": "S_8"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.199700000000121,
+          "cardId": "S_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.2376000000001568,
+          "cardId": "S_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.37480000000005,
+          "cardId": "S_4"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3229999999998654,
+          "cardId": "S_7"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 4.5487000000000535,
+          "cardId": "S_5"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.004900000000134241,
+          "cardId": "S_6"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 7.110100000000102,
+          "cardId": "S_J"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 4.878799999999956,
+          "cardId": "S_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.4600000000000364,
+          "cardId": "S_K"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.005700000000160799,
+          "cardId": "S_3"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.27460000000019136,
+          "cardId": "D_10"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p3",
+          "milliseconds": 0.46100000000001273,
+          "cardId": "H_A"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p0",
+          "milliseconds": 1.176300000000083,
+          "cardId": "H_9"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p1",
+          "milliseconds": 0.3997999999999138,
+          "cardId": "H_Q"
+        },
+        {
+          "policy": "ai-v2-ismcts",
+          "playerId": "p2",
+          "milliseconds": 0.0047000000001844455,
+          "cardId": "H_K"
+        }
+      ]
+    }
+  ]
+}

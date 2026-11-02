@@ -26,6 +26,7 @@
     "v3:data": "node --import tsx scripts/v3-expert-data.ts",
     "v3:audit-data": "node --import tsx scripts/v3-data-audit.ts",
     "v3:train": "node --import tsx scripts/v3-train-baseline.ts",
+    "v3:train:teacher": "node --import tsx scripts/v3-first-training.ts",
     "validate:expert-knowledge": "node --import tsx scripts/validate-expert-knowledge.ts",
     "expert:review": "node --import tsx scripts/expert-evaluation.ts"
   },
