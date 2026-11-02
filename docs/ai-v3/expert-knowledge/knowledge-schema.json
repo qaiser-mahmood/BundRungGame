@@ -1,0 +1,909 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:bundrung:expert-knowledge:1.0.0",
+  "title": "Narrative expert knowledge; not V3 training annotations",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/principles"
+    },
+    {
+      "$ref": "#/$defs/scenarios"
+    },
+    {
+      "$ref": "#/$defs/interview"
+    }
+  ],
+  "$defs": {
+    "mechanic": {
+      "type": "object",
+      "properties": {
+        "sourceCommit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lines": {
+          "type": "string",
+          "minLength": 1
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "sourceCommit",
+        "path",
+        "symbol",
+        "lines",
+        "finding"
+      ],
+      "additionalProperties": false
+    },
+    "principle": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(EK-[A-N][0-9]+|EX-[A-N][0-9]+|GM-[A-Z]+)$"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "superseded"
+          ]
+        },
+        "supersededBy": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "category": {
+          "enum": [
+            "caller_strength",
+            "partner_control",
+            "position_risk",
+            "ace_management",
+            "suit_preservation",
+            "partnership_coverage",
+            "partner_signals",
+            "concealment",
+            "card_counting",
+            "suit_exploration",
+            "opponent_signals",
+            "take_control",
+            "streak_defense",
+            "force_reveal",
+            "multi_trick_planning",
+            "mechanics"
+          ]
+        },
+        "gamePhase": {
+          "enum": [
+            "bidding",
+            "any_trick",
+            "following",
+            "leading",
+            "after_partner_lead",
+            "hidden_trump",
+            "post_reveal",
+            "opponent_called",
+            "repeated_leads",
+            "next_trick_lead",
+            "resolution"
+          ]
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "preferredAction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expectedBenefit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "certainty": {
+          "enum": [
+            "engine_verified",
+            "context_dependent",
+            "uncertain",
+            "unresolved"
+          ]
+        },
+        "classification": {
+          "enum": [
+            "verified_game_mechanic",
+            "expert_strategic_preference",
+            "probabilistic_inference",
+            "conditional_exception",
+            "unverified_hypothesis"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "section": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "sourceId",
+              "section",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "relatedPrinciples": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scenarioIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "openQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "mechanicVerification": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/mechanic"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "supersededBy",
+        "category",
+        "gamePhase",
+        "preconditions",
+        "preferredAction",
+        "reasoning",
+        "expectedBenefit",
+        "exceptions",
+        "certainty",
+        "classification",
+        "evidence",
+        "relatedPrinciples",
+        "scenarioIds",
+        "openQuestions",
+        "mechanicVerification"
+      ],
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^SC-([A-N][0-9]+|[0-9]+)$"
+        },
+        "discussionNumber": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "topic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observationCompleteness": {
+          "const": "narrative_only"
+        },
+        "responseStatus": {
+          "enum": [
+            "answered",
+            "unanswered"
+          ]
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "rungCaller": {
+              "enum": [
+                "unknown",
+                "observer",
+                "partner",
+                "our_team_unspecified",
+                "opponent_team"
+              ]
+            },
+            "callType": {
+              "enum": [
+                "unknown",
+                "forced",
+                "voluntary"
+              ]
+            },
+            "rungVisibility": {
+              "enum": [
+                "unknown",
+                "hidden",
+                "revealed"
+              ]
+            },
+            "knownTrumpSuit": {
+              "enum": [
+                "HEARTS",
+                "DIAMONDS",
+                "CLUBS",
+                "SPADES",
+                null
+              ]
+            },
+            "position": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 4
+            },
+            "trickNumber": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "ownCards": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+              }
+            },
+            "ownCardsComplete": {
+              "type": "boolean"
+            },
+            "currentTrick": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "seatRole": {
+                    "enum": [
+                      "partner",
+                      "opponent",
+                      "observer",
+                      "unknown"
+                    ]
+                  },
+                  "card": {
+                    "type": "string",
+                    "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+                  },
+                  "visibility": {
+                    "const": "public"
+                  }
+                },
+                "required": [
+                  "seatRole",
+                  "card",
+                  "visibility"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "knownPublicHistory": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "confirmedVoids": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "seatRole": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "suit": {
+                    "enum": [
+                      "HEARTS",
+                      "DIAMONDS",
+                      "CLUBS",
+                      "SPADES"
+                    ]
+                  },
+                  "basis": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "seatRole",
+                  "suit",
+                  "basis"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "suspectedShortages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "rungCaller",
+            "callType",
+            "rungVisibility",
+            "knownTrumpSuit",
+            "position",
+            "trickNumber",
+            "ownCards",
+            "ownCardsComplete",
+            "currentTrick",
+            "knownPublicHistory",
+            "confirmedVoids",
+            "suspectedShortages"
+          ],
+          "additionalProperties": false
+        },
+        "expertSelectedCard": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+        },
+        "expertResponse": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "alternativesConsidered": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reasoning": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "expressedConfidence": {
+          "enum": [
+            "not_quantified",
+            "not_expressed"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "section": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "sourceId",
+              "section",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "principleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "correctionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "missingInformation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "discussionNumber",
+        "topic",
+        "observationCompleteness",
+        "responseStatus",
+        "context",
+        "expertSelectedCard",
+        "expertResponse",
+        "alternativesConsidered",
+        "reasoning",
+        "exceptions",
+        "expressedConfidence",
+        "evidence",
+        "principleIds",
+        "correctionIds",
+        "missingInformation"
+      ],
+      "additionalProperties": false
+    },
+    "correction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^COR-[0-9]{2}$"
+        },
+        "status": {
+          "const": "rejected_interpretation"
+        },
+        "rejectedInterpretation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replacementPrincipleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "section": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "sourceId",
+              "section",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "rejectedInterpretation",
+        "replacementPrincipleIds",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "principles": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "documentType": {
+          "const": "principles"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "provenance": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "path",
+            "sha256",
+            "provenance"
+          ],
+          "additionalProperties": false
+        },
+        "principles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/principle"
+          },
+          "minItems": 1
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/correction"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "documentType",
+        "source",
+        "principles",
+        "corrections"
+      ],
+      "additionalProperties": false
+    },
+    "scenarios": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "documentType": {
+          "const": "scenarios"
+        },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scenario"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "documentType",
+        "sourceId",
+        "scenarios"
+      ],
+      "additionalProperties": false
+    },
+    "interview": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "documentType": {
+          "const": "interview"
+        },
+        "scenarioNumber": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "topic": {
+          "type": "string"
+        },
+        "rungCaller": {
+          "enum": [
+            "unknown",
+            "observer",
+            "partner",
+            "our_team_unspecified",
+            "opponent_team"
+          ]
+        },
+        "callType": {
+          "enum": [
+            "unknown",
+            "forced",
+            "voluntary"
+          ]
+        },
+        "rungVisibility": {
+          "enum": [
+            "unknown",
+            "hidden",
+            "revealed"
+          ]
+        },
+        "knownTrumpSuit": {
+          "enum": [
+            "HEARTS",
+            "DIAMONDS",
+            "CLUBS",
+            "SPADES",
+            null
+          ]
+        },
+        "position": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4
+        },
+        "trickNumber": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "ownCards": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+          }
+        },
+        "ownCardsComplete": {
+          "type": "boolean"
+        },
+        "currentTrick": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "seatRole": {
+                "enum": [
+                  "partner",
+                  "opponent",
+                  "observer",
+                  "unknown"
+                ]
+              },
+              "card": {
+                "type": "string",
+                "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+              },
+              "visibility": {
+                "const": "public"
+              }
+            },
+            "required": [
+              "seatRole",
+              "card",
+              "visibility"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "publicHistory": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "confirmedVoids": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "seatRole": {
+                "type": "string",
+                "minLength": 1
+              },
+              "suit": {
+                "enum": [
+                  "HEARTS",
+                  "DIAMONDS",
+                  "CLUBS",
+                  "SPADES"
+                ]
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "seatRole",
+              "suit",
+              "basis"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "suspectedShortages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "expertSelectedCard": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[HDCS]_(A|K|Q|J|10|[2-9])$"
+        },
+        "alternativesConsidered": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reasoning": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "expressedConfidence": {
+          "enum": [
+            "not_expressed",
+            "uncertain",
+            "conditional",
+            "strong_preference"
+          ]
+        },
+        "correctionsToPreviousKnowledge": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "missingInformationForTraining": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "responseStatus": {
+          "enum": [
+            "answered",
+            "unanswered"
+          ]
+        },
+        "sourceReference": {
+          "type": "string"
+        },
+        "observationPacketId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "documentType",
+        "scenarioNumber",
+        "topic",
+        "rungCaller",
+        "callType",
+        "rungVisibility",
+        "knownTrumpSuit",
+        "position",
+        "trickNumber",
+        "ownCards",
+        "ownCardsComplete",
+        "currentTrick",
+        "publicHistory",
+        "confirmedVoids",
+        "suspectedShortages",
+        "expertSelectedCard",
+        "alternativesConsidered",
+        "reasoning",
+        "exceptions",
+        "expressedConfidence",
+        "correctionsToPreviousKnowledge",
+        "missingInformationForTraining",
+        "responseStatus",
+        "sourceReference",
+        "observationPacketId"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

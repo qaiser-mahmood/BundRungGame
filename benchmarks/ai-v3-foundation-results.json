@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "manifestHash": "2f29d87fac94ac913ae429e1fdbaebf665692900382255a083c1558aef0597b4",
+  "positions": 64,
+  "features": 519,
+  "opponentStyles": [
+    "lowest-legal",
+    "highest-legal",
+    "seeded-uniform"
+  ],
+  "coverage": {
+    "lowPartnerLeadAfterWin": 19,
+    "highPartnerLead": 9,
+    "repeatedPartnerLead": 12,
+    "ambiguousHighWinDifferentLow": 8,
+    "ourCaller": 42,
+    "opponentCaller": 22,
+    "revealedIndividualStreak": 16,
+    "unrevealedTrump": 36,
+    "note": "Observable descriptive thresholds for collection coverage, never intention labels or expected actions."
+  },
+  "dataLatency": {
+    "scope": "feature validation/vectorization only; excludes generation, packets, inference, search and queue",
+    "count": 320,
+    "meanMs": 0.05612828750000052,
+    "p50Ms": 0.05511100000001079,
+    "p95Ms": 0.09214600000001383,
+    "maxMs": 0.7384190000000217
+  },
+  "status": {
+    "stage": "A plus offline training scaffolding",
+    "annotations": {
+      "train": 0,
+      "validation": 0,
+      "holdout": 0
+    },
+    "usableHeads": [],
+    "blockers": [
+      "Human expert annotations are missing; generated positions and bot actions are not expert labels.",
+      "No human training annotations.",
+      "No independent human validation annotations.",
+      "No head has both training and validation targets."
+    ],
+    "readyForBaselineTraining": false,
+    "readyForSearchIntegration": false,
+    "readyForSelfPlay": false,
+    "readyForSequenceModel": false
+  },
+  "modelEvaluation": null,
+  "tournamentResults": null,
+  "policyLatency8_16_32Rooms": null,
+  "generatorSourceCommit": "8c24b2adc4c5906e2c13df4ddc470fabb3ce1346",
+  "scope": "Stage A plus offline baseline scaffolding; no trained expert model or V3 policy",
+  "corpus": {
+    "initialDeals": 16,
+    "candidatePositions": 64,
+    "blindAssignedCases": 16,
+    "humanAnnotations": 0,
+    "officialEngineReplayVerified": true
+  },
+  "validation": {
+    "allTests": {
+      "passed": 285,
+      "files": 30
+    },
+    "newV3Tests": 29,
+    "typescriptClient": "passed: npx tsc --noEmit",
+    "typescriptAI": "passed: npm run typecheck:ai",
+    "productionBuild": "passed; existing >500kB chunk advisory",
+    "tacticalChecks": {
+      "passed": 14,
+      "total": 14,
+      "scope": "existing synthetic checks, not V3 strength"
+    }
+  },
+  "trainingGate": {
+    "blocked": true,
+    "status": {
+      "stage": "A plus offline training scaffolding",
+      "annotations": {
+        "train": 0,
+        "validation": 0,
+        "holdout": 0
+      },
+      "usableHeads": [],
+      "blockers": [
+        "Human expert annotations are missing; generated positions and bot actions are not expert labels.",
+        "No human training annotations.",
+        "No independent human validation annotations.",
+        "No head has both training and validation targets."
+      ],
+      "readyForBaselineTraining": false,
+      "readyForSearchIntegration": false,
+      "readyForSelfPlay": false,
+      "readyForSequenceModel": false
+    },
+    "checkpointWritten": false,
+    "modelEvaluation": null,
+    "tournaments": null,
+    "policyLatency": null,
+    "canonicalBefore": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+    "canonicalAfter": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+    "exitCode": 2
+  },
+  "canonicalCheckpointSha256": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3"
+}

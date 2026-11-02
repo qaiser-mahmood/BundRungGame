@@ -1,0 +1,19 @@
+## First genuine 15-case expert collection pilot
+
+Adds an opt-in targeted pilot to the merged V3 review harness. The owner can prepare 15 distinct legal decisions, review them independently, save/compare, and resume at the first untouched case using the same private credentials. No model training or V3 activation. Final review corrections separate completed decisions from skips/unresolved answers and journal uncertain saves for exact idempotent recovery.
+
+- Versioned deterministic selection from an official-engine/replayed pool, one snapshot per initial deal. Balances phase, position and split; targets public Ace/streak/void/partner contexts and own suit coverage. Reports shortfalls and limits near-forced binary choices. No AI output or invented expert answer guides selection.
+- Clearer own-card/current-trick/order/winner display, public bidding summary, grouped previous tricks, rank-entry helper, saved progress/case picker and guarded navigation while requests are pending. Predictions remain hidden until save; V3 remains Not available.
+- One-time private owner token initialization and users-file support; same identity/storage resumes across restart. Exact Windows PowerShell, private ACL, launch, resume and export instructions. Local loopback only, no hosting or production API integration.
+- Preserves V3 annotation/export and independent-review safeguards. Missing pilot context, duplicate/tampered assignments and illegal labels rejected. No canonical model or game-rule changes.
+
+Evidence: 78 focused tests / 6 files, both TypeScript checks and client syntax pass; real prepare/export/replay/status commands pass. Proposed 15 cases meet all targets: 5 early/5 middle/5 late, all positions, 8 hidden/7 revealed, 8 forced/7 voluntary, 4 partner-control/7 opponent-control, current and next-lead Ace cases, 4 opponent streak contexts, 5 deals per split, all with >=3 legal cards. Zero human labels.
+
+Negative result: existing V2 emitted an internal-failure diagnostic and used its legal fallback on 1/15 cases. This is retained/displayed in actual diagnostics, not counted as completed search or learning. Windows/manual browser testing remains outstanding; the pilot is for that human review. Curated coverage is not playing-strength evidence.
+
+See docs/AI_V3_EXPERT_PILOT.md, docs/AI_V3_EXPERT_PILOT_RESULTS.md and benchmarks/ai-v3-expert-pilot-coverage.json. Target feature/ai-v3-partnership-learning. Leave draft for independent review; do not merge automatically.
+
+
+Final workflow corrections: picker/progress expose Not reviewed, Completed decision, Skipped, Ambiguous and Insufficient states, with an all-visited summary and first-untouched resume. Skips remain revisitable and blind; history is preserved. Browser-local journaling persists the original request ID/payload before POST. Authenticated own-request reconciliation restores a saved receipt/comparison or permits only the identical retry. New edits/navigation are blocked while unresolved. Confirmed pre-save rejection (including malformed/oversized JSON and revision conflict) is distinct from transport/post-commit uncertainty. Rejected drafts are read-only for note recovery; saved cases can read their existing comparison without another submission. Tokens/private source state are not journaled or returned by the lookup.
+
+Limitations: pending browser intent requires the original profile/origin and intact local storage; use one tab and do not clear storage during recovery. Saved server labels survive independently. Windows/manual browser validation remains outstanding; automated tests exercise the actual recovery module plus authenticated HTTP, refresh/restart, duplicate/revision guards and no premature comparison. Production gameplay/AI/engine and training contracts are unchanged. Do not merge automatically.
