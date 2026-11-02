@@ -1,0 +1,2 @@
+# Only needed for optional offline V3 CPU training; TypeScript inference has no extra dependency.
+numpy==2.2.3

@@ -1,0 +1,22 @@
+{
+  "stage": "locked before holdout scoring or final gameplay",
+  "candidate": "regularized MLP: 629-256-128-52 ReLU; 200884 parameters",
+  "checkpointSHA256": "1b45e9a136c154e005a6fbdeff2e035cc2446802be3e8530af2669a29fe3ce83",
+  "validationSelection": "Minimum validation cross entropy with patience 6, best epoch 31. Hard labels retained after pilot visit-distribution mixing failed to improve validation loss.",
+  "validationLoss": 0.9380021926042288,
+  "validationAgreement": 0.6489942038868053,
+  "validationGames": {
+    "versusRetrainedLinear": "100 wins, 100 losses; 200 games; seeds 5500000-5500099, both team assignments",
+    "versusOriginalLinear": "103 wins, 97 losses; 200 games; seeds 5600000-5600099, both team assignments"
+  },
+  "interpretation": "MLP has stronger validation imitation but no demonstrated gameplay advantage over the retrained linear architecture. Retain both checkpoints; no production policy is replaced.",
+  "finalProtocol": {
+    "holdout": "250 complete deals, generated with separate seed offset, never used for fitting, objective choice or checkpoint selection",
+    "gameplaySeed": 9300000,
+    "pairsPerComparison": 300,
+    "gamesPerComparison": 600,
+    "comparators": ["original PR10 linear", "selective32 V2 teacher", "existing heuristic", "retrained linear"],
+    "originalControl": "Original PR10 linear versus selective32 on the same 300 final seed pairs",
+    "uncertainty": "Bootstrap complete seed pairs; report per-mode and partnership outcomes; do not change the candidate after final results"
+  }
+}

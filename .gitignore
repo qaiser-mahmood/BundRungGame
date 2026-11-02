@@ -44,3 +44,6 @@ server/ai/models/experiments/v3/
 *-run.local.log
 training-mixed.local.log
 gameplay-mixed.local.log
+*.local.log
+*.local.json
+__pycache__/
