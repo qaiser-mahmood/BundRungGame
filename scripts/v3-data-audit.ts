@@ -15,7 +15,7 @@ for(const p of corpus.packets){const o=p.observation,f=strategicFacts(o),lead=f.
  if(!o.trumpRevealed)coverage.unrevealedTrump++;
 }
 for(let pass=0;pass<5;pass++)for(const p of corpus.packets){const start=performance.now();vectorize(p.observation);times.push(performance.now()-start);}times.sort((a,b)=>a-b);
-const report={schemaVersion:1,manifestHash:corpus.manifest.manifestHash,positions:corpus.packets.length,features:FEATURE_COUNT,opponentStyles:[...new Set(corpus.manifest.sources.map(s=>s.opponentStyle))],
+const report={schemaVersion:1,manifestHash:corpus.manifest.manifestHash,positions:corpus.packets.length,features:corpus.packets[0]?.features.length??FEATURE_COUNT,featureSchema:corpus.manifest.featureSchema,opponentStyles:[...new Set(corpus.manifest.sources.map(s=>s.opponentStyle))],
  coverage:{...coverage,note:'Observable descriptive thresholds for collection coverage, never intention labels or expected actions.'},
  dataLatency:{scope:'feature validation/vectorization only; excludes generation, packets, inference, search and queue',count:times.length,meanMs:times.reduce((a,b)=>a+b,0)/times.length,p50Ms:times[Math.ceil(times.length*.5)-1],p95Ms:times[Math.ceil(times.length*.95)-1],maxMs:times.at(-1)},
  status:supervisionStatus(corpus),modelEvaluation:null,tournamentResults:null,policyLatency8_16_32Rooms:null};

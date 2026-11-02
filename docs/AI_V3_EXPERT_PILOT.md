@@ -1,5 +1,7 @@
 # First 15 expert reviews: local owner pilot
 
+**Already have saved reviews? Follow [the non-destructive caller-information migration](AI_V3_CALLER_PRIVATE_CORRECTION.md), not the preparation/token-creation steps below. Do not recreate your pilot or repeat unaffected decisions.**
+
 This is a collection pilot, not AI training. Start from `feature/ai-v3-expert-pilot` (based on V3 with PR #7 merged). Production gameplay/defaults and the canonical model are unchanged. V3 remains **Not available**; recorded V2 decisions are comparisons only after the expert saves. V2 may use its existing legal fallback on difficult frames; that actual flag is shown and is not represented as a completed search. This pilot does not repair or claim strength for that baseline.
 
 ## What is prepared
@@ -47,7 +49,7 @@ The service binds **127.0.0.1 only**, authenticates every data API and does not 
 
 The page shows all ordinary/publicly revealed own cards, legal options, partner/opponent relative seats and current chronological playing order. Current trick and previous tricks are separated; a publicly determinable winning card and downgraded effective strength are shown. Unknown/concealed cards stay unknown. Public void proofs, counts, dealer score and qualifying individual streaks are shown.
 
-Bidding information is a **public status summary** (caller, forcedness, preceding pass count and per-seat final status), not an invented full auction transcript. A separately locked hidden card and undisclosed trump are omitted under the existing strict V3 observer boundary, even if the caller knows them in live play. Legitimately public revealed hands remain visible.
+Bidding information is a **public status summary** (caller, forcedness, preceding pass count and per-seat final status), not an invented full auction transcript. In v2 the acting caller sees their own selected suit/locked card, distinct from whether it is legally playable. Non-callers still cannot see unrevealed caller-private information. Historical v1 pilots require the migration linked above. Legitimately public revealed hands remain visible.
 
 1. Select a preferred legal card. No choice/confidence/AI answer is prefilled.
 2. Optionally use Add as next rank or edit ranked groups (card IDs, comma-separated ties, one group per line). Unmentioned alternatives remain incomparable.
