@@ -1,3 +1,4 @@
+import {FEATURE_SCHEMA} from '../server/ai/v3/data/Observation';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
@@ -9,7 +10,7 @@ import {calibrate,emptyBaseline,evaluate,frequencyBaseline} from '../server/ai/v
 import {loadCheckpoint,payload,saveCheckpoint} from '../server/ai/v3/learning/Checkpoint';
 export function trainCLI(args:string[]){
  const get=(key:string,fallback:string)=>args.includes(key)?args[args.indexOf(key)+1]:fallback,corpus=readCorpus(get('--corpus','/tmp/v3-expert-corpus'));
- verifyReplay(corpus);const annotations=get('--annotations',''),data=annotations?JSON.parse(readFileSync(annotations,'utf8')) as AcceptedDataset:undefined,status=supervisionStatus(corpus,data);
+ verifyReplay(corpus);if(corpus.manifest.featureSchema!==FEATURE_SCHEMA)throw new Error('V3_PLAYER_V2_MODEL_COMPATIBILITY_REQUIRED');const annotations=get('--annotations',''),data=annotations?JSON.parse(readFileSync(annotations,'utf8')) as AcceptedDataset:undefined,status=supervisionStatus(corpus,data);
  if(!status.readyForBaselineTraining)return {blocked:true,status,checkpointWritten:false,modelEvaluation:null,tournaments:null,policyLatency:null};
  const train=trainingRows(corpus,data!,'train'),validation=trainingRows(corpus,data!,'validation'),resume=get('--resume',''),loaded=resume?loadCheckpoint(resume):null;
  if(loaded&&(loaded.data.manifestHash!==corpus.manifest.manifestHash||loaded.data.annotationHash!==data!.datasetHash))throw new Error('V3_RESUME_PROVENANCE');

@@ -5,7 +5,7 @@ import {resolve,dirname,join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {Corpus,GeneratorConfig,digest,generateCorpus,verifyCorpus,assignmentPackets} from '../server/ai/v3/data/Corpus';
 import {AnnotationBatch,AcceptedDataset,annotationTemplate,annotationReport,importAnnotations,verifyAccepted} from '../server/ai/v3/data/Annotations';
-import {FEATURE_COUNT,FEATURE_NAMES,FEATURE_SCHEMA} from '../server/ai/v3/data/Observation';
+import {FEATURE_COUNT,FEATURE_NAMES,FEATURE_SCHEMA,PLAYER_FEATURE_COUNT,PLAYER_FEATURE_NAMES,PLAYER_FEATURE_SCHEMA} from '../server/ai/v3/data/Observation';
 import {supervisionStatus} from '../server/ai/v3/learning/Rows';
 export function readCorpus(directory:string):Corpus {
  const packets=JSON.parse(readFileSync(join(directory,'private','packets.json'),'utf8')),manifest=JSON.parse(readFileSync(join(directory,'private','manifest.json'),'utf8'));
@@ -19,9 +19,9 @@ export function verifyReplay(corpus:Corpus):void {verifyCorpus(corpus);if(genera
 export function dataCLI(args:string[]):unknown {
  const command=args[0],get=(key:string,fallback:string)=>args.includes(key)?args[args.indexOf(key)+1]:fallback;
  if(command==='generate'){
-  const config:GeneratorConfig={seed:Number(get('--seed','1200000')),trainDeals:Number(get('--train-deals','8')),validationDeals:Number(get('--validation-deals','4')),holdoutDeals:Number(get('--holdout-deals','4')),positionsPerDeal:Number(get('--positions','4')),sourceCommit:get('--source-commit','')};
+  const config:GeneratorConfig={seed:Number(get('--seed','1200000')),trainDeals:Number(get('--train-deals','8')),validationDeals:Number(get('--validation-deals','4')),holdoutDeals:Number(get('--holdout-deals','4')),positionsPerDeal:Number(get('--positions','4')),sourceCommit:get('--source-commit',''),observationVersion:2};
   const corpus=generateCorpus(config),selected=assignmentPackets(corpus,Number(get('--position-offset','0'))),template=annotationTemplate(corpus,get('--annotator','UNASSIGNED'),selected.map(p=>p.id));
-  writeBundle(get('--output','/tmp/v3-expert-corpus'),{'public/card-and-label-format.json':{cards:CARDS.map((c,index)=>({index,...c})),shortage:['VOID','SINGLETON','TWO_PLUS'],returnSuit:[...SUITS,'NO_REQUEST'],leadControl:['PARTNER_RETAIN','OBSERVER_TAKE','NO_PREFERENCE'],strategyPhase:['FORCE_REVEAL','PRESERVE_CONCEALMENT','LEAD_CONTROL','INDIVIDUAL_STREAK','ENDGAME','OTHER']},'private/packets.json':corpus.packets,'public/packets.json':selected,'public/annotation-template.json':template,'private/manifest.json':corpus.manifest,'feature-schema.json':{schema:FEATURE_SCHEMA,count:FEATURE_COUNT,names:FEATURE_NAMES},'status.json':supervisionStatus(corpus)});
+  writeBundle(get('--output','/tmp/v3-expert-corpus'),{'public/card-and-label-format.json':{cards:CARDS.map((c,index)=>({index,...c})),shortage:['VOID','SINGLETON','TWO_PLUS'],returnSuit:[...SUITS,'NO_REQUEST'],leadControl:['PARTNER_RETAIN','OBSERVER_TAKE','NO_PREFERENCE'],strategyPhase:['FORCE_REVEAL','PRESERVE_CONCEALMENT','LEAD_CONTROL','INDIVIDUAL_STREAK','ENDGAME','OTHER']},'private/packets.json':corpus.packets,'public/packets.json':selected,'public/annotation-template.json':template,'private/manifest.json':corpus.manifest,'feature-schema.json':{schema:PLAYER_FEATURE_SCHEMA,count:PLAYER_FEATURE_COUNT,names:PLAYER_FEATURE_NAMES},'status.json':supervisionStatus(corpus)});
   return {positions:corpus.packets.length,blindAssignmentPositions:selected.length,deals:config.trainDeals+config.validationDeals+config.holdoutDeals,manifestHash:corpus.manifest.manifestHash,status:supervisionStatus(corpus)};
  }
  const corpus=readCorpus(get('--corpus','/tmp/v3-expert-corpus'));

@@ -23,8 +23,8 @@ export function reviewApp(store:ReviewStore,users:Record<string,string>){
  app.use('/api',(req,res,next)=>{const actor=authenticatedActor(req.headers.authorization,users);if(!actor){res.status(401).json({error:'AUTHENTICATION_REQUIRED'});return;}res.locals.actor=actor;const origin=req.headers.origin;if(origin&&origin!==`http://${req.headers.host}`){res.status(403).json({error:'ORIGIN_REJECTED'});return;}next();});
  app.use(express.json({limit:'32kb',strict:true}));
  app.get('/api/session',(_req,res)=>{
-  const cases=store.assigned.map(p=>{const last=store.latest(res.locals.actor,p.id);return {id:p.id,revision:last?.revision??0,status:last?.submission.status??'unreviewed',state:caseState(last)};});
-  res.json({actor:res.locals.actor,assignmentId:store.bundle.hash,cases,summary:Object.fromEntries(['not_reviewed','completed','skipped','ambiguous','insufficient'].map(state=>[state,cases.filter(c=>c.state===state).length])),resumeCaseId:cases.find(c=>c.state==='not_reviewed')?.id??null,cards:CARDS.map((c,index)=>({index,id:c.id,rank:c.rank,suit:c.suit})),principles:store.principleIds.map(id=>({id,description:guide.find(p=>p.id===id)?.preferredAction??id}))});
+  const cases=store.assigned.map(p=>{const last=store.latest(res.locals.actor,p.id);return {id:p.id,revision:last?.revision??0,status:last?.submission.status??'unreviewed',state:caseState(last),correctionRequired:store.correctionRequired(res.locals.actor,p.id)};});
+  res.json({informationAudit:store.correctionSummary(res.locals.actor),correctionCases:store.correctionCases(res.locals.actor),actor:res.locals.actor,assignmentId:store.bundle.hash,cases,summary:Object.fromEntries(['not_reviewed','completed','skipped','ambiguous','insufficient'].map(state=>[state,cases.filter(c=>c.state===state).length])),resumeCaseId:cases.find(c=>c.state==='not_reviewed')?.id??null,cards:CARDS.map((c,index)=>({index,id:c.id,rank:c.rank,suit:c.suit})),principles:store.principleIds.map(id=>({id,description:guide.find(p=>p.id===id)?.preferredAction??id}))});
  });
  app.get('/api/cases/:id',(req,res)=>{try{res.json(store.case(res.locals.actor,req.params.id));}catch{res.status(404).json({error:'UNKNOWN_CASE'});}});
  app.post('/api/cases/:id/reviews',(req,res)=>{
@@ -42,7 +42,13 @@ export function reviewApp(store:ReviewStore,users:Record<string,string>){
   try{const record=store.request(res.locals.actor,req.params.id,req.params.requestId);res.json(record?{found:true,...savedResponse(store,res.locals.actor,record),submission:record.submission}:{found:false});}catch{res.status(404).json({error:'REQUEST_LOOKUP_FAILED'});}
  });
  app.get('/api/cases/:id/comparison',(req,res)=>{try{res.json(store.comparison(res.locals.actor,req.params.id));}catch{res.status(403).json({error:'BLIND_REVIEW_REQUIRED'});}});
- app.get('/api/report',(_req,res)=>res.json(evaluationReport(store.recordsFor(res.locals.actor),store.bundle)));
+ app.get('/api/corrections/:id',(req,res)=>{try{res.json(store.correctionCase(res.locals.actor,req.params.id));}catch{res.status(404).json({error:'CALLER_CORRECTION_NOT_AVAILABLE'});}});
+ app.post('/api/corrections/:id/reviews',(req,res)=>{
+  try{const record=store.submitCorrection(res.locals.actor,req.params.id,req.body);try{res.json({id:record.id,revision:record.revision,comparison:store.correctionComparison(res.locals.actor,req.params.id,record)});}catch{res.status(503).json({error:'SAVE_OUTCOME_UNCERTAIN',saveOutcome:'uncertain'});}}
+  catch(error){const reason=error instanceof Error?error.message:'';if(/^(CALLER|EVALUATION)_[A-Z_]+$/.test(reason))res.status(400).json({error:reason,saveOutcome:'rejected'});else res.status(503).json({error:'SAVE_OUTCOME_UNCERTAIN',saveOutcome:'uncertain'});}
+ });
+ app.get('/api/corrections/:id/requests/:requestId',(req,res)=>{try{store.correctionCase(res.locals.actor,req.params.id);const record=store.corrections?.request(res.locals.actor,req.params.id,req.params.requestId);res.json(record?{found:true,id:record.id,revision:record.revision,submission:record.submission,comparison:store.correctionComparison(res.locals.actor,req.params.id,record)}:{found:false});}catch{res.status(404).json({error:'CALLER_CORRECTION_NOT_AVAILABLE'});}});
+ app.get('/api/report',(_req,res)=>res.json({...evaluationReport(store.recordsFor(res.locals.actor),store.bundle),informationAudit:store.correctionSummary(res.locals.actor)}));
  app.use((_req,res)=>res.status(404).json({error:'NOT_FOUND'}));
  app.use((error:unknown,_req:express.Request,res:express.Response,_next:express.NextFunction)=>{const type=(error as {type?:string})?.type;if(type==='entity.too.large'||type==='entity.parse.failed'){res.status(type==='entity.too.large'?413:400).json({error:'INVALID_JSON_REQUEST',saveOutcome:'rejected'});return;}res.status(503).json({error:'SAVE_OUTCOME_UNCERTAIN',saveOutcome:'uncertain'});});return app;
 }

@@ -1,3 +1,4 @@
+import {FEATURE_SCHEMA} from '../data/Observation';
 import {Corpus,Split} from '../data/Corpus';
 import {AcceptedDataset,Head,activeRecords,verifyAccepted} from '../data/Annotations';
 export interface TrainingRow {head:Head;features:number[];mask:number[];target:number[];weight:number;dealKey:string;packetId:string;coverage:'complete'|'partial';}
@@ -24,7 +25,7 @@ export function trainingRows(corpus:Corpus,data:AcceptedDataset,split:Split):Tra
 export function supervisionStatus(corpus:Corpus,data?:AcceptedDataset){
  if(data)verifyAccepted(corpus,data);const records=data?activeRecords(data):[];
  const counts=Object.fromEntries(['train','validation','holdout'].map(s=>[s,records.filter(r=>r.split===s).length]));
- const blockers:string[]=[];
+ const blockers:string[]=[];if(corpus.manifest.featureSchema!==FEATURE_SCHEMA)blockers.push('Player-relative v2 input requires a compatible baseline; legacy models must not drop caller-private features.');
  if(!records.length)blockers.push('Human expert annotations are missing; generated positions and bot actions are not expert labels.');
  if(!counts.train)blockers.push('No human training annotations.');if(!counts.validation)blockers.push('No independent human validation annotations.');
  const train=data?trainingRows(corpus,data,'train'):[],validation=data?trainingRows(corpus,data,'validation'):[];
