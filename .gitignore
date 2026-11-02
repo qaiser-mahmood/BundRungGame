@@ -41,3 +41,6 @@ server/ai/models/experiments/v3/
 
 # Local expert review records, credentials are supplied via environment only
 .expert-review/
+*-run.local.log
+training-mixed.local.log
+gameplay-mixed.local.log

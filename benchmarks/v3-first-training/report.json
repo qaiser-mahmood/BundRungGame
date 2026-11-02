@@ -1,0 +1,652 @@
+{
+  "config": {
+    "seed": 763300,
+    "epochs": 20,
+    "counts": [
+      80,
+      16,
+      24
+    ],
+    "rate": 0.015,
+    "architecture": "629 affine 52 masked softmax",
+    "selection": "minimum validation cross entropy"
+  },
+  "provenance": {
+    "kind": "synthetic-supervision",
+    "teacher": "ai-v2-ismcts/control",
+    "teacherOptions": {
+      "iterations": 8,
+      "particles": 4,
+      "timeMs": "Infinity",
+      "exact": false,
+      "adaptive": false,
+      "rollout": "control"
+    },
+    "sourceCommit": "a74f684be0f5092341c4717a7678f88c94bc0ed7",
+    "datasetHash": "5c88b9021f138a5f6ac0fb15377c9e95ae6054d79441bea0c2bca1737870f9b1",
+    "splitUnit": "complete initial deal",
+    "expertRecordsUsed": 0,
+    "dealKeys": {
+      "train": [
+        "63ff388fb21a7941a5e992aa79434e9e8257209919a24b51c1997de359f7084d",
+        "90ab8dcdb8b7beb27944407799a4f93bffe8d2bfde43340853ecab2b6efd20ec",
+        "7c6487d988848f57f7eaaa93e1994e987c6a27a2724b023f02e499b1dd1793a8",
+        "7340f474e1631f55f004bf9edeb3c60e8e4c1d68c2ec7606fe39412bc804083f",
+        "436fb1bac33a0d1977d2192b70a83aa273983802abf07bd6c51cacae84ca4106",
+        "19009b1a053911233d158d4035eafa3598d3678d7e26b8ef2404ff012fbdd302",
+        "cb9c69b74393c8bafc7d37fd25274c91186fdf362b1f27e1bfaaa0e72b6337cd",
+        "1cc9a09aa72cab8043b6be7439254a29b9f69e409d1835d824befbe462f78412",
+        "a093c3324a14d696c39a4f5890625fca71a42bb079e00bbe7e391b46084baef6",
+        "8229e64c518da5b2570070a57759566b430278e2b0c5234145404300b35b309c",
+        "12cfe7f60f214b0d54d8fe36ed6fcf3d3c2c1e769fb65e1488b9fb873a1edefd",
+        "623c5bc97ffc247a1159e762b9562089790931892e6fcc338a4648a7dc7b993b",
+        "8c446eb46defe7e1f4aae9ed4d0c9dd0395dd2fa23439289bc203ae41d6eed7f",
+        "2458b9a81770cdc4be3d158fe9a24d0a02155c131d850a345be5c1d367b8c7fc",
+        "02bae9d914cd071d8e2ec97ff99b0039f33bce0c2fb3294e77f7655080cf93fb",
+        "a17b9a1fa1e02a8b2d5441f4709145ecca4cb03b1cf5bd40f6869cdc1903a538",
+        "eaeb3a0cfa7b2d54ddc2a63d7492b0035780bda8559d29b0048d8c7feea7b150",
+        "c8a64b8860d13911eabb858adeea35382e660e5ebfe81e61a9744a50e41cef7e",
+        "1c2b2c7564978ddfe5dd2a724d0fec7099ca70a13ad8fa1f64a957f6d8a7d211",
+        "5bf088152c1d3020398d0c334572b6b067c7f9a6b0e3b3db8fc177d2dca5340d",
+        "7d0cde23fca133bb15674651caa135705217fd41b288078959a389b9e1696d86",
+        "a608f589e0cd7355a6761bb38eddad11a95860bc772dac377a401642a33555a0",
+        "ac33dc409eb6fe8c75bef157f642c1eb248651c2ac53d4b8e8e63a52b3274731",
+        "af1b984d926aa1a1ccd568ec4cc9a0b6a9ef0fc4a0d602e5f5772e1bd3fe5120",
+        "b262d55a1ab7dd31a40e9694a3a5a1273170bd21af8501c9fda0ec60200de3c6",
+        "1612aba053ab5e5671c4d29cfa5bb1c3afa2951a4aab2db80d9c62099a5bf62c",
+        "51bcab291e142eb130829b0c343fa51518f7b774dc0c6d86ab577481a24b4cfe",
+        "7ef5f6b15d7cab05fe89332c5affdb59d84883024b4d6d9a2a3e5cc4591545b7",
+        "93ed98658038f58e13471271312e29e3a1dc71281502219c80456174d3e031e8",
+        "c942bd28f70c5cb1a864c92e09d84c182167c8cc42216530ff0640b8db53357d",
+        "167269be8f64562cd0001214154e19f9c58f20b379cc2878167e22bacda8e46a",
+        "5bc1051df15f4b28060ec24498ffaad28d02af1d1e32a7ea1c514f98a377cda1",
+        "c5ca10beb5f9e6b61138c15bf72d1c94ad8c3ce2462e49c36f69b1d5a8c63233",
+        "db96a0f78d2823d1dcbd98aa812337ec5b27973bb6a749ba216f91ccd0c47fc3",
+        "627cf5e326656605051b91cd760f1b2552a4c681a2a2085dd18b82f2ea3e1d67",
+        "53662b2cfe829096900a9c49c377455d73d8639ca75c35aea009a085f7c6a28d",
+        "b6d11972409f5efa239a666790afef1afba9e7662b2e8bd8970446b25f9bfd73",
+        "f8dcff067c65a35d4bd0d25a97aff1da18416e820d135bb226ed6d2fd55c4acd",
+        "e7e19fd5abac4d78a9872cf6f08d6456662f30fa0ed3878f2ddd660f8b714e93",
+        "1ed0b4d487f0c74b6022fad8c3fda01e6cc402ae1febcd60017bdc61fc3cf7f9",
+        "d3cc9bc8ff98052d5528ff4e09ef419d06e61a6abcb1e095fa28c474dfbfa006",
+        "2f503b4af2eba5d99cc8bac17cc1d0bd1d6eff2c6123ad2161a208ace0533b4f",
+        "16974634ea73fb5e077d3aac118b7423e273de2f7b0d3f10e424252071553bd0",
+        "adc81ddacca02cd4fa59e15a83602ed46aff7fbfaeabc101cf9a961352dc2e11",
+        "067b8ccfe836eece18165b3ae8342c0e71cdb1a2cee7496b24dd9e550e1c529c",
+        "84849f150444c2a2dd5a0c7937e49dbb2e3ba900cc9b9c1fbd0dcf4b2acabea3",
+        "0c1829b469b9da26ad2c005af70a5e9191d8586ba133b9e567a5d55effa9a4ad",
+        "4c0f7d305eb70237abe538b129c898ad7eefc41b0137eb0347baf7204595d808",
+        "b1114a4be68577ae3fc7a05319d7fa5dca6580a49148fabe567d1fb9a4ea9833",
+        "fb48df3a54620851448687bedccec6d2c1bd5e7e98f7028cd64f276fff217963",
+        "1a81b502846a1092f421ac26ea4a2333bbb3015bbae707c69fda879271b62982",
+        "3dd6a3e516eabbc1ca3ec6a72aafeab1cb4659b24dfc494e9239b6f23039d7d2",
+        "34757d6f149f99b5e0aef897872d1a8c223b8047b03ebe0fb5ee1ac3ca5cf291",
+        "1b0c09602174c84d800084a85639d84a5ee4986393308d7aa131b64cf1867e54",
+        "1031a7729352fb1b1e7d0f721ace075fe95152732d89da67cee240efa33a8958",
+        "b0f50d18b9de8bb55c2de47b0c959049bd6ba3cb4e3930427a8b99dd161d4c29",
+        "303fe21ed8e0b17a2f922b034080bc3aacb34310deb2572f45fd29362dd5d4e6",
+        "d7f8cfa248c1d5187585c4ed0224284b74648d10c2b170354f79cb05f029e345",
+        "fbe5964751a8a64a6783c04ff9b6755538effe1bf153391c8c33192914d140b0",
+        "c0870ee8475929ba5fcf79d6f0e52dbb481059506a7323326d20d4b5e1b31aba",
+        "dda816f17c561492e39209b4794d908caf5a295dea551f0e3fd69366ab25e9a2",
+        "56627238dfcb6d03680405fb1101826af9cdb3edd158bcb465b07694d360d969",
+        "2a6cb20068d5967d1bfb63d1d818fe0c164817a883173903686d612098045788",
+        "86aee0b09b170357bb184a9a9badfff8ba4ea5301384492834d10f54a3de9b72",
+        "4b7bccb071cf079857346c2b4b14369bce2782c8da94f43b505c2a51afa01bda",
+        "7426f258c5069537ef36c763cc39c1ebd7d10ecb039a8c454689de1efe460884",
+        "3e64b3a33eb0b812b567358f5fdc0ed0adc4a4ee339bacdd0e596e3855564adf",
+        "589d6106358c2709674dd9d2b113c820879a1067c4b2bbce7b5df78a9dc63403",
+        "bcc7797c76754b5fd6d9f56cb2a3ac5298b0fe411d406845f6db9a0c19d01c59",
+        "7ed23df4c2f499a80c032e626c86e3e7d638368f33f46ec3ce7e318b94702abf",
+        "5541a6bff9a8cfa65923677085b9a090e35fd066a6bc88cff084012af7f1c73f",
+        "eca703f7f760e0be137311c069e59105fc8ad384217d7bdab369ead434e8e82e",
+        "fed34cf880713f7ba69a3201cba677d1ab2da8157b656381b2f9b0e1bf2381d0",
+        "7a8080b19e884d96b09f3bf718378620bde783a145cb09b36d2d816e4b8bf1d0",
+        "06e350803fe60a8d1d6b9f3d5e8f19293278870b3c9887c15d5516b5ce9bc2cb",
+        "950970a621b1340d72680cfb488ff8d79358cccc638dfe4b25f8392a9b3cd6d7",
+        "180b51ca9e5a180e244ea144ed4020bbcb628dd3e5654af79d6f48a78384ae5b",
+        "ce647d72722fdeac24237c545743c4485f6ce6ecde9cca19e69167fe333f8b9b",
+        "30da68515593e747be60d1908961fb6512b8f15b694974dbdea0b05abc38595a",
+        "c47e4edde395c1ba053ee7678b456465922c823e942ecbe3d9deb02dc8753106"
+      ],
+      "validation": [
+        "205e9e9ba9b7b393485bbdd34c9567a0a0101ae5cc6b0d62bfe1c0daf91c9c36",
+        "4c80b405c9f4451bdd6e10840c0c525def0ea34be169ef6ee09ab9a8e0cddce1",
+        "fb2a245487c54e856c5e4a813d5d236fe36a242a24618691497e09289e9ebf5d",
+        "58d2cd9680c2ca3b7c07c857b472835c32e0e00db5b008d67e27b22e0095319f",
+        "9ff3025b3772e354786c121b534ffb7baa3a4a0304b659cf2d01b43bdacbb74e",
+        "7c69992959c3d4690fc62aa5a51ccd2ff6db78257fc389398f21da3d14ff8d7f",
+        "fca17e8ede9563eb036a62c18ce75ded1853664bf983e7e2ea32b9d5cd7cbcb8",
+        "e5ab21132bdf18985e2b82cb71326636d2b2aa6692a900f4169962d921216d02",
+        "876ca5327af898e10123c017bec9196bffec3e423c15884dd1f429c7f9aab308",
+        "d4f3ee5760fffd4558d8e1c3b48a86991e3d0048b27c26316c512245db0f4e2d",
+        "e69ba79fce8e65ace0b15bacb21791f0cbd79902313a174a5db4f8ffbbe703db",
+        "64c301d185c7b1f6dcd35fe31af9df3e27c2ca5f787c16c036d1b3f3d6f0f77c",
+        "79e1d1afdbc68664d84905af4ce451b2d90a6bac2f8b249f3a7e29ee584d471a",
+        "5c1a246025e0c75098ff443804f3c63a6a6856d94e7613d14a6f7e02ff233892",
+        "f621eeb32e9386e1a73283df12c1320d74cbdc15e73a312b42ad3407e9f53d33",
+        "3e21815b546247e8b6cc2387232ba9331f569cb5eef43416718f2cfedae20b20"
+      ],
+      "holdout": [
+        "6f8b0fe75ac63a9583d0a82059b42f1bd81d9f00b10298e45122623f3c46a0e9",
+        "44d2564e09b43513d25b99142ba7606708dcc4b189c6f3ef502d56486982565e",
+        "8efdd972b15da5d5f480d87c603d2b1757ae69f5d6ee51b7c4b8d0c7e3a5a134",
+        "7d7e88b664e42530b56c7409be7c9314167c93e75f7433829696b6cb3c35e9b0",
+        "86ad2d5839de056c75cec62b101830b5d84151e9d4dab69246cfe19be3b0caaf",
+        "d8a0e170e780a10ebc2069e601d64d2ce6f9bf91aee1fcbac742fa578671971b",
+        "32562c292a58839e5653e47224f9565258f0ae376f71c55bb69dfb038506bd6a",
+        "b5e6f9a32eb04f1a593ce7bdc9ebfc165460b27a1fb36c302948366d272d4867",
+        "81a00ec412047f5690f985bcb42c2f2b2b4ed420e20f5689f67c94b82df29bca",
+        "f779f1bde8cfefb8021966768d21a8c923812c310ab7756c433472a105f9b1e0",
+        "2d5b1c0142a575d8ee1938c98c461b0d3f229e3c70495d69d74488bc61e3a813",
+        "1a37c994829e2f57f32892e19aa0a9dbcdcb89a3e2726182781b4cda02ecfbcd",
+        "bf09729e9fc8acfedcfd5231544ed89fe382fd3107d3bab5a5f89dc6e1ff451c",
+        "f5f54420330d5dcabcb35e95c5fad48108354f8c0da4c448ea03ca6cdc817b85",
+        "6bf621eb98b5a1b66827652ed621ac83f9792584c494cdf8f9599a16a3ec346a",
+        "35f578a220c920284fff72eb2abdb4f0655820ec95b41454d05ba5ca2e82e47f",
+        "523e67bc6051abc23912d73a16b5ec0b44cd8d804d66c95a129b5354ae4428c2",
+        "a9e220dd9d37b973b843b2220bd8d5b7c2eb1fc7c4dba534932989ea3bb85027",
+        "223e9747eb0fa9a247792f7d8438867af630a76d7b0ad734cd9269c4a22cb337",
+        "1c8dbe2e4d46cfedbd192a91fc05ff2b7c26d7404eeedc2fe929914f62206c55",
+        "00977571cc8a8985b008261c7bb67af4dc8849012e3f2cebc799bd079677efdc",
+        "66e98abefce63acc1bc4c9aec52b3af8658e34f7811699a3d4a6c4a7ca228aa1",
+        "819198a63813b549590d17d1ecdc683582f5e99f8e0068196aeaf46094a13ee3",
+        "5b432c12eaaad406e0a41f7938080dabcf401e865704f4e8332696a456efe796"
+      ]
+    },
+    "teacherStats": {
+      "decisions": 3853,
+      "forced": 661,
+      "obvious": 0,
+      "searches": 3192,
+      "exact": 0,
+      "iterations": 25536,
+      "nodes": 23053,
+      "invalidWorlds": 0,
+      "fallbacks": 0,
+      "deadlineStops": 0,
+      "particles": 12768,
+      "ess": 12768,
+      "searchMs": 6612.606100000022,
+      "templateBuilds": 11544,
+      "fullObservations": 0,
+      "lightObservations": 489060
+    }
+  },
+  "checkpoint": "C:\\Users\\Qaiser\\BundRungGame\\server\\ai\\models\\experiments\\v3\\first-training-mixed\\checkpoint.json",
+  "sha256": "56050bbcd02a6e30b2832c69170f2483e41f78461181545d92f0cc252cf77d66",
+  "checkpointBytes": 385863,
+  "generationMs": 7401.3209,
+  "trainingMs": 1705.812100000001,
+  "bestEpoch": 3,
+  "history": [
+    {
+      "epoch": 1,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.7495065552742808,
+        "agreement": 0.7285287528005975,
+        "legalCompliance": 1,
+        "inferenceMs": 81.95799999999963
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.9351162315606092,
+        "agreement": 0.638623326959847,
+        "legalCompliance": 1,
+        "inferenceMs": 15.606400000000576
+      }
+    },
+    {
+      "epoch": 2,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.6310183254609717,
+        "agreement": 0.7983569828230023,
+        "legalCompliance": 1,
+        "inferenceMs": 76.37189999999919
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8581845816261084,
+        "agreement": 0.6902485659655831,
+        "legalCompliance": 1,
+        "inferenceMs": 8.747999999999593
+      }
+    },
+    {
+      "epoch": 3,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.571883581199808,
+        "agreement": 0.8237490664675131,
+        "legalCompliance": 1,
+        "inferenceMs": 40.19079999999849
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8417648464403725,
+        "agreement": 0.6959847036328872,
+        "legalCompliance": 1,
+        "inferenceMs": 8.47019999999975
+      }
+    },
+    {
+      "epoch": 4,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.52506486000168,
+        "agreement": 0.8401792382374906,
+        "legalCompliance": 1,
+        "inferenceMs": 40.86120000000119
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.847330261445161,
+        "agreement": 0.6978967495219885,
+        "legalCompliance": 1,
+        "inferenceMs": 7.762699999999313
+      }
+    },
+    {
+      "epoch": 5,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.4953298071178941,
+        "agreement": 0.8465272591486184,
+        "legalCompliance": 1,
+        "inferenceMs": 40.294200000000274
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.845673582169853,
+        "agreement": 0.6978967495219885,
+        "legalCompliance": 1,
+        "inferenceMs": 8.283900000000358
+      }
+    },
+    {
+      "epoch": 6,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.475185424761353,
+        "agreement": 0.8603435399551904,
+        "legalCompliance": 1,
+        "inferenceMs": 40.09259999999995
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8495023180344928,
+        "agreement": 0.6978967495219885,
+        "legalCompliance": 1,
+        "inferenceMs": 8.833399999999529
+      }
+    },
+    {
+      "epoch": 7,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.45219938269933546,
+        "agreement": 0.8737864077669902,
+        "legalCompliance": 1,
+        "inferenceMs": 40.49669999999969
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8418578248217732,
+        "agreement": 0.7074569789674953,
+        "legalCompliance": 1,
+        "inferenceMs": 7.82589999999982
+      }
+    },
+    {
+      "epoch": 8,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.43428349157801766,
+        "agreement": 0.876773711725168,
+        "legalCompliance": 1,
+        "inferenceMs": 40.48080000000118
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.844619899705913,
+        "agreement": 0.6902485659655831,
+        "legalCompliance": 1,
+        "inferenceMs": 7.793099999998958
+      }
+    },
+    {
+      "epoch": 9,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.41951396671915975,
+        "agreement": 0.8849887976101568,
+        "legalCompliance": 1,
+        "inferenceMs": 39.53490000000056
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.85013773490211,
+        "agreement": 0.6940726577437859,
+        "legalCompliance": 1,
+        "inferenceMs": 7.95430000000124
+      }
+    },
+    {
+      "epoch": 10,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.40553980912238946,
+        "agreement": 0.8917102315160568,
+        "legalCompliance": 1,
+        "inferenceMs": 39.71310000000085
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8551744076088634,
+        "agreement": 0.6883365200764818,
+        "legalCompliance": 1,
+        "inferenceMs": 7.950700000001234
+      }
+    },
+    {
+      "epoch": 11,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3937369027075572,
+        "agreement": 0.8961911874533234,
+        "legalCompliance": 1,
+        "inferenceMs": 39.951100000000224
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8547434346258768,
+        "agreement": 0.6864244741873805,
+        "legalCompliance": 1,
+        "inferenceMs": 8.410200000000259
+      }
+    },
+    {
+      "epoch": 12,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3830994942084081,
+        "agreement": 0.9002987303958178,
+        "legalCompliance": 1,
+        "inferenceMs": 41.86110000000008
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8553636421796232,
+        "agreement": 0.6921606118546845,
+        "legalCompliance": 1,
+        "inferenceMs": 7.824199999999109
+      }
+    },
+    {
+      "epoch": 13,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.37218879649007597,
+        "agreement": 0.9055265123226288,
+        "legalCompliance": 1,
+        "inferenceMs": 38.96979999999894
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8601454561058935,
+        "agreement": 0.6959847036328872,
+        "legalCompliance": 1,
+        "inferenceMs": 8.033100000000559
+      }
+    },
+    {
+      "epoch": 14,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3635748653446521,
+        "agreement": 0.9178491411501121,
+        "legalCompliance": 1,
+        "inferenceMs": 38.90089999999873
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8627256397818769,
+        "agreement": 0.6902485659655831,
+        "legalCompliance": 1,
+        "inferenceMs": 7.898699999999735
+      }
+    },
+    {
+      "epoch": 15,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3548026657711098,
+        "agreement": 0.9174757281553398,
+        "legalCompliance": 1,
+        "inferenceMs": 39.095900000000256
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8670732337517069,
+        "agreement": 0.6883365200764818,
+        "legalCompliance": 1,
+        "inferenceMs": 8.130699999999706
+      }
+    },
+    {
+      "epoch": 16,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3468459065732903,
+        "agreement": 0.9238237490664675,
+        "legalCompliance": 1,
+        "inferenceMs": 38.85889999999927
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8651777394568508,
+        "agreement": 0.6806883365200764,
+        "legalCompliance": 1,
+        "inferenceMs": 7.789999999999054
+      }
+    },
+    {
+      "epoch": 17,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.34056548985750007,
+        "agreement": 0.9241971620612397,
+        "legalCompliance": 1,
+        "inferenceMs": 39.17569999999978
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8676523480186903,
+        "agreement": 0.6787762906309751,
+        "legalCompliance": 1,
+        "inferenceMs": 7.806300000000192
+      }
+    },
+    {
+      "epoch": 18,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.33481481824648596,
+        "agreement": 0.929798356982823,
+        "legalCompliance": 1,
+        "inferenceMs": 43.3033000000014
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8722601076362162,
+        "agreement": 0.6806883365200764,
+        "legalCompliance": 1,
+        "inferenceMs": 7.626399999999194
+      }
+    },
+    {
+      "epoch": 19,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.3270647129363658,
+        "agreement": 0.9312920089619119,
+        "legalCompliance": 1,
+        "inferenceMs": 39.052999999999884
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8777572440282108,
+        "agreement": 0.6826003824091779,
+        "legalCompliance": 1,
+        "inferenceMs": 7.9307000000007974
+      }
+    },
+    {
+      "epoch": 20,
+      "training": {
+        "samples": 2678,
+        "deals": 80,
+        "loss": 0.32159410560758794,
+        "agreement": 0.9339058999253174,
+        "legalCompliance": 1,
+        "inferenceMs": 38.63520000000062
+      },
+      "val": {
+        "samples": 523,
+        "deals": 16,
+        "loss": 0.8866750354577897,
+        "agreement": 0.6768642447418738,
+        "legalCompliance": 1,
+        "inferenceMs": 7.701900000000023
+      }
+    }
+  ],
+  "training": {
+    "samples": 2678,
+    "deals": 80,
+    "loss": 0.571883581199808,
+    "agreement": 0.8237490664675131,
+    "legalCompliance": 1,
+    "inferenceMs": 38.398699999999735
+  },
+  "validation": {
+    "samples": 523,
+    "deals": 16,
+    "loss": 0.8417648464403725,
+    "agreement": 0.6959847036328872,
+    "legalCompliance": 1,
+    "inferenceMs": 7.8195999999989
+  },
+  "holdout": {
+    "samples": 652,
+    "deals": 24,
+    "loss": 0.8457952854547196,
+    "agreement": 0.7177914110429447,
+    "legalCompliance": 1,
+    "inferenceMs": 9.703299999999217
+  },
+  "restartParity": true,
+  "slices": {
+    "caller": {
+      "samples": 157,
+      "deals": 24,
+      "loss": 1.2045395803406251,
+      "agreement": 0.5859872611464968,
+      "legalCompliance": 1,
+      "inferenceMs": 2.5252000000000407
+    },
+    "noncaller": {
+      "samples": 495,
+      "deals": 24,
+      "loss": 0.7320117414201996,
+      "agreement": 0.7595959595959596,
+      "legalCompliance": 1,
+      "inferenceMs": 6.893799999999828
+    },
+    "hidden": {
+      "samples": 147,
+      "deals": 8,
+      "loss": 1.1215965163916288,
+      "agreement": 0.6190476190476191,
+      "legalCompliance": 1,
+      "inferenceMs": 2.2110999999986234
+    },
+    "revealed": {
+      "samples": 505,
+      "deals": 24,
+      "loss": 0.7655125509047673,
+      "agreement": 0.7465346534653465,
+      "legalCompliance": 1,
+      "inferenceMs": 7.177999999999884
+    },
+    "OPEN_TRUMP": {
+      "samples": 188,
+      "deals": 8,
+      "loss": 0.7154374262636317,
+      "agreement": 0.776595744680851,
+      "legalCompliance": 1,
+      "inferenceMs": 2.655800000000454
+    },
+    "BWINJI": {
+      "samples": 128,
+      "deals": 8,
+      "loss": 0.693054179926815,
+      "agreement": 0.8046875,
+      "legalCompliance": 1,
+      "inferenceMs": 2.0788999999986117
+    },
+    "CLOSE_TRUMP": {
+      "samples": 336,
+      "deals": 8,
+      "loss": 0.9769206992508375,
+      "agreement": 0.6517857142857143,
+      "legalCompliance": 1,
+      "inferenceMs": 4.567300000000614
+    }
+  },
+  "limitations": [
+    "Card decisions only; authoritative advanceForced handles reveal and other forced transitions.",
+    "Teacher uses a small fixed eight-iteration budget; V2 internal fallback counts are recorded.",
+    "No human expert data used; imitation does not establish gameplay strength."
+  ]
+}

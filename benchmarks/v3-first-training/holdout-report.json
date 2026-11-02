@@ -1,0 +1,69 @@
+{
+  "datasetHash": "5c88b9021f138a5f6ac0fb15377c9e95ae6054d79441bea0c2bca1737870f9b1",
+  "holdout": {
+    "samples": 652,
+    "deals": 24,
+    "loss": 0.8457952854547196,
+    "agreement": 0.7177914110429447,
+    "legalCompliance": 1,
+    "inferenceMs": 9.703299999999217
+  },
+  "slices": {
+    "caller": {
+      "samples": 157,
+      "deals": 24,
+      "loss": 1.2045395803406251,
+      "agreement": 0.5859872611464968,
+      "legalCompliance": 1,
+      "inferenceMs": 2.5252000000000407
+    },
+    "noncaller": {
+      "samples": 495,
+      "deals": 24,
+      "loss": 0.7320117414201996,
+      "agreement": 0.7595959595959596,
+      "legalCompliance": 1,
+      "inferenceMs": 6.893799999999828
+    },
+    "hidden": {
+      "samples": 147,
+      "deals": 8,
+      "loss": 1.1215965163916288,
+      "agreement": 0.6190476190476191,
+      "legalCompliance": 1,
+      "inferenceMs": 2.2110999999986234
+    },
+    "revealed": {
+      "samples": 505,
+      "deals": 24,
+      "loss": 0.7655125509047673,
+      "agreement": 0.7465346534653465,
+      "legalCompliance": 1,
+      "inferenceMs": 7.177999999999884
+    },
+    "OPEN_TRUMP": {
+      "samples": 188,
+      "deals": 8,
+      "loss": 0.7154374262636317,
+      "agreement": 0.776595744680851,
+      "legalCompliance": 1,
+      "inferenceMs": 2.655800000000454
+    },
+    "BWINJI": {
+      "samples": 128,
+      "deals": 8,
+      "loss": 0.693054179926815,
+      "agreement": 0.8046875,
+      "legalCompliance": 1,
+      "inferenceMs": 2.0788999999986117
+    },
+    "CLOSE_TRUMP": {
+      "samples": 336,
+      "deals": 8,
+      "loss": 0.9769206992508375,
+      "agreement": 0.6517857142857143,
+      "legalCompliance": 1,
+      "inferenceMs": 4.567300000000614
+    }
+  }
+}
