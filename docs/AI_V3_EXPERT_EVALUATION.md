@@ -4,6 +4,8 @@ PR #6 (rung reveal eligibility) is merged into `feature/ai-v3-partnership-learni
 
 For the first targeted 15-case owner session, use [the Windows-ready pilot workflow](AI_V3_EXPERT_PILOT.md). The original `prepare` command below remains available for untargeted assignments.
 
+**Owners with saved v1 reviews: use [the caller-private migration](AI_V3_CALLER_PRIVATE_CORRECTION.md) before continuing; keep the original directory and token.**
+
 ## Prepare a private assignment
 
 ```sh
@@ -35,7 +37,7 @@ Before submission, neither API nor client receives AI actions, source seeds, spl
 
 V2 calls the existing `decideV2` controller with 8 ISMCTS iterations, 4 particles, 128 nodes, control rollouts, adaptive allocation and exact solving disabled. All RNG inputs are seeded and deadline is Infinity during **offline preparation** for fixed-work reproducibility; work still has bounded iterations/nodes/rollout plies. This is a recorded V2 configuration, not a strength claim about all V2 configurations. Actual search fallback/counters and elapsed milliseconds are stored. No canonical neural model is loaded.
 
-Both expert inputs and V2 preparation omit undisclosed trump, inspected partner hands and private concealed memories. This stricter boundary differs from some legitimately available caller/private-inspection information in live V2 and is recorded in diagnostics. No live policy behavior changes. Publicly revealed hands remain legitimate visible information. V3 is `not_available`, with a null action: there is no validated trained V3 policy to compare. The offline untrained baseline scaffold is not presented as an operational model.
+Historical v1 expert inputs and V2 preparation omitted undisclosed trump even from the caller; this defect is repaired by the versioned caller-private boundary. New v2 preserves the actor’s selected suit/locked card and own concealed memories while excluding opponents’ concealed information. Card-decision evaluation preserves legitimate own private knowledge; the historical stricter v1 boundary remains only for exact replay. Active face-down inspection/challenge phases are outside card-decision collection. No live policy behavior changes. Publicly revealed hands remain legitimate visible information. V3 is `not_available`, with a null action: there is no validated trained V3 policy to compare. The offline untrained baseline scaffold is not presented as an operational model.
 
 Corpus verification and preparation replay the same official setup/trajectory to match each observation hash before predicting. Repeating a configuration reproduces positions and seeded actions; wall-clock latency, timestamps and annotation IDs are measurements, not deterministic fields. Keep configuration/source commit and the private bundle for audit.
 
