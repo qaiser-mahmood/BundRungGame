@@ -1,0 +1,9 @@
+import {writeFileSync} from 'node:fs';
+import {readDataset,SPLITS} from './v3-partnership-data';
+const {manifest,rows}=readDataset(process.argv[2]);
+const splits=Object.fromEntries(SPLITS.map(split=>{
+ const xs=rows.filter(r=>r.split===split),hist=(f:(r:typeof rows[number])=>string|number|boolean)=>Object.fromEntries([...new Set(xs.map(f))].map(k=>[String(k),xs.filter(r=>f(r)===k).length]));
+ return [split,{deals:manifest.shards.filter((s:{split:string})=>s.split===split).length,samples:xs.length,multi:xs.filter(r=>r.mask.reduce((a,b)=>a+b,0)>1).length,modes:Object.fromEntries(['CLOSE_TRUMP','OPEN_TRUMP','BWINJI'].map(mode=>[mode,{deals:new Set(xs.filter(r=>r.mode===mode).map(r=>r.deal)).size,samples:xs.filter(r=>r.mode===mode).length}])),caller:hist(r=>r.caller),revealed:hist(r=>r.revealed),position:hist(r=>r.position),stage:hist(r=>r.trick<=4?'early':r.trick<=9?'middle':'late'),handHighCards:hist(r=>r.handHigh),maxOwnSuitLength:hist(r=>Math.max(...r.ownSuitCounts)),partnerWinning:xs.filter(r=>r.partnerWinning).length,partnerWinningMulti:xs.filter(r=>r.partnerWinning&&r.mask.reduce((a,b)=>a+b,0)>1).length,teacherOvertakes:xs.filter(r=>r.partnerWinning&&r.overtakes.includes(r.label)).length,teacherBudgets:hist(r=>`${r.iterations}/${r.particles}`),searchVisitRows:xs.filter(r=>r.visits.some(Boolean)).length,rootVisits:xs.reduce((n,r)=>n+r.visits.reduce((a,b)=>a+b,0),0)}];
+}));
+const report={...manifest,shards:undefined,splits,rowsPerSecond:rows.length/(manifest.generationMs/1000),dealsPerSecond:manifest.counts.reduce((a:number,b:number)=>a+b,0)/(manifest.generationMs/1000),fallbacks:0,invalidWorlds:0,note:'Generation aborts on any teacher fallback, invalid world or deadline stop. Counts describe teacher trajectories, not model gameplay.'};
+writeFileSync(process.argv[3],JSON.stringify(report,null,2),{flag:'wx'});console.log(JSON.stringify(report,null,2));

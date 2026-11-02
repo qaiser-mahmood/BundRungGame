@@ -1,0 +1,146 @@
+{
+  "candidate": "benchmarks/v3-partnership-training/checkpoint.json",
+  "baseline": "selective32",
+  "seed": 9300000,
+  "pairs": 300,
+  "milliseconds": 50223.9659,
+  "summary": {
+    "games": 600,
+    "pairs": 300,
+    "wins": 222,
+    "losses": 378,
+    "ties": 0,
+    "winRate": 0.37,
+    "paired95CI": [
+      0.3416666666666667,
+      0.3983333333333333
+    ],
+    "invalid": 0,
+    "meanScore": -11.115,
+    "meanTrickDifferential": -0.02,
+    "latency": {
+      "decisions": 10328,
+      "meanMs": 0.40110003872967964,
+      "p95Ms": 0.6075000000000728
+    },
+    "partnership": {
+      "opportunities": 2341,
+      "overtakes": 468,
+      "conserves": 1873,
+      "overtakeTrickWins": 382,
+      "conserveTrickWins": 1630,
+      "overtakeGameWins": 159,
+      "conserveGameWins": 767
+    },
+    "trump": {
+      "known": 8908,
+      "used": 2384,
+      "highUsed": 793
+    }
+  },
+  "byMode": {
+    "CLOSE_TRUMP": {
+      "games": 200,
+      "pairs": 100,
+      "wins": 67,
+      "losses": 133,
+      "ties": 0,
+      "winRate": 0.335,
+      "paired95CI": [
+        0.285,
+        0.38
+      ],
+      "invalid": 0,
+      "meanScore": -6.435,
+      "meanTrickDifferential": 0.1,
+      "latency": {
+        "decisions": 4008,
+        "meanMs": 0.4114464820359711,
+        "p95Ms": 0.6161000000029162
+      },
+      "partnership": {
+        "opportunities": 923,
+        "overtakes": 185,
+        "conserves": 738,
+        "overtakeTrickWins": 148,
+        "conserveTrickWins": 639,
+        "overtakeGameWins": 68,
+        "conserveGameWins": 293
+      },
+      "trump": {
+        "known": 2588,
+        "used": 699,
+        "highUsed": 212
+      }
+    },
+    "OPEN_TRUMP": {
+      "games": 200,
+      "pairs": 100,
+      "wins": 79,
+      "losses": 121,
+      "ties": 0,
+      "winRate": 0.395,
+      "paired95CI": [
+        0.345,
+        0.45
+      ],
+      "invalid": 0,
+      "meanScore": -8.19,
+      "meanTrickDifferential": -0.185,
+      "latency": {
+        "decisions": 3082,
+        "meanMs": 0.3930321219987447,
+        "p95Ms": 0.6022999999986496
+      },
+      "partnership": {
+        "opportunities": 689,
+        "overtakes": 135,
+        "conserves": 554,
+        "overtakeTrickWins": 115,
+        "conserveTrickWins": 483,
+        "overtakeGameWins": 42,
+        "conserveGameWins": 241
+      },
+      "trump": {
+        "known": 3082,
+        "used": 796,
+        "highUsed": 276
+      }
+    },
+    "BWINJI": {
+      "games": 200,
+      "pairs": 100,
+      "wins": 76,
+      "losses": 124,
+      "ties": 0,
+      "winRate": 0.38,
+      "paired95CI": [
+        0.33,
+        0.425
+      ],
+      "invalid": 0,
+      "meanScore": -18.72,
+      "meanTrickDifferential": 0.025,
+      "latency": {
+        "decisions": 3238,
+        "meanMs": 0.39597242124763016,
+        "p95Ms": 0.6036000000003696
+      },
+      "partnership": {
+        "opportunities": 729,
+        "overtakes": 148,
+        "conserves": 581,
+        "overtakeTrickWins": 119,
+        "conserveTrickWins": 508,
+        "overtakeGameWins": 49,
+        "conserveGameWins": 233
+      },
+      "trump": {
+        "known": 3238,
+        "used": 889,
+        "highUsed": 305
+      }
+    }
+  },
+  "note": "Paired initial deals and both team assignments; CI bootstraps complete seed pairs. Outcomes after overtake/conserve are observational, not causal. Games are complete deals, not matches. Forced reveal/accept handling is shared."
+}
