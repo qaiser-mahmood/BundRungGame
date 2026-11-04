@@ -1,0 +1,109 @@
+{
+  "schema": "bundrung-expert-pilot-coverage/v1",
+  "generatorSourceCommit": "dce683e6a8260f5af4aed401fdbc679f05059658",
+  "manifestHash": "32bc7693d91a712a0575126ca7bafbd6e80a2f649b79de7544c8de8f68912c26",
+  "config": {
+    "seed": 3100000,
+    "trainDeals": 15,
+    "validationDeals": 15,
+    "holdoutDeals": 15,
+    "positionsPerDeal": 52,
+    "sourceCommit": "dce683e6a8260f5af4aed401fdbc679f05059658",
+    "calling": "mixed",
+    "targeted": true
+  },
+  "coverage": {
+    "assigned": 15,
+    "counts": {
+      "phase:middle": 5,
+      "position:4": 4,
+      "rung:revealed": 7,
+      "call:voluntary": 7,
+      "split:validation": 5,
+      "control:opponent": 7,
+      "own-strong-suit": 12,
+      "own-weak-suit": 11,
+      "public-void-evidence": 10,
+      "ace-downgrade-history": 5,
+      "current-ace-downgrade": 1,
+      "opponent-streak-threat": 4,
+      "choices:3-plus": 15,
+      "phase:late": 5,
+      "position:3": 3,
+      "split:train": 5,
+      "control:partner": 4,
+      "protect-partner-choice": 4,
+      "phase:early": 5,
+      "position:2": 4,
+      "rung:hidden": 8,
+      "split:holdout": 5,
+      "call:forced": 8,
+      "position:1": 4,
+      "control:unknown-or-leading": 4,
+      "next-ace-lead-risk": 1
+    },
+    "targets": {
+      "phase:early": 5,
+      "phase:middle": 5,
+      "phase:late": 5,
+      "position:1": 3,
+      "position:2": 3,
+      "position:3": 3,
+      "position:4": 3,
+      "rung:hidden": 5,
+      "rung:revealed": 5,
+      "call:forced": 5,
+      "call:voluntary": 5,
+      "control:partner": 3,
+      "control:opponent": 4,
+      "own-strong-suit": 5,
+      "own-weak-suit": 5,
+      "public-void-evidence": 5,
+      "current-ace-downgrade": 1,
+      "next-ace-lead-risk": 1,
+      "ace-downgrade-history": 2,
+      "opponent-streak-threat": 2,
+      "protect-partner-choice": 3,
+      "split:train": 5,
+      "split:validation": 5,
+      "split:holdout": 5,
+      "choices:3-plus": 10
+    },
+    "insufficient": [],
+    "selectionHash": "286e19113cceae4d0b6e0c927b917cbc818083b47fb78650c13129c04f534f4d",
+    "poolPositions": 1595,
+    "poolDeals": 45,
+    "description": "Observable targeted coverage, not expert labels or model quality."
+  },
+  "humanExpertLabels": 0,
+  "annotationsCreated": 0,
+  "aiComparisons": {
+    "v2": {
+      "available": 15,
+      "fallbackCases": 1,
+      "reportedInvalidWorlds": 1,
+      "completedIterations": 112,
+      "scope": "Actual bounded offline policy outputs; fallbacks are not completed-search results. Not playing-strength evidence."
+    },
+    "v3": {
+      "status": "not_available",
+      "trained": false
+    }
+  },
+  "validation": {
+    "focusedTests": 67,
+    "files": 5,
+    "aiTypecheck": "passed",
+    "applicationTypecheck": "passed: npx tsc --noEmit",
+    "clientSyntax": "passed",
+    "windowsManualTest": "not run: Linux environment, no PowerShell"
+  },
+  "canonicalCheckpointSha256": "66c8afb9366ca64f3b7123c275c1d982ad4dec3bac7939931b0a534b57b2e4c3",
+  "limitations": [
+    "Fifteen curated cases are not representative strength evidence or adequate model training data.",
+    "Public bidding summary is not a complete transcript.",
+    "Source metadata/private bundle must not be inspected by a blind reviewer.",
+    "Cross-study overlap and expert qualification require curator review.",
+    "A V2 fallback occurred; retain actual diagnostics."
+  ]
+}

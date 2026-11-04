@@ -1,0 +1,331 @@
+{
+  "schema": "bundrung-v3-expert-annotations/v1",
+  "manifestHash": "2f29d87fac94ac913ae429e1fdbaebf665692900382255a083c1558aef0597b4",
+  "annotatorId": "UNASSIGNED",
+  "provenance": {
+    "kind": "unfilled-template",
+    "qualification": "self-declared"
+  },
+  "annotations": [
+    {
+      "packetId": "2c6dc3238e318dca77e4e2f45840db8c554bdca0014dfa1901e6af0e386a034e",
+      "observationHash": "438a7cf9a7cf59a90bdf958143047503ec86c8bd68a2bc95ba859e517fa9df3b",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "61593fa264c1cbc455821d35f8204083ec5da2b94a11233e923e248bcc4a8423",
+      "observationHash": "3304c8690576649872fcdac1fd4e97f080deb39800bf0cdf6d197964748389e0",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "af63f437a55f9f8cb0cdd56f549cb9e6011c2e55384190c1a78b474c1eef044d",
+      "observationHash": "a60e92df235f36967322f2a108722291b2fa5434425994894fb42872e5861af5",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "fae2fab1f5edb7fe7b01142fc0367e3330528ba5c05d64a6dfe52c6a010ca097",
+      "observationHash": "daaa13a304561fa19eebf92cf264a78192b0ab1aa1ef50e768ef9e83ae9a0975",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "08b54ce20927e3a51a5b7dd940052c117b320615b1d01732991c5d0e04209c28",
+      "observationHash": "66dc52cee158689e0eda90e77c406aa7dcb839e5e8a53a1d19f040a4045e353f",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "b31ba8ca6f9db08376809318ab02ea5304105f91dae7dbdeaec8bbba0ccc4e3a",
+      "observationHash": "89b44f540cdbc00b094d5f2a4925ab4663458506b6b5303999da80c8db78ebf9",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "567cd78a3b60f3eb72b1b3af04099a84dc3fe1ee87c9f858b25d11d1d3339e5f",
+      "observationHash": "e0787e35ec14b1db0df3db2ebec6c1598eac3eb48f77f3df918161b4214c2a18",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "5b2750a64828b29424693823bb44c68290376620e42f0d92855b28862516d2bb",
+      "observationHash": "8e5648bc830aed9b01e8fae0dbee26a75abf03c5f8124c51159aeb4789a96f63",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "b0406b846ffa2c90fe7de40b32be1236e9d08736053a944175fb106cec9f8287",
+      "observationHash": "39cbb9c58861454643ac6884e4b559af90371a5703cc08ab45112ddec38974eb",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "70cf7b266dbecf53e42c1f014e6f0945e2ab57b39250d8c61ae40c85b192a515",
+      "observationHash": "197f5ffd9e57270262b2df6bd5be75ff8f127340d6aa463cfe526e721d9260ba",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "efa6ac15ecaefea6811a31dec7022f650dc30ee0c4450b765df80c7c0323f568",
+      "observationHash": "80fa07a88ef648bf4e9a54d2e7e979b8d58769c3d993d7e4b93a6ea0b8c10e3a",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "507d981093d10d9437e21cf090d009a0aca4ccc76e4c09c9a279b23eac2fc129",
+      "observationHash": "fadca054eb265853b6cf0169b96789a9ff7bd9e9717f649966944fd1fcdfa453",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "e78d5a8e64585c3abc73a8fae4f2fe4c511ca2e8ab46a6172b3a69fc31ca8420",
+      "observationHash": "2265f3087683b9dec80e73f879fdaa66ba90239d173e71db9cecf1d2d6279fcc",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "a3fc04522a12f1e0847d93bb1a39ad37142e88e13f2b7bfbbc1549b5a86dca4a",
+      "observationHash": "21b6254504420a8010e482bebd88533466b56e27bdf1654ec362ff592ea1e555",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "46ed9bf073b71c435f3d5ad4e339f7ab31a2abe35516ec211413d14dcd1de236",
+      "observationHash": "c8b9f386000c613510cce3bffd723f1bb4e2b131b17a195e7306e23199560aba",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    },
+    {
+      "packetId": "b6d871ad226f4e4128f3e218d719d23a6b3bebc05c7b5faa80a29079515290cc",
+      "observationHash": "3eef4b46674bfa7c33d30a29ad0df9700b032704a07754db5bf069617b2a3c0c",
+      "revision": 1,
+      "coverage": "partial",
+      "rankedActions": [],
+      "actionConfidence": 0,
+      "reasoning": "",
+      "latent": {
+        "shortage": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "returnSuit": null,
+        "leadControl": null,
+        "strategyPhase": null
+      }
+    }
+  ]
+}

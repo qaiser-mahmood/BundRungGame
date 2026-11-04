@@ -1,0 +1,19 @@
+{
+  "stage": "A plus offline training scaffolding",
+  "annotations": {
+    "train": 0,
+    "validation": 0,
+    "holdout": 0
+  },
+  "usableHeads": [],
+  "blockers": [
+    "Human expert annotations are missing; generated positions and bot actions are not expert labels.",
+    "No human training annotations.",
+    "No independent human validation annotations.",
+    "No head has both training and validation targets."
+  ],
+  "readyForBaselineTraining": false,
+  "readyForSearchIntegration": false,
+  "readyForSelfPlay": false,
+  "readyForSequenceModel": false
+}

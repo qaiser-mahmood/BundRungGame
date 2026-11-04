@@ -1,0 +1,159 @@
+{
+  "sourceCommit": "84202464b3ea0dfa3af70419a52f623a3a469b16",
+  "config": {
+    "seed": 2400000,
+    "trainDeals": 4,
+    "validationDeals": 4,
+    "holdoutDeals": 4,
+    "positionsPerDeal": 12,
+    "sourceCommit": "84202464b3ea0dfa3af70419a52f623a3a469b16",
+    "calling": "mixed"
+  },
+  "manifestHash": "be63e4e44574900f157e5ec8ed49b7cb6d0ee7cec3ee11666779dd84573e5b11",
+  "cases": 12,
+  "humanExpertLabels": 0,
+  "canonicalModelLoaded": false,
+  "V3": "not_available",
+  "AIChoiceLatencyOffline": {
+    "count": 12,
+    "p50Ms": 3.1079590000000508,
+    "p95Ms": 11.609094000000027,
+    "maxMs": 11.609094000000027,
+    "scope": "Offline fixed-work preparation, not live/concurrent latency"
+  },
+  "predictionDiagnostics": [
+    {
+      "completed": 8,
+      "nodes": 6,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 0,
+      "nodes": 0,
+      "invalidWorlds": 1,
+      "fallback": true,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 4,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 5,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    },
+    {
+      "completed": 8,
+      "nodes": 8,
+      "invalidWorlds": 0,
+      "fallback": false,
+      "exact": false,
+      "adaptive": false,
+      "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+      "iterations": 8,
+      "particles": 4
+    }
+  ],
+  "trainingExportRecords": 0
+}

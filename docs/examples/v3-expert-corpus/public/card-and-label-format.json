@@ -1,0 +1,445 @@
+{
+  "cards": [
+    {
+      "index": 0,
+      "id": "H_2",
+      "suit": "HEARTS",
+      "rank": "2",
+      "playValue": 2,
+      "tossValue": 2
+    },
+    {
+      "index": 1,
+      "id": "H_3",
+      "suit": "HEARTS",
+      "rank": "3",
+      "playValue": 3,
+      "tossValue": 3
+    },
+    {
+      "index": 2,
+      "id": "H_4",
+      "suit": "HEARTS",
+      "rank": "4",
+      "playValue": 4,
+      "tossValue": 4
+    },
+    {
+      "index": 3,
+      "id": "H_5",
+      "suit": "HEARTS",
+      "rank": "5",
+      "playValue": 5,
+      "tossValue": 5
+    },
+    {
+      "index": 4,
+      "id": "H_6",
+      "suit": "HEARTS",
+      "rank": "6",
+      "playValue": 6,
+      "tossValue": 6
+    },
+    {
+      "index": 5,
+      "id": "H_7",
+      "suit": "HEARTS",
+      "rank": "7",
+      "playValue": 7,
+      "tossValue": 7
+    },
+    {
+      "index": 6,
+      "id": "H_8",
+      "suit": "HEARTS",
+      "rank": "8",
+      "playValue": 8,
+      "tossValue": 8
+    },
+    {
+      "index": 7,
+      "id": "H_9",
+      "suit": "HEARTS",
+      "rank": "9",
+      "playValue": 9,
+      "tossValue": 9
+    },
+    {
+      "index": 8,
+      "id": "H_10",
+      "suit": "HEARTS",
+      "rank": "10",
+      "playValue": 10,
+      "tossValue": 10
+    },
+    {
+      "index": 9,
+      "id": "H_J",
+      "suit": "HEARTS",
+      "rank": "J",
+      "playValue": 11,
+      "tossValue": 11
+    },
+    {
+      "index": 10,
+      "id": "H_Q",
+      "suit": "HEARTS",
+      "rank": "Q",
+      "playValue": 12,
+      "tossValue": 12
+    },
+    {
+      "index": 11,
+      "id": "H_K",
+      "suit": "HEARTS",
+      "rank": "K",
+      "playValue": 13,
+      "tossValue": 13
+    },
+    {
+      "index": 12,
+      "id": "H_A",
+      "suit": "HEARTS",
+      "rank": "A",
+      "playValue": 14,
+      "tossValue": 1
+    },
+    {
+      "index": 13,
+      "id": "D_2",
+      "suit": "DIAMONDS",
+      "rank": "2",
+      "playValue": 2,
+      "tossValue": 2
+    },
+    {
+      "index": 14,
+      "id": "D_3",
+      "suit": "DIAMONDS",
+      "rank": "3",
+      "playValue": 3,
+      "tossValue": 3
+    },
+    {
+      "index": 15,
+      "id": "D_4",
+      "suit": "DIAMONDS",
+      "rank": "4",
+      "playValue": 4,
+      "tossValue": 4
+    },
+    {
+      "index": 16,
+      "id": "D_5",
+      "suit": "DIAMONDS",
+      "rank": "5",
+      "playValue": 5,
+      "tossValue": 5
+    },
+    {
+      "index": 17,
+      "id": "D_6",
+      "suit": "DIAMONDS",
+      "rank": "6",
+      "playValue": 6,
+      "tossValue": 6
+    },
+    {
+      "index": 18,
+      "id": "D_7",
+      "suit": "DIAMONDS",
+      "rank": "7",
+      "playValue": 7,
+      "tossValue": 7
+    },
+    {
+      "index": 19,
+      "id": "D_8",
+      "suit": "DIAMONDS",
+      "rank": "8",
+      "playValue": 8,
+      "tossValue": 8
+    },
+    {
+      "index": 20,
+      "id": "D_9",
+      "suit": "DIAMONDS",
+      "rank": "9",
+      "playValue": 9,
+      "tossValue": 9
+    },
+    {
+      "index": 21,
+      "id": "D_10",
+      "suit": "DIAMONDS",
+      "rank": "10",
+      "playValue": 10,
+      "tossValue": 10
+    },
+    {
+      "index": 22,
+      "id": "D_J",
+      "suit": "DIAMONDS",
+      "rank": "J",
+      "playValue": 11,
+      "tossValue": 11
+    },
+    {
+      "index": 23,
+      "id": "D_Q",
+      "suit": "DIAMONDS",
+      "rank": "Q",
+      "playValue": 12,
+      "tossValue": 12
+    },
+    {
+      "index": 24,
+      "id": "D_K",
+      "suit": "DIAMONDS",
+      "rank": "K",
+      "playValue": 13,
+      "tossValue": 13
+    },
+    {
+      "index": 25,
+      "id": "D_A",
+      "suit": "DIAMONDS",
+      "rank": "A",
+      "playValue": 14,
+      "tossValue": 1
+    },
+    {
+      "index": 26,
+      "id": "C_2",
+      "suit": "CLUBS",
+      "rank": "2",
+      "playValue": 2,
+      "tossValue": 2
+    },
+    {
+      "index": 27,
+      "id": "C_3",
+      "suit": "CLUBS",
+      "rank": "3",
+      "playValue": 3,
+      "tossValue": 3
+    },
+    {
+      "index": 28,
+      "id": "C_4",
+      "suit": "CLUBS",
+      "rank": "4",
+      "playValue": 4,
+      "tossValue": 4
+    },
+    {
+      "index": 29,
+      "id": "C_5",
+      "suit": "CLUBS",
+      "rank": "5",
+      "playValue": 5,
+      "tossValue": 5
+    },
+    {
+      "index": 30,
+      "id": "C_6",
+      "suit": "CLUBS",
+      "rank": "6",
+      "playValue": 6,
+      "tossValue": 6
+    },
+    {
+      "index": 31,
+      "id": "C_7",
+      "suit": "CLUBS",
+      "rank": "7",
+      "playValue": 7,
+      "tossValue": 7
+    },
+    {
+      "index": 32,
+      "id": "C_8",
+      "suit": "CLUBS",
+      "rank": "8",
+      "playValue": 8,
+      "tossValue": 8
+    },
+    {
+      "index": 33,
+      "id": "C_9",
+      "suit": "CLUBS",
+      "rank": "9",
+      "playValue": 9,
+      "tossValue": 9
+    },
+    {
+      "index": 34,
+      "id": "C_10",
+      "suit": "CLUBS",
+      "rank": "10",
+      "playValue": 10,
+      "tossValue": 10
+    },
+    {
+      "index": 35,
+      "id": "C_J",
+      "suit": "CLUBS",
+      "rank": "J",
+      "playValue": 11,
+      "tossValue": 11
+    },
+    {
+      "index": 36,
+      "id": "C_Q",
+      "suit": "CLUBS",
+      "rank": "Q",
+      "playValue": 12,
+      "tossValue": 12
+    },
+    {
+      "index": 37,
+      "id": "C_K",
+      "suit": "CLUBS",
+      "rank": "K",
+      "playValue": 13,
+      "tossValue": 13
+    },
+    {
+      "index": 38,
+      "id": "C_A",
+      "suit": "CLUBS",
+      "rank": "A",
+      "playValue": 14,
+      "tossValue": 1
+    },
+    {
+      "index": 39,
+      "id": "S_2",
+      "suit": "SPADES",
+      "rank": "2",
+      "playValue": 2,
+      "tossValue": 2
+    },
+    {
+      "index": 40,
+      "id": "S_3",
+      "suit": "SPADES",
+      "rank": "3",
+      "playValue": 3,
+      "tossValue": 3
+    },
+    {
+      "index": 41,
+      "id": "S_4",
+      "suit": "SPADES",
+      "rank": "4",
+      "playValue": 4,
+      "tossValue": 4
+    },
+    {
+      "index": 42,
+      "id": "S_5",
+      "suit": "SPADES",
+      "rank": "5",
+      "playValue": 5,
+      "tossValue": 5
+    },
+    {
+      "index": 43,
+      "id": "S_6",
+      "suit": "SPADES",
+      "rank": "6",
+      "playValue": 6,
+      "tossValue": 6
+    },
+    {
+      "index": 44,
+      "id": "S_7",
+      "suit": "SPADES",
+      "rank": "7",
+      "playValue": 7,
+      "tossValue": 7
+    },
+    {
+      "index": 45,
+      "id": "S_8",
+      "suit": "SPADES",
+      "rank": "8",
+      "playValue": 8,
+      "tossValue": 8
+    },
+    {
+      "index": 46,
+      "id": "S_9",
+      "suit": "SPADES",
+      "rank": "9",
+      "playValue": 9,
+      "tossValue": 9
+    },
+    {
+      "index": 47,
+      "id": "S_10",
+      "suit": "SPADES",
+      "rank": "10",
+      "playValue": 10,
+      "tossValue": 10
+    },
+    {
+      "index": 48,
+      "id": "S_J",
+      "suit": "SPADES",
+      "rank": "J",
+      "playValue": 11,
+      "tossValue": 11
+    },
+    {
+      "index": 49,
+      "id": "S_Q",
+      "suit": "SPADES",
+      "rank": "Q",
+      "playValue": 12,
+      "tossValue": 12
+    },
+    {
+      "index": 50,
+      "id": "S_K",
+      "suit": "SPADES",
+      "rank": "K",
+      "playValue": 13,
+      "tossValue": 13
+    },
+    {
+      "index": 51,
+      "id": "S_A",
+      "suit": "SPADES",
+      "rank": "A",
+      "playValue": 14,
+      "tossValue": 1
+    }
+  ],
+  "shortage": [
+    "VOID",
+    "SINGLETON",
+    "TWO_PLUS"
+  ],
+  "returnSuit": [
+    "HEARTS",
+    "DIAMONDS",
+    "CLUBS",
+    "SPADES",
+    "NO_REQUEST"
+  ],
+  "leadControl": [
+    "PARTNER_RETAIN",
+    "OBSERVER_TAKE",
+    "NO_PREFERENCE"
+  ],
+  "strategyPhase": [
+    "FORCE_REVEAL",
+    "PRESERVE_CONCEALMENT",
+    "LEAD_CONTROL",
+    "INDIVIDUAL_STREAK",
+    "ENDGAME",
+    "OTHER"
+  ]
+}

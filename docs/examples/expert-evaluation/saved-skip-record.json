@@ -1,0 +1,65 @@
+{
+  "schema": "bundrung-expert-review/v1",
+  "id": "0f50e6fc-a601-4d47-a5f6-3d5a30dc13c2",
+  "annotatorId": "technical_smoke",
+  "packetId": "24abf5cedbd2ebe8f6cd6857ca18aa766b48a170bd5475aa45c00df103df26a5",
+  "observationHash": "7a95d96683fafdd6d74a8fcbbfb35958ae87f0be474d716b0d67b28b2c0d52dc",
+  "dealKey": "316401c8b07ac584a41a54d6ca8bf677c3f078ed014e19e203b777488899b65a",
+  "seed": 2400000,
+  "replayReference": "be63e4e44574900f157e5ec8ed49b7cb6d0ee7cec3ee11666779dd84573e5b11:24abf5cedbd2ebe8f6cd6857ca18aa766b48a170bd5475aa45c00df103df26a5",
+  "actingPlayer": "relative-seat-0",
+  "legal": [
+    8,
+    11,
+    12,
+    47,
+    48
+  ],
+  "revision": 1,
+  "timestamp": "2026-11-01T10:01:11.920Z",
+  "blindAtSubmission": true,
+  "submission": {
+    "requestId": "technical-smoke-skip-001",
+    "expectedRevision": 0,
+    "status": "skipped",
+    "selected": null,
+    "rankedAlternatives": [],
+    "reasoning": "Automated persistence smoke example only. No human expert decision or training label supplied.",
+    "signals": "",
+    "uncertainty": "Not an expert-reviewed example.",
+    "confidence": null,
+    "principles": []
+  },
+  "annotation": null,
+  "predictions": {
+    "v2": {
+      "status": "available",
+      "policy": "ai-v2-ismcts",
+      "version": "84202464b3ea0dfa3af70419a52f623a3a469b16",
+      "action": 47,
+      "milliseconds": 11.609094000000027,
+      "diagnostics": {
+        "completed": 8,
+        "nodes": 6,
+        "invalidWorlds": 0,
+        "fallback": false,
+        "exact": false,
+        "adaptive": false,
+        "inputBoundary": "V3 strict observer; no undisclosed trump/inspection memories",
+        "iterations": 8,
+        "particles": 4
+      }
+    },
+    "v3": {
+      "status": "not_available",
+      "policy": "ai-v3-partnership",
+      "version": "no-validated-trained-policy",
+      "action": null,
+      "milliseconds": null,
+      "diagnostics": null
+    }
+  },
+  "sourceCommit": "84202464b3ea0dfa3af70419a52f623a3a469b16",
+  "manifestHash": "be63e4e44574900f157e5ec8ed49b7cb6d0ee7cec3ee11666779dd84573e5b11",
+  "split": "train"
+}
